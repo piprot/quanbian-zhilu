@@ -5420,6 +5420,7 @@ export class AdaptiveGameApp {
     if (this.handleCustomScenarioClick(action, actionTarget)) return;
     if (this.handleCoachClick(action, actionTarget)) return;
     if (this.handleEndingClick(action, actionTarget)) return;
+    if (this.handleReviewClick(action, actionTarget)) return;
 
     switch (action) {
       case "open-node": {
@@ -5657,146 +5658,6 @@ export class AdaptiveGameApp {
             : "认证点 = 测评总分 + 角色重点能力等级合计；完成 30 题测评提升总分，训练角色重点能力提升等级。"
         );
         this.audio.ui();
-        break;
-      case "open-due-review": {
-        const ability = actionTarget.dataset.ability;
-        const dueIds = dueReviewCards(this.save.reviewCards ?? [])
-          .filter(
-            (card) =>
-              !ability || this.reviewAbilityFor(card.nodeId) === ability
-          )
-          .map((card) => card.nodeId);
-        if (dueIds.length === 0) {
-          this.showToast(
-            this.language === "en"
-              ? "No review cards are due right now."
-              : "当前没有到期的复习卡。"
-          );
-          break;
-        }
-        this.wrongReviewQueue = dueIds;
-        this.wrongReviewIndex = 0;
-        this.storyNodeId = dueIds[0];
-        this.replayMode = true;
-        this.lastOutcome = undefined;
-        this.lastOutcomeNodeId = undefined;
-        this.audio.ui();
-        this.show("story");
-        break;
-      }
-      case "open-dual-review": {
-        const ability = actionTarget.dataset.ability;
-        const dueIds = dueReviewCards(this.save.reviewCards ?? [])
-          .filter(
-            (card) =>
-              !ability || this.reviewAbilityFor(card.nodeId) === ability
-          )
-          .map((card) => card.nodeId);
-        if (dueIds.length === 0) {
-          this.showToast(
-            this.language === "en"
-              ? "No review cards are due right now."
-              : "当前没有到期的复习卡。"
-          );
-          break;
-        }
-        this.dualReviewQueue = dueIds;
-        this.dualReviewIndex = 0;
-        this.resetDualSelection();
-        this.audio.ui();
-        this.show("dualReview");
-        break;
-      }
-      case "dual-toggle": {
-        const axis = actionTarget.dataset.axis as "best" | "worst";
-        const option = Number(actionTarget.dataset.option);
-        if (axis === "best") {
-          this.dualBestIndex = option;
-          if (this.dualWorstIndex === option) this.dualWorstIndex = undefined;
-        } else {
-          this.dualWorstIndex = option;
-          if (this.dualBestIndex === option) this.dualBestIndex = undefined;
-        }
-        this.audio.ui();
-        this.renderDualReview();
-        break;
-      }
-      case "dual-submit": {
-        if (
-          this.dualBestIndex === undefined ||
-          this.dualWorstIndex === undefined
-        ) {
-          this.showToast(
-            this.language === "en"
-              ? "Choose both the best and worst move first."
-              : "请先同时选择最佳和最差选项。"
-          );
-          break;
-        }
-        const nodeId = this.dualReviewQueue[this.dualReviewIndex];
-        if (!nodeId) break;
-        const roleNode = getNodeForRole(this.save.profile.role, nodeId);
-        const options = storyNodeDisplay(this.language, this.save,roleNode).options;
-        const expertIndex = options.findIndex(
-          (option) => option.quality === "expert"
-        );
-        const worstIndex = worstOptionIndex(options);
-        const outcome = scoreDualAxis(
-          this.dualBestIndex,
-          this.dualWorstIndex,
-          expertIndex,
-          worstIndex
-        );
-        this.dualLastOutcome = outcome;
-        this.dualSubmitted = true;
-        this.save.reviewCards = recordReviewResult(
-          this.save.reviewCards ?? [],
-          nodeId,
-          dualAxisQuality(outcome)
-        );
-        this.persistSave();
-        if (outcome === "perfect") this.audio.expert();
-        else if (outcome === "partial") this.audio.partial();
-        else this.audio.risk();
-        this.renderDualReview();
-        break;
-      }
-      case "dual-next":
-        this.dualReviewIndex += 1;
-        if (this.dualReviewIndex >= this.dualReviewQueue.length) {
-          this.dualReviewQueue = [];
-          this.dualReviewIndex = 0;
-          this.resetDualSelection();
-          this.audio.ui();
-          this.show("report");
-          break;
-        }
-        this.resetDualSelection();
-        this.audio.ui();
-        this.renderDualReview();
-        break;
-      case "dual-close":
-        this.dualReviewQueue = [];
-        this.dualReviewIndex = 0;
-        this.resetDualSelection();
-        this.audio.ui();
-        this.show("report");
-        break;
-      case "open-team-academy":
-        this.teamAcademy = new TeamAcademyApp(
-          this.save.profile.role as "parachute" | "founder" | "highPotential",
-          this.language,
-          {
-            onBack: () => this.show("menu"),
-            onAudio: (kind) => {
-              if (kind === "correct") this.audio.expert();
-              else if (kind === "wrong") this.audio.risk();
-              else this.audio.ui();
-            }
-          }
-        );
-        this.audio.ui();
-        this.show("teamAcademy");
         break;
       case "claim-challenge": {
         const challengeId = actionTarget.dataset.challenge ?? "";
@@ -7595,6 +7456,156 @@ export class AdaptiveGameApp {
         } else {
           this.show("map");
         }
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private handleReviewClick(
+    action: string,
+    actionTarget: HTMLElement
+  ): boolean {
+    switch (action) {
+      case "open-due-review": {
+        const ability = actionTarget.dataset.ability;
+        const dueIds = dueReviewCards(this.save.reviewCards ?? [])
+          .filter(
+            (card) =>
+              !ability || this.reviewAbilityFor(card.nodeId) === ability
+          )
+          .map((card) => card.nodeId);
+        if (dueIds.length === 0) {
+          this.showToast(
+            this.language === "en"
+              ? "No review cards are due right now."
+              : "当前没有到期的复习卡。"
+          );
+          return true;
+        }
+        this.wrongReviewQueue = dueIds;
+        this.wrongReviewIndex = 0;
+        this.storyNodeId = dueIds[0];
+        this.replayMode = true;
+        this.lastOutcome = undefined;
+        this.lastOutcomeNodeId = undefined;
+        this.audio.ui();
+        this.show("story");
+        return true;
+      }
+      case "open-dual-review": {
+        const ability = actionTarget.dataset.ability;
+        const dueIds = dueReviewCards(this.save.reviewCards ?? [])
+          .filter(
+            (card) =>
+              !ability || this.reviewAbilityFor(card.nodeId) === ability
+          )
+          .map((card) => card.nodeId);
+        if (dueIds.length === 0) {
+          this.showToast(
+            this.language === "en"
+              ? "No review cards are due right now."
+              : "当前没有到期的复习卡。"
+          );
+          return true;
+        }
+        this.dualReviewQueue = dueIds;
+        this.dualReviewIndex = 0;
+        this.resetDualSelection();
+        this.audio.ui();
+        this.show("dualReview");
+        return true;
+      }
+      case "dual-toggle": {
+        const axis = actionTarget.dataset.axis as "best" | "worst";
+        const option = Number(actionTarget.dataset.option);
+        if (axis === "best") {
+          this.dualBestIndex = option;
+          if (this.dualWorstIndex === option) this.dualWorstIndex = undefined;
+        } else {
+          this.dualWorstIndex = option;
+          if (this.dualBestIndex === option) this.dualBestIndex = undefined;
+        }
+        this.audio.ui();
+        this.renderDualReview();
+        return true;
+      }
+      case "dual-submit": {
+        if (
+          this.dualBestIndex === undefined ||
+          this.dualWorstIndex === undefined
+        ) {
+          this.showToast(
+            this.language === "en"
+              ? "Choose both the best and worst move first."
+              : "请先同时选择最佳和最差选项。"
+          );
+          return true;
+        }
+        const nodeId = this.dualReviewQueue[this.dualReviewIndex];
+        if (!nodeId) return true;
+        const roleNode = getNodeForRole(this.save.profile.role, nodeId);
+        const options = storyNodeDisplay(this.language, this.save,roleNode).options;
+        const expertIndex = options.findIndex(
+          (option) => option.quality === "expert"
+        );
+        const worstIndex = worstOptionIndex(options);
+        const outcome = scoreDualAxis(
+          this.dualBestIndex,
+          this.dualWorstIndex,
+          expertIndex,
+          worstIndex
+        );
+        this.dualLastOutcome = outcome;
+        this.dualSubmitted = true;
+        this.save.reviewCards = recordReviewResult(
+          this.save.reviewCards ?? [],
+          nodeId,
+          dualAxisQuality(outcome)
+        );
+        this.persistSave();
+        if (outcome === "perfect") this.audio.expert();
+        else if (outcome === "partial") this.audio.partial();
+        else this.audio.risk();
+        this.renderDualReview();
+        return true;
+      }
+      case "dual-next":
+        this.dualReviewIndex += 1;
+        if (this.dualReviewIndex >= this.dualReviewQueue.length) {
+          this.dualReviewQueue = [];
+          this.dualReviewIndex = 0;
+          this.resetDualSelection();
+          this.audio.ui();
+          this.show("report");
+          return true;
+        }
+        this.resetDualSelection();
+        this.audio.ui();
+        this.renderDualReview();
+        return true;
+      case "dual-close":
+        this.dualReviewQueue = [];
+        this.dualReviewIndex = 0;
+        this.resetDualSelection();
+        this.audio.ui();
+        this.show("report");
+        return true;
+      case "open-team-academy":
+        this.teamAcademy = new TeamAcademyApp(
+          this.save.profile.role as "parachute" | "founder" | "highPotential",
+          this.language,
+          {
+            onBack: () => this.show("menu"),
+            onAudio: (kind) => {
+              if (kind === "correct") this.audio.expert();
+              else if (kind === "wrong") this.audio.risk();
+              else this.audio.ui();
+            }
+          }
+        );
+        this.audio.ui();
+        this.show("teamAcademy");
         return true;
       default:
         return false;
