@@ -5417,6 +5417,7 @@ export class AdaptiveGameApp {
     if (this.handleCloudClick(action, actionTarget)) return;
     if (this.handleExportClick(action, actionTarget)) return;
     if (this.handleLiveClick(action, actionTarget)) return;
+    if (this.handleCustomScenarioClick(action, actionTarget)) return;
 
     switch (action) {
       case "open-node": {
@@ -5794,93 +5795,6 @@ export class AdaptiveGameApp {
         );
         this.audio.ui();
         this.show("teamAcademy");
-        break;
-      case "open-custom-scenarios":
-        this.customPlayId = undefined;
-        this.customPlayResult = undefined;
-        this.audio.ui();
-        this.show("customScenarios");
-        break;
-      case "custom-submit": {
-        const value = (name: string): string =>
-          this.root.querySelector<HTMLInputElement>(`[name="${name}"]`)?.value ??
-          "";
-        const title = value("custom-title");
-        const context = value("custom-context");
-        const stake = value("custom-stake");
-        const options = [0, 1, 2].map((index) => ({
-          label: value(`custom-option-${index}-label`),
-          summary: value(`custom-option-${index}-summary`),
-          feedback: value(`custom-option-${index}-feedback`),
-          quality: this.root.querySelector<HTMLSelectElement>(
-            `[name="custom-option-${index}-quality"]`
-          )?.value as "expert" | "partial" | "risk"
-        }));
-        const errors = validateCustomScenario({ title, context, stake, options });
-        if (errors.length > 0) {
-          this.showToast(errors[0]);
-          this.audio.risk();
-          break;
-        }
-        this.customScenarios = [
-          ...this.customScenarios,
-          createCustomScenario({ title, context, stake, options })
-        ];
-        saveCustomScenarios(this.customScenarios);
-        this.audio.expert();
-        this.renderCustomScenarios();
-        break;
-      }
-      case "custom-export": {
-        const text = exportCustomScenarios(this.customScenarios);
-        const blob = new Blob([text], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const anchor = document.createElement("a");
-        anchor.href = url;
-        anchor.download = "ascend-custom-scenarios.json";
-        anchor.click();
-        URL.revokeObjectURL(url);
-        this.audio.ui();
-        break;
-      }
-      case "custom-delete": {
-        const id = actionTarget.dataset.id;
-        this.customScenarios = this.customScenarios.filter(
-          (scenario) => scenario.id !== id
-        );
-        saveCustomScenarios(this.customScenarios);
-        this.audio.ui();
-        this.renderCustomScenarios();
-        break;
-      }
-      case "custom-play": {
-        const id = actionTarget.dataset.id;
-        if (this.customScenarios.some((scenario) => scenario.id === id)) {
-          this.customPlayId = id;
-          this.customPlayResult = undefined;
-          this.audio.ui();
-          this.show("customScenarioPlay");
-        }
-        break;
-      }
-      case "custom-option": {
-        const index = Number(actionTarget.dataset.option);
-        this.customPlayResult = index;
-        const scenario = this.customScenarios.find(
-          (item) => item.id === this.customPlayId
-        );
-        const quality = scenario?.options[index]?.quality;
-        if (quality === "expert") this.audio.expert();
-        else if (quality === "partial") this.audio.partial();
-        else this.audio.risk();
-        this.renderCustomScenarioPlay();
-        break;
-      }
-      case "custom-back":
-        this.customPlayId = undefined;
-        this.customPlayResult = undefined;
-        this.audio.ui();
-        this.show("customScenarios");
         break;
       case "open-wrong-review": {
         const wrongIds = [
@@ -7562,6 +7476,103 @@ export class AdaptiveGameApp {
         this.liveName = "";
         this.audio.ui();
         this.renderCoach();
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private handleCustomScenarioClick(
+    action: string,
+    actionTarget: HTMLElement
+  ): boolean {
+    switch (action) {
+      case "open-custom-scenarios":
+        this.customPlayId = undefined;
+        this.customPlayResult = undefined;
+        this.audio.ui();
+        this.show("customScenarios");
+        return true;
+      case "custom-submit": {
+        const value = (name: string): string =>
+          this.root.querySelector<HTMLInputElement>(`[name="${name}"]`)?.value ??
+          "";
+        const title = value("custom-title");
+        const context = value("custom-context");
+        const stake = value("custom-stake");
+        const options = [0, 1, 2].map((index) => ({
+          label: value(`custom-option-${index}-label`),
+          summary: value(`custom-option-${index}-summary`),
+          feedback: value(`custom-option-${index}-feedback`),
+          quality: this.root.querySelector<HTMLSelectElement>(
+            `[name="custom-option-${index}-quality"]`
+          )?.value as "expert" | "partial" | "risk"
+        }));
+        const errors = validateCustomScenario({ title, context, stake, options });
+        if (errors.length > 0) {
+          this.showToast(errors[0]);
+          this.audio.risk();
+          return true;
+        }
+        this.customScenarios = [
+          ...this.customScenarios,
+          createCustomScenario({ title, context, stake, options })
+        ];
+        saveCustomScenarios(this.customScenarios);
+        this.audio.expert();
+        this.renderCustomScenarios();
+        return true;
+      }
+      case "custom-export": {
+        const text = exportCustomScenarios(this.customScenarios);
+        const blob = new Blob([text], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = "ascend-custom-scenarios.json";
+        anchor.click();
+        URL.revokeObjectURL(url);
+        this.audio.ui();
+        return true;
+      }
+      case "custom-delete": {
+        const id = actionTarget.dataset.id;
+        this.customScenarios = this.customScenarios.filter(
+          (scenario) => scenario.id !== id
+        );
+        saveCustomScenarios(this.customScenarios);
+        this.audio.ui();
+        this.renderCustomScenarios();
+        return true;
+      }
+      case "custom-play": {
+        const id = actionTarget.dataset.id;
+        if (this.customScenarios.some((scenario) => scenario.id === id)) {
+          this.customPlayId = id;
+          this.customPlayResult = undefined;
+          this.audio.ui();
+          this.show("customScenarioPlay");
+        }
+        return true;
+      }
+      case "custom-option": {
+        const index = Number(actionTarget.dataset.option);
+        this.customPlayResult = index;
+        const scenario = this.customScenarios.find(
+          (item) => item.id === this.customPlayId
+        );
+        const quality = scenario?.options[index]?.quality;
+        if (quality === "expert") this.audio.expert();
+        else if (quality === "partial") this.audio.partial();
+        else this.audio.risk();
+        this.renderCustomScenarioPlay();
+        return true;
+      }
+      case "custom-back":
+        this.customPlayId = undefined;
+        this.customPlayResult = undefined;
+        this.audio.ui();
+        this.show("customScenarios");
         return true;
       default:
         return false;
