@@ -166,6 +166,7 @@ import {
   customScenariosView,
   dualReviewView
 } from "./trainerViews";
+import { chapterTransitionView } from "./transitionView";
 import {
   chapterTrainingMarkup,
   expeditionHeroMarkup,
@@ -2074,66 +2075,13 @@ export class AdaptiveGameApp {
       this.show("map");
       return;
     }
-    const chapter = getChapter(this.pendingChapterTransition);
-    const next = chapter.id < CHAPTERS.length ? CHAPTERS[chapter.id] : undefined;
-    const civ = stageForChapter(chapter.id);
-    this.root.innerHTML = `
-      <header class="topbar">
-        <div class="brand">${this.t("brand")}</div>
-        <button class="link sound-toggle" data-action="toggle-sound" aria-label="${this.language === "en" ? "Toggle sound" : "切换声音"}">${this.muted ? this.t("soundOff") : this.t("soundOn")}</button>
-        <button class="link language-toggle" data-action="toggle-language" aria-label="${this.language === "en" ? "Switch language" : "切换语言"}">${this.t("language")}</button>
-      </header>
-      <main class="transition-shell" aria-label="${this.language === "en" ? "Chapter transition" : "章节过渡"}">
-        <section class="transition-panel">
-          <p class="eyebrow">${this.language === "en" ? `Chapter ${chapter.code} ${this.t("chapterComplete")}` : `第 ${chapter.code} 章完成`}</p>
-          <h1>${chapterDisplay(this.language, chapter).title}</h1>
-          <p class="expedition-transition-line" style="--civ:${civ.color}">${this.language === "en" ? `${civ.nameEn} · ${civ.focusEn}` : `${civ.nameZh} · ${civ.focusZh}`}</p>
-          <p class="transition-summary">${escapeHtml(chapterReflectionText(this.language, chapter.id))}</p>
-          <div class="route-choice-panel">
-            <h3>${this.t("routeTitle")}</h3>
-            <p class="muted">${this.t("routeHint")}</p>
-            <div class="route-choice-actions">
-              ${(["expert", "risk", "partial"] as const)
-                .map((route) => {
-                  const selected = this.save.routePath[chapter.id] === route;
-                  const labelKey =
-                    route === "expert"
-                      ? "routeExpert"
-                      : route === "risk"
-                        ? "routeRisk"
-                        : "routePartial";
-                  return `<button class="${selected ? "selected" : ""}" data-action="choose-route" data-chapter="${chapter.id}" data-route="${route}" aria-pressed="${selected ? "true" : "false"}">${this.t(labelKey)}${selected ? ` <span class="route-selected-tag">${this.language === "en" ? "Selected" : "已选"}</span>` : ""}</button>`;
-                })
-                .join("")}
-            </div>
-            ${this.save.routePath[chapter.id] ? `<p class="route-preview" role="status">${this.t(this.save.routePath[chapter.id] === "expert" ? "routeExpertPreview" : this.save.routePath[chapter.id] === "risk" ? "routeRiskPreview" : "routePartialPreview")}</p>` : ""}
-            ${
-              this.pendingForkNodeId
-                ? `<button class="primary fork-entry-button" data-action="enter-fork">${this.language === "en" ? "Enter Route Fork" : "进入路线分叉"}</button>`
-                : ""
-            }
-          </div>
-          ${ 
-            next
-              ? `
-                <div class="next-chapter">
-                  <span>${this.t("nextChapter")}</span>
-                  <strong>${this.language === "en" ? `Chapter ${next.code} · ${chapterDisplay(this.language, next).title}` : `第 ${next.code} 章 · ${next.title}`}</strong>
-                  <p>${chapterDisplay(this.language, next).subtitle}</p>
-                </div>
-              `
-              : `
-                <div class="next-chapter">
-                  <span>${this.t("campaignComplete")}</span>
-                  <strong>${this.t("campaignCompleteText")}</strong>
-                  <p>${this.t("campaignCompleteHint")}</p>
-                </div>
-              `
-          }
-          <button class="primary" data-action="continue-transition-map">${this.t("menuContinue")}</button>
-        </section>
-      </main>
-    `;
+    this.root.innerHTML = chapterTransitionView(
+      this.save,
+      this.language,
+      this.muted,
+      this.pendingChapterTransition,
+      this.pendingForkNodeId
+    );
   }
 
   private renderAbility(): void {
