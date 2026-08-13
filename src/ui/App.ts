@@ -1128,7 +1128,7 @@ export class AdaptiveGameApp {
     return `
       <section class="exploration-panel ${doneAll ? "complete" : ""}">
         <div class="exploration-head">
-          <span>${en ? "Explore the site" : "探秘现场"}</span>
+          <span>${en ? "Field recon" : "情报勘察"}</span>
           <strong>${found.length} / 3</strong>
         </div>
         <div class="exploration-actions">${actions}</div>
@@ -1277,13 +1277,13 @@ export class AdaptiveGameApp {
     return `
       <section class="expedition-hero" style="--civ:${civ.color}">
         <div>
-          <p class="eyebrow">${en ? "Four Ancient Civilizations · Treasure Map" : "四大文明 · 藏宝图"}</p>
+          <p class="eyebrow">${en ? "Nine-Chapter Power Structure" : "九章权力架构"}</p>
           <h1>${en ? civ.nameEn : civ.nameZh} · ${en ? civ.relicEn : civ.relicZh}</h1>
           <p>${escapeHtml(en ? civ.clueEn : civ.clueZh)}</p>
         </div>
         <div class="treasure-ring">
           <strong>${exp.foundPieces} / ${exp.totalPieces}</strong>
-          <span>${en ? "Treasure pieces" : "藏宝图残片"}</span>
+          <span>${en ? "Chapters completed" : "章节进度"}</span>
         </div>
       </section>
     `;
@@ -1454,7 +1454,7 @@ export class AdaptiveGameApp {
    *
    * 命名规范（与 scripts/generate-real-art.mjs 同步）：
    *   menu-card-00 ~ menu-card-10      首页十大模块卡片封面
-   *   treasure-fragment-1 ~ treasure-fragment-9  藏宝图 9 残片
+   *   treasure-fragment-1 ~ treasure-fragment-9  权力架构九章进度标记
    *   role-parachute / role-founder / role-highPotential  三张角色立绘（jpg，替代原有 svg 简笔画）
    *   duel-lobby / duel-match / duel-reveal  1v1 三场景
    *   ach-cat-story/training/trial/duel/event/rank  成就六大类封面
@@ -2252,11 +2252,11 @@ export class AdaptiveGameApp {
                 <div>
                   <p class="eyebrow">${en ? "Three things to know" : "进入地图前，先记住三件事"}</p>
                   <ol>
-                    <li><strong>${en ? "Explore first" : "先探秘"}</strong>${en ? "Complete one survey action to unlock choices." : "先完成一个探秘动作，才能解锁选择。"}</li>
+                    <li><strong>${en ? "Recon first" : "先勘察"}</strong>${en ? "Complete one recon action to unlock choices." : "先完成一个勘察动作，才能解锁选择。"}</li>
                     <li><strong>${en ? "Core + Extended" : "核心 + 扩展"}</strong>${en ? "Core 2/2 unlocks the next chapter; 7 extended scenarios add depth and rewards." : "核心 2/2 推进章节，7 个扩展情境提供深度和奖励。"}</li>
                     <li><strong>${en ? "Guardian verification" : "守护验证"}</strong>${en ? "Repeatedly picking the first option triggers a real trade-off check." : "反复选择第一个方案会触发真实取舍验证。"}</li>
                   </ol>
-                  <button class="primary" data-action="dismiss-map-guide">${en ? "Start Exploring" : "开始探秘"}</button>
+                  <button class="primary" data-action="dismiss-map-guide">${en ? "Start Recon" : "开始勘察"}</button>
                 </div>
               </section>
             `
@@ -2311,7 +2311,7 @@ export class AdaptiveGameApp {
               <p class="chapter-main-progress">${this.language === "en" ? `Core ${coreDoneCount} / 2 · Extended ${extraDoneCount} / 7` : `核心 ${coreDoneCount} / 2 · 扩展 ${extraDoneCount} / 7`}</p>
             </div>
             <div class="expedition-chapter-card" style="--civ:${civilizationForChapter(chapter.id).color}">
-              <span>${this.language === "en" ? `Expedition · ${civilizationForChapter(chapter.id).nameEn}` : `探秘 · ${civilizationForChapter(chapter.id).nameZh}`}</span>
+              <span>${this.language === "en" ? `Stage · ${civilizationForChapter(chapter.id).nameEn}` : `阶段 · ${civilizationForChapter(chapter.id).nameZh}`}</span>
               <strong>${this.language === "en" ? civilizationForChapter(chapter.id).relicEn : civilizationForChapter(chapter.id).relicZh}</strong>
               <p>${escapeHtml(this.language === "en" ? civilizationForChapter(chapter.id).clueEn : civilizationForChapter(chapter.id).clueZh)}</p>
             </div>
@@ -2369,7 +2369,7 @@ export class AdaptiveGameApp {
             </div>
             ${this.npcCameoMarkup(chapter.id)}
             <div class="mini-panel treasure-panel">
-              <h3>${this.language === "en" ? "Treasure Map" : "藏宝图"}</h3>
+              <h3>${this.language === "en" ? "Power Structure" : "权力架构"}</h3>
               <div class="treasure-track">
                 ${CHAPTERS.map((item) => {
                   const done = isChapterComplete(this.save, item.id);
@@ -2381,7 +2381,7 @@ export class AdaptiveGameApp {
                   </span>`;
                 }).join("")}
               </div>
-              <p class="muted">${this.language === "en" ? "Each completed chapter reveals one piece of the treasure map." : "每完成一章，藏宝图就会显出一块残片。"}</p>
+              <p class="muted">${this.language === "en" ? "Each completed chapter advances the power structure." : "每完成一章，权力架构就推进一段。"}</p>
             </div>
             <div class="mini-panel investment-panel">
               <h3>${this.language === "en" ? "Reinvest in the Organization" : "组织再投资"}</h3>
@@ -2703,7 +2703,7 @@ export class AdaptiveGameApp {
         <section class="expedition-scene" style="--civ:${civ.color}">
           <div>
             <span>${en ? `${civ.nameEn} · ${civ.relicEn}` : `${civ.nameZh} · ${civ.relicZh}`}</span>
-            <strong>${en ? "Expedition Journal" : "探秘笔记"}</strong>
+            <strong>${en ? "Intel Journal" : "情报笔记"}</strong>
           </div>
           <p>${escapeHtml(en ? civ.clueEn : civ.clueZh)}</p>
         </section>
@@ -2868,7 +2868,7 @@ export class AdaptiveGameApp {
                           ${!showingOutcome && !this.replayMode ? this.explorationPanelMarkup(node) : ""}
                           ${
                             !explorationReady && !showingOutcome && !this.replayMode
-                              ? `<p class="exploration-lock-note">${en ? "Complete one exploration action to unlock the choices." : "先完成一个探秘动作，才能解锁选择。"}</p>`
+                              ? `<p class="exploration-lock-note">${en ? "Complete one recon action to unlock the choices." : "先完成一个勘察动作，才能解锁选择。"}</p>`
                               : ""
                           }
                           <div class="option-list">
@@ -2890,8 +2890,8 @@ export class AdaptiveGameApp {
                                         ? `${this.t("optionLockedAbility")} ${this.abilityDisplay(gate.ability).name} Lv.${gate.needed}`
                                         : !explorationReady
                                           ? en
-                                            ? "Complete an exploration action first"
-                                            : "先完成一个探秘动作"
+                                            ? "Complete a recon action first"
+                                            : "先完成一个勘察动作"
                                           : "";
                                   return `
                                     <button class="option-card ${blocked ? "locked" : ""}" data-action="choose-option" data-option="${originalIndex}" data-quality="${option.quality}" ${blocked ? "disabled" : ""}>

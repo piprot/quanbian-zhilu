@@ -177,9 +177,9 @@ export interface SaveState {
   bestScore?: number;
   /** 完成整个九章权力架构的次数，用于「游玩次数」而不是决策次数。 */
   campaignCompletions?: number;
-  /** 探秘玩法：每个剧情节点已完成的勘察/访谈/破译动作。 */
+  /** 勘察玩法：每个剧情节点已完成的勘察/访谈/研读动作。 */
   explorationFound?: Record<string, string[]>;
-  /** 已完成全部三个探秘动作并获得奖励的节点。 */
+  /** 已完成全部三个勘察动作并获得奖励的节点。 */
   explorationCompleted?: string[];
   /** 连续选择第一个选项的次数，用于防“全选 A”通关。 */
   firstPickStreak?: number;

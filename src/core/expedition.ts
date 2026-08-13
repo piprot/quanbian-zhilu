@@ -17,27 +17,27 @@ export interface CivilizationDef {
 export const CIVILIZATIONS: CivilizationDef[] = [
   {
     id: "egypt",
-    nameZh: "古埃及",
-    nameEn: "Ancient Egypt",
-    regionZh: "尼罗河三角洲",
-    regionEn: "Nile Delta",
-    relicZh: "太阳历书",
-    relicEn: "Book of the Sun",
+    nameZh: "识局 · 谋权",
+    nameEn: "Diagnose · Build Power",
+    regionZh: "第 1–2 章",
+    regionEn: "Chapters 1–2",
+    relicZh: "权力地图",
+    relicEn: "Power Map",
     clueZh:
-      "第一块藏宝图残片藏在组织最旧的档案室里：谁先被询问、谁保持沉默，往往比任何路线图更接近真相。",
+      "在授权之前先诊断：谁被询问、谁保持沉默，比任何架构图更接近真实权力结构。",
     clueEn:
-      "The first map fragment hides in the oldest archive of the organization: who gets asked first and who stays silent reveals more than any drawn route.",
+      "Diagnose before acting: who gets asked and who stays silent reveals the real power structure better than any org chart.",
     color: "#d9a441",
     chapters: [1, 2]
   },
   {
     id: "mesopotamia",
-    nameZh: "两河文明",
-    nameEn: "Mesopotamia",
-    regionZh: "幼发拉底河与底格里斯河之间",
-    regionEn: "Between the Euphrates and the Tigris",
-    relicZh: "楔形法典",
-    relicEn: "Cuneiform Code",
+    nameZh: "用人 · 驭势",
+    nameEn: "Staff · Align",
+    regionZh: "第 3–4 章",
+    regionEn: "Chapters 3–4",
+    relicZh: "制度流程",
+    relicEn: "Institution",
     clueZh:
       "规则只有写成流程才能存续：把判断变成制度，组织才不会在权力交接时崩塌。",
     clueEn:
@@ -47,12 +47,12 @@ export const CIVILIZATIONS: CivilizationDef[] = [
   },
   {
     id: "indus",
-    nameZh: "印度河文明",
-    nameEn: "Indus Valley",
-    regionZh: "印度河与萨拉斯瓦蒂河之间",
-    regionEn: "Between the Indus and Saraswati",
-    relicZh: "印章城图",
-    relicEn: "Seal City Map",
+    nameZh: "执权 · 掌权",
+    nameEn: "Decide · Hold",
+    regionZh: "第 5–6 章",
+    regionEn: "Chapters 5–6",
+    relicZh: "组织地图",
+    relicEn: "Org Map",
     clueZh:
       "真正的组织地图不在架构图上，而在资源流动里：钱、时间和关键任务流向哪里，权力就在哪里。",
     clueEn:
@@ -62,12 +62,12 @@ export const CIVILIZATIONS: CivilizationDef[] = [
   },
   {
     id: "china",
-    nameZh: "华夏文明",
-    nameEn: "Chinese Civilization",
-    regionZh: "黄河中下游",
-    regionEn: "The Yellow River basin",
-    relicZh: "九鼎星图",
-    relicEn: "Nine Cauldrons Star Chart",
+    nameZh: "固权 · 成业",
+    nameEn: "Anchor · Succeed",
+    regionZh: "第 7–9 章",
+    regionEn: "Chapters 7–9",
+    relicZh: "传承系统",
+    relicEn: "Succession",
     clueZh:
       "成业之秘不是个人的威名，而是传位、复盘与交接制度：让系统在你离开后仍能自转。",
     clueEn:
