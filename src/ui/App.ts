@@ -147,7 +147,11 @@ import {
 } from "../core/trials";
 import { hiddenRouteSteps } from "../core/hiddenRoutes";
 import { uiString, type Language } from "../core/i18n";
-import { readAnalyticsEvents, trackEvent } from "../core/analytics";
+import {
+  exportAnalyticsPayload,
+  readAnalyticsEvents,
+  trackEvent
+} from "../core/analytics";
 import { ROLE_EN } from "../core/translations";
 import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, npcAvatarColor, achievementDisplay, challengeDisplay, challengeCategoryLabel, assessmentDisplay, chapterReflectionText, aiArchetypeLabel, leadershipLensText, roleMove, nodeIntel, resourceChips, chapterBadge, dimensionMarkup } from "./display";
 import { buildReportMarkdown, downloadText, encodeSaveLink } from "./export";
@@ -464,7 +468,12 @@ export class AdaptiveGameApp {
     if (this.save.profileCreated) {
       this.resourceRecoveryNote = applyDailyResourceRecovery(this.save);
     }
-    trackEvent("session_start", { language: this.language });
+    trackEvent("session_start", {
+      language: this.language,
+      lastChapter: this.save.unlockedChapters.at(-1) ?? 1,
+      unlockedChapters: this.save.unlockedChapters.length,
+      playCount: this.save.playCount
+    });
     const corruptSave = consumeCorruptSaveNotice();
     if (corruptSave) {
       window.setTimeout(() => {
@@ -6271,6 +6280,12 @@ export class AdaptiveGameApp {
       baseNode.kind === "main" && isChapterPassed(this.save, baseNode.chapterId)
         ? baseNode.chapterId
         : undefined;
+    if (this.pendingChapterTransition !== undefined) {
+      trackEvent("chapter_complete", {
+        chapterId: this.pendingChapterTransition,
+        role: this.save.profile.role
+      });
+    }
     const highAbility = (
       Object.keys(outcome.option.effects) as AbilityId[]
     ).find((id) => abilityLevel(this.save.profile.abilities[id]) >= 3);
@@ -6881,19 +6896,21 @@ export class AdaptiveGameApp {
   private exportAnalytics(): void {
     downloadText(
       `${this.language === "en" ? "Ascend-events" : "升维事件日志"}.json`,
-      JSON.stringify(readAnalyticsEvents(), null, 2),
+      JSON.stringify(exportAnalyticsPayload(readAnalyticsEvents()), null, 2),
       "application/json"
     );
     this.audio.ui();
   }
 
   private exportReturnPackage(): void {
+    const events = readAnalyticsEvents();
     const payload = {
       version: APP_VERSION,
       exportedAt: new Date().toISOString(),
       build: ONLINE_ENABLED ? "online" : "static",
       save: this.save,
-      events: readAnalyticsEvents()
+      events,
+      analytics: exportAnalyticsPayload(events).summary
     };
     downloadText(
       `${this.language === "en" ? "Ascend-return-package" : "升维回传包"}.json`,
