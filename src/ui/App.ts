@@ -5413,6 +5413,7 @@ export class AdaptiveGameApp {
     if (this.handleAssessmentClick(action, actionTarget)) return;
     if (this.handleDuelClick(action, actionTarget)) return;
     if (this.handleTrialClick(action, actionTarget)) return;
+    if (this.handleSettingsClick(action, actionTarget)) return;
 
     switch (action) {
       case "open-node": {
@@ -6443,77 +6444,6 @@ export class AdaptiveGameApp {
       case "cloud-reconnect":
         void this.cloudReconnect();
         break;
-      case "toggle-sound":
-        this.muted = !this.muted;
-        localStorage.setItem("adaptive-ascent-muted", this.muted ? "1" : "0");
-        this.audio.setMuted(this.muted);
-        this.showToast(
-          this.language === "en"
-            ? this.muted
-              ? "Sound muted."
-              : "Sound on."
-            : this.muted
-              ? "声音已关闭。"
-              : "声音已开启。"
-        );
-        this.render();
-        break;
-      case "preview-sfx":
-        this.audio.ensure();
-        this.audio.expert();
-        break;
-      case "toggle-music":
-        this.musicMuted = !this.musicMuted;
-        localStorage.setItem("adaptive-ascent-music", this.musicMuted ? "1" : "0");
-        this.audio.setMusicMuted(this.musicMuted);
-        this.showToast(
-          this.language === "en"
-            ? this.musicMuted
-              ? "Music muted."
-              : "Music on."
-            : this.musicMuted
-              ? "音乐已关闭。"
-              : "音乐已开启。"
-        );
-        this.render();
-        break;
-      case "settings-font-size":
-        this.fontScale = Number(actionTarget.dataset.size) || 1;
-        localStorage.setItem(
-          "adaptive-ascent-font-scale",
-          String(this.fontScale)
-        );
-        document.documentElement.style.fontSize =
-          `${this.fontScale * 100}%`;
-        this.render();
-        break;
-      case "toggle-language":
-        this.language = this.language === "zh" ? "en" : "zh";
-        localStorage.setItem("adaptive-ascent-lang", this.language);
-        document.documentElement.lang = this.language;
-        this.audio.ui();
-        this.showToast(
-          this.language === "en"
-            ? "Language switched to English."
-            : "已切换为中文。"
-        );
-        this.render();
-        break;
-      case "reset-profile":
-        if (
-          window.confirm(
-            this.language === "en"
-              ? "Clear the current profile and all progress?"
-              : "确定要清空当前档案和所有进度吗？"
-          )
-        ) {
-          deleteRoleSlot(this.save.profile.role);
-          this.save = resetSave(this.save.profile.role);
-          trackEvent("profile_reset");
-          this.pendingRole = this.save.profile.role;
-          this.show("profile");
-        }
-        break;
       case "claim-challenge": {
         const challengeId = actionTarget.dataset.challenge ?? "";
         const today = todayKey();
@@ -7517,6 +7447,87 @@ export class AdaptiveGameApp {
         if (hireTrialAlly(this.save)) {
           this.audio.trainingCorrect();
           this.renderTrial();
+        }
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private handleSettingsClick(
+    action: string,
+    actionTarget: HTMLElement
+  ): boolean {
+    switch (action) {
+      case "toggle-sound":
+        this.muted = !this.muted;
+        localStorage.setItem("adaptive-ascent-muted", this.muted ? "1" : "0");
+        this.audio.setMuted(this.muted);
+        this.showToast(
+          this.language === "en"
+            ? this.muted
+              ? "Sound muted."
+              : "Sound on."
+            : this.muted
+              ? "声音已关闭。"
+              : "声音已开启。"
+        );
+        this.render();
+        return true;
+      case "preview-sfx":
+        this.audio.ensure();
+        this.audio.expert();
+        return true;
+      case "toggle-music":
+        this.musicMuted = !this.musicMuted;
+        localStorage.setItem("adaptive-ascent-music", this.musicMuted ? "1" : "0");
+        this.audio.setMusicMuted(this.musicMuted);
+        this.showToast(
+          this.language === "en"
+            ? this.musicMuted
+              ? "Music muted."
+              : "Music on."
+            : this.musicMuted
+              ? "音乐已关闭。"
+              : "音乐已开启。"
+        );
+        this.render();
+        return true;
+      case "settings-font-size":
+        this.fontScale = Number(actionTarget.dataset.size) || 1;
+        localStorage.setItem(
+          "adaptive-ascent-font-scale",
+          String(this.fontScale)
+        );
+        document.documentElement.style.fontSize =
+          `${this.fontScale * 100}%`;
+        this.render();
+        return true;
+      case "toggle-language":
+        this.language = this.language === "zh" ? "en" : "zh";
+        localStorage.setItem("adaptive-ascent-lang", this.language);
+        document.documentElement.lang = this.language;
+        this.audio.ui();
+        this.showToast(
+          this.language === "en"
+            ? "Language switched to English."
+            : "已切换为中文。"
+        );
+        this.render();
+        return true;
+      case "reset-profile":
+        if (
+          window.confirm(
+            this.language === "en"
+              ? "Clear the current profile and all progress?"
+              : "确定要清空当前档案和所有进度吗？"
+          )
+        ) {
+          deleteRoleSlot(this.save.profile.role);
+          this.save = resetSave(this.save.profile.role);
+          trackEvent("profile_reset");
+          this.pendingRole = this.save.profile.role;
+          this.show("profile");
         }
         return true;
       default:
