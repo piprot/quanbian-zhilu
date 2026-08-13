@@ -5275,7 +5275,7 @@ export class AdaptiveGameApp {
     if (this.duelRevealing) {
       this.root.innerHTML =
         '<main class="duel-reveal has-reveal-art" aria-label="' + this.t("duelReveal") + '">' +
-        '<img class="duel-reveal-bg" src="${artAsset("duel-reveal")}" alt="" aria-hidden="true" onerror="this.style.display=\'none\'" />' +
+        '<img class="duel-reveal-bg" src="' + artAsset("duel-reveal") + '" alt="" aria-hidden="true" onerror="this.style.display=\'none\'" />' +
         '<h1>' + this.t("duelReveal") + '</h1>' +
         '<div class="reveal-spinner"></div>' +
         '</main>';
