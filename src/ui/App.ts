@@ -64,11 +64,6 @@ import {
   CHAPTERS,
   forkNodeForRoute,
   NODE_INTEL,
-  RANDOM_EVENT_IDS,
-  RANDOM_EVENT_META,
-  randomEventEligibleCount,
-  nextRandomEvent,
-  SIDE_QUEST_ARCS,
   getChapter,
   getNode,
   getNodeForRole
@@ -121,7 +116,6 @@ import { NPCS } from "../core/npcs";
 import {
   dailyChallenges,
   todayKey,
-  weekEndsAt,
   weekKey,
   weeklyChallenges
 } from "../core/challenges";
@@ -153,13 +147,13 @@ import {
   trackEvent
 } from "../core/analytics";
 import { ROLE_EN } from "../core/translations";
-import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, npcAvatarColor, achievementDisplay, challengeDisplay, challengeCategoryLabel, assessmentDisplay, chapterReflectionText, aiArchetypeLabel, leadershipLensText, roleMove, nodeIntel, resourceChips, chapterBadge, dimensionMarkup } from "./display";
+import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, npcAvatarColor, achievementDisplay, assessmentDisplay, aiArchetypeLabel, leadershipLensText, roleMove, nodeIntel, resourceChips, dimensionMarkup } from "./display";
 import { buildReportMarkdown, downloadText, encodeSaveLink } from "./export";
 import { artAsset, chapterArtStyle } from "./assets";
 import { storyNodeDisplay } from "./nodeView";
 import { escapeAttr, escapeHtml, formatDelta } from "./escape";
 import { abilityView, endingView, reportView } from "./reportView";
-import { difficultySelector, settingsView } from "./settingsView";
+import { settingsView } from "./settingsView";
 import { achievementsView } from "./achievementsView";
 import { profileView } from "./profileView";
 import { relationsView } from "./relationsView";
@@ -172,14 +166,8 @@ import {
 } from "./trainerViews";
 import { chapterTransitionView } from "./transitionView";
 import { coachView } from "./coachView";
+import { mapView } from "./mapView";
 import {
-  nodeRow,
-  questArcMarkup
-} from "./mapHelpers";
-import {
-  chapterTrainingMarkup,
-  expeditionHeroMarkup,
-  npcCameoMarkup,
   optionCostSummary,
   primaryAbilityForOption,
   storyOptionOrder
@@ -1182,329 +1170,17 @@ export class AdaptiveGameApp {
   }
 
   private renderMap(): void {
-    const summary = profileSummary(this.save);
-    const en = this.language === "en";
-    const chapter = getChapter(this.selectedChapter);
-    const mainNodes = chapter.nodeIds.map(getNode);
-    const mainDoneCount = mainNodes.filter((node) =>
-      isNodeComplete(this.save, node.id)
-    ).length;
-    const coreDoneCount = mainNodes
-      .slice(0, 2)
-      .filter((node) => isNodeComplete(this.save, node.id)).length;
-    const extraDoneCount = Math.max(0, mainDoneCount - coreDoneCount);
-    const chapterDone = isChapterComplete(this.save, chapter.id);
-    const chapterPassed = isChapterPassed(this.save, chapter.id);
-    const availableRandom = nextRandomEvent({
-      ...this.save,
-      role: this.save.profile.role,
-      difficulty: this.save.difficulty
+    this.root.innerHTML = mapView(this.save, this.language, {
+      selectedChapter: this.selectedChapter,
+      mapDetailOpen: this.mapDetailOpen,
+      resourceRecoveryNote: this.resourceRecoveryNote,
+      showMapGuide:
+        this.save.playCount === 0 && !this.guideSteps().includes("map-intro"),
+      riskCrisis: this.riskCrisisActive(),
+      nextAdvice: this.nextActionAdvice(),
+      latestDecision: this.latestDecisionText(),
+      productionReady: this.productionReady()
     });
-    this.root.innerHTML = `
-      <header class="topbar">
-        <div class="brand">${this.t("brand")}</div>
-        <button class="link" data-action="open-menu">${this.t("returnHome")}</button>
-        <div class="topbar-meta">
-          <span>${this.save.profile.name}</span>
-          <span>${rankName(this.language, summary.rank)}</span>
-        </div>
-      </header>
-      <main class="map-shell ${this.mapDetailOpen ? "map-detail-open" : ""}" style="${chapterArtStyle(chapter.id)}" aria-label="${this.language === "en" ? "Campaign map" : "主线地图"}">
-        ${expeditionHeroMarkup(this.language, this.save,chapter.id)}
-        ${
-          this.save.playCount === 0 && !this.guideSteps().includes("map-intro")
-            ? `
-              <section class="map-guide-overlay" role="dialog" aria-label="${en ? "First map guide" : "首次地图引导"}">
-                <div>
-                  <p class="eyebrow">${en ? "Three things to know" : "进入地图前，先记住三件事"}</p>
-                  <ol>
-                    <li><strong>${en ? "Recon first" : "先勘察"}</strong>${en ? "Complete one recon action to unlock choices." : "先完成一个勘察动作，才能解锁选择。"}</li>
-                    <li><strong>${en ? "Core + Extended" : "核心 + 扩展"}</strong>${en ? "Core 2/2 unlocks the next chapter; 7 extended scenarios add depth and rewards." : "核心 2/2 推进章节，7 个扩展情境提供深度和奖励。"}</li>
-                    <li><strong>${en ? "Guardian verification" : "守护验证"}</strong>${en ? "Repeatedly picking the first option triggers a real trade-off check." : "反复选择第一个方案会触发真实取舍验证。"}</li>
-                  </ol>
-                  <button class="primary" data-action="dismiss-map-guide">${en ? "Start Recon" : "开始勘察"}</button>
-                </div>
-              </section>
-            `
-            : ""
-        }
-        ${
-          this.riskCrisisActive()
-            ? `<div class="trust-crisis-banner" role="alert">${this.language === "en" ? "Trust crisis: recent risk-heavy choices made the team withhold information. Play steady scenarios to rebuild trust." : "信任危机：近期风险选择让团队开始保留信息。先完成稳健情境重建信任。"}</div>`
-            : ""
-        }
-        <section class="lg-quest-banner" style="--dot:#41c7c0">
-          <img src="./art/chapter-${chapter.id}.jpg" alt="" loading="lazy" />
-          <div>
-            <p class="eyebrow">${this.language === "en" ? "Leadership Game Center" : "领导力游戏中心"}</p>
-            <h2>${this.language === "en" ? "Five games to train leadership judgment" : "五个游戏，练出领导力判断"}</h2>
-            <p>${this.language === "en" ? `Wins ${this.save.leadershipGameWins} · Losses ${this.save.leadershipGameLosses}. Decision chess, game theory, resource allocation, team management, and crisis command.` : `胜 ${this.save.leadershipGameWins} · 负 ${this.save.leadershipGameLosses}。决策棋、博弈推演、资源分配、团队管理与危机指挥。`}</p>
-            <button data-action="open-leadership-games">${this.language === "en" ? "Enter Game Center" : "进入游戏中心"}</button>
-          </div>
-        </section>
-        ${
-          this.resourceRecoveryNote
-            ? `<div class="recovery-banner" role="status">${this.language === "en" ? "Daily resource recovery applied: +10 energy, +4 trust, +3 influence, +3 capital. Refreshes once per day when entering the map." : "今日资源恢复已生效：精力+10、信任+4、影响力+3、组织资源+3；每天首次进入地图时自动恢复一次。"}</div>`
-            : ""
-        }
-        ${
-          this.save.profile.resources.energy < 25 ||
-          this.save.profile.resources.trust < 40 ||
-          this.save.profile.resources.capital < 25
-            ? `<div class="resource-crisis-banner" role="alert">${this.language === "en" ? "A key resource is low. Restore energy once per chapter, or play side quests to rebuild trust and capital before continuing." : "关键资源偏低：每章可深呼吸恢复一次精力，也可先做支线补充信任与组织资源，再继续主线。"}</div>`
-            : ""
-        }
-        <section class="map-head">
-          <div>
-            <p class="eyebrow">${this.t("mainQuest")}</p>
-            <h1>${this.t("campaignTitle")}</h1>
-            <p class="muted">${this.t("mapHint")}</p>
-            <p class="muted chapter-count-hint">${this.language === "en" ? "Core 2/2 unlocks the next chapter; 7 extended scenarios add optional depth and rewards." : "完成每章前 2 个核心主线即可推进章节；另外 7 个主线扩展情境提供额外深度与奖励。"}</p>
-          </div>
-          <div class="resource-strip">
-            ${resourceChips(this.language, this.save.profile)}
-          </div>
-        </section>
-        <section class="chapter-track">
-          ${CHAPTERS.map((item) => chapterBadge(this.language, this.save, this.selectedChapter,item)).join("")}
-        </section>
-        <section class="map-body">
-          <div class="chapter-detail">
-            <div class="chapter-title">
-              <span class="chapter-code">${this.language === "en" ? `Chapter ${chapter.code}` : `第 ${chapter.code} 章`}</span>
-              <h2>${chapterDisplay(this.language, chapter).title}</h2>
-              <p>${chapterDisplay(this.language, chapter).subtitle}</p>
-              <p class="chapter-main-progress">${this.language === "en" ? `Core ${coreDoneCount} / 2 · Extended ${extraDoneCount} / 7` : `核心 ${coreDoneCount} / 2 · 扩展 ${extraDoneCount} / 7`}</p>
-            </div>
-            <div class="expedition-chapter-card" style="--civ:${stageForChapter(chapter.id).color}">
-              <span>${this.language === "en" ? `Stage · ${stageForChapter(chapter.id).nameEn}` : `阶段 · ${stageForChapter(chapter.id).nameZh}`}</span>
-              <strong>${this.language === "en" ? stageForChapter(chapter.id).focusEn : stageForChapter(chapter.id).focusZh}</strong>
-              <p>${escapeHtml(this.language === "en" ? stageForChapter(chapter.id).clueEn : stageForChapter(chapter.id).clueZh)}</p>
-            </div>
-            <div class="node-list">
-              ${mainNodes.map((node) => nodeRow(node, this.save, this.language)).join("")}
-            </div>
-            ${
-              chapterDone
-                ? `
-                  <section class="chapter-reflection">
-                    <h3>${this.t("chapterReflectionTitle")}</h3>
-                    <p>${escapeHtml(chapterReflectionText(this.language, chapter.id))}</p>
-                  </section>
-                  ${
-                    chapterPassed
-                      ? ""
-                      : `<p class="star-gate-warning">${this.language === "en" ? "This chapter did not reach one star. Retry it to unlock the next chapter." : "本章未达到一星，需重新挑战才能解锁下一章。"}</p>`
-                  }
-                  <button class="replay-chapter-button" data-action="replay-chapter" data-chapter="${chapter.id}">${this.t("replayChapter")}</button>
-                  ${
-                    chapterPassed
-                      ? ""
-                      : `<button class="retry-chapter-button" data-action="retry-chapter" data-chapter="${chapter.id}">${this.language === "en" ? "Retry Chapter" : "重新挑战本章"}</button>`
-                  }
-                `
-                : ""
-            }
-            ${chapterTrainingMarkup(this.language, this.save,chapter.id)}
-            <section class="quest-board">
-              <h3>${this.t("sideQuestArcsTitle")}</h3>
-              <p class="muted">${this.t("sideQuestHint")}</p>
-              ${SIDE_QUEST_ARCS.map((arc) => questArcMarkup(arc, this.save, this.language)).join("")}
-            </section>
-          </div>
-          <aside class="map-side">
-            <button
-              class="map-collapse-toggle"
-              data-action="toggle-map-detail"
-              aria-expanded="${this.mapDetailOpen ? "true" : "false"}"
-            >${this.language === "en"
-              ? this.mapDetailOpen
-                ? "Collapse extra panels"
-                : "Show more panels"
-              : this.mapDetailOpen
-                ? "收起更多面板"
-                : "展开更多面板"}</button>
-            <div class="mini-panel next-step-panel">
-              <h3>${this.t("nextStepTitle")}</h3>
-              <p>${escapeHtml(this.nextActionAdvice().text)}</p>
-              ${
-                this.nextActionAdvice().action
-                  ? `<button data-action="${this.nextActionAdvice().action}" ${this.nextActionAdvice().ability ? `data-ability="${this.nextActionAdvice().ability}"` : ""}>${this.t("nextStepAction")}</button>`
-                  : ""
-              }
-            </div>
-            ${npcCameoMarkup(this.language, this.save,chapter.id)}
-            <div class="mini-panel power-panel">
-              <h3>${this.language === "en" ? "Power Structure" : "权力架构"}</h3>
-              <div class="power-track">
-                ${CHAPTERS.map((item) => {
-                  const done = isChapterComplete(this.save, item.id);
-                  const civ = stageForChapter(item.id);
-                  const title = escapeAttr(this.language === "en" ? civ.focusEn : civ.focusZh);
-                  return `<span class="${done ? "found" : "missing"} power-frag-wrap" title="${title}" style="--dot:${civ.color}">
-                    <img class="power-frag" src="${artAsset(`power-stage-${item.id}`)}" alt="${title}" onerror="this.style.display='none'" loading="lazy" />
-                    <span class="power-frag-text">${done ? "✓" : "○"}</span>
-                  </span>`;
-                }).join("")}
-              </div>
-              <p class="muted">${this.language === "en" ? "Each completed chapter advances the power structure." : "每完成一章，权力架构就推进一段。"}</p>
-            </div>
-            <div class="mini-panel investment-panel">
-              <h3>${this.language === "en" ? "Reinvest in the Organization" : "组织再投资"}</h3>
-              <p class="muted">${this.language === "en" ? "Spend 25 organizational resources to gain trust, influence, and mastery; every third investment upgrades production capacity." : "消耗 25 点组织资源，换取信任、影响力和修炼点；每 3 次触发一次产能升级。"}</p>
-              <p class="muted">${this.language === "en" ? `Invested ${this.save.organizationInvestments ?? 0} times` : `已投资 ${this.save.organizationInvestments ?? 0} 次`}</p>
-              <button data-action="organizational-invest" ${this.save.profile.resources.capital < 25 ? "disabled" : ""}>${this.language === "en" ? "Invest 25" : "投资 25"}</button>
-            </div>
-            <div class="mini-panel production-panel">
-              <h3>${this.language === "en" ? "Daily Production" : "每日产能"}</h3>
-              <p class="muted">${this.language === "en" ? "Complete 3 decisions today, then claim resources." : "今天完成 3 次决策后领取资源奖励。"}</p>
-              <div class="production-progress">
-                <span style="width:${Math.min(100, ((this.save.productionCount ?? 0) / 3) * 100)}%"></span>
-              </div>
-              <p class="muted">${this.save.productionCount ?? 0} / 3</p>
-              <button data-action="claim-production" ${this.productionReady() ? "" : "disabled"}>${this.language === "en" ? "Claim Rewards" : "领取产能奖励"}</button>
-            </div>
-            <div class="mini-panel role-objective">
-              <h3>${this.t("roleObjective")}</h3>
-              <p>${this.language === "en" ? ROLE_EN[this.save.profile.role].objective : ROLES[this.save.profile.role].objective}</p>
-            </div>
-            <div class="mini-panel mobile-collapse">
-              <h3>${this.t("situation")}</h3>
-              <p>${this.language === "en" ? `Completed ${summary.chapterCount}/9 chapters, ${this.save.completedSideQuests.length}/${SIDE_QUEST_ARCS.reduce((count, arc) => count + arc.nodes.length, 0)} side quests, ${this.save.completedRandomEvents.length} random events. Latest decision: ${this.latestDecisionText()}.` : `已完成 ${summary.chapterCount}/9 章，支线 ${this.save.completedSideQuests.length}/${SIDE_QUEST_ARCS.reduce((count, arc) => count + arc.nodes.length, 0)}，随机事件 ${this.save.completedRandomEvents.length}，最近决策 ${this.latestDecisionText()}。`}</p>
-            </div>
-            <div>${difficultySelector(this.save, this.language)}</div>
-            <div class="challenge-panel">
-              <h3>${this.t("dailyTitle")}</h3>
-              ${dailyChallenges(this.save)
-                .map(
-                  (challenge) => {
-                    const today = todayKey();
-                    const claimedToday = (this.save.claimedDaily[today] ?? []).includes(challenge.id);
-                    const view = challengeDisplay(this.language, challenge);
-                    return `
-                    <div class="challenge-row ${challenge.done ? "done" : ""}">
-                      <div>
-                        <strong>${escapeHtml(view.title)}</strong>
-                        <small>${challengeCategoryLabel(this.language, challenge.category)}</small>
-                        <span>${challenge.current} / ${challenge.target}</span>
-                        <p>${escapeHtml(view.description)}</p>
-                      </div>
-                      ${
-                        challenge.done && !claimedToday
-                          ? `<button data-action="claim-challenge" data-challenge="${challenge.id}">${this.t("claim")}${challenge.reward}</button>`
-                          : claimedToday
-                            ? `<small>${this.t("claimed")}</small>`
-                            : `<small>${this.t("inProgress")}</small>`
-                      }
-                    </div>
-                  `;
-                  }
-                )
-                .join("")}
-            </div>
-            <div class="challenge-panel weekly-panel mobile-collapse">
-              <h3>${this.language === "en" ? "Weekly Focus" : "本周聚焦"}</h3>
-              <p class="muted">${this.language === "en" ? "One leadership theme per week, not daily chores." : "每周一个领导力主题，少而精。"}</p>
-              <p class="muted">${this.language === "en" ? `Week ${weekKey()} 路 resets in ${Math.max(0, Math.ceil((weekEndsAt() - Date.now()) / 3600000))}h` : `本周 ${weekKey()} 路 ${Math.max(0, Math.ceil((weekEndsAt() - Date.now()) / 3600000))} 小时后重置`}</p>
-              ${weeklyChallenges(this.save)
-                .map(
-                  (challenge) => `
-                    <div class="challenge-row ${challenge.done ? "done" : ""}">
-                      <div>
-                        <strong>${escapeHtml(challengeDisplay(this.language, challenge).title)}</strong>
-                        <small>${challengeCategoryLabel(this.language, challenge.category)}</small>
-                        <span>${challenge.current} / ${challenge.target}</span>
-                        <p>${escapeHtml(challengeDisplay(this.language, challenge).description)}</p>
-                      </div>
-                      ${
-                        (this.save.claimedWeekly?.[weekKey()] ?? []).includes(
-                          challenge.id
-                        )
-                          ? `<small>${this.t("claimed")}</small>`
-                          : challenge.done
-                            ? `<button data-action="claim-weekly" data-challenge="${challenge.id}">${this.t("claim")}${challenge.reward}</button>`
-                            : `<small>${this.t("inProgress")}</small>`
-                      }
-                    </div>
-                  `
-                )
-                .join("")}
-            </div>
-            <div class="random-event-panel">
-              <h3>${this.t("randomEvent")}</h3>
-              ${ 
-                availableRandom
-                  ? `
-                    <p>${this.t("randomAvailable")}</p>
-                    <button data-action="open-node" data-node="${availableRandom}">${this.t("handleRandomEvent")}</button>
-                  `
-                  : `
-                    <p class="muted">${this.t("randomDone")}</p>
-                    <button data-action="rotate-events">${this.language === "en" ? "Rotate Event Pool" : "轮转事件池"}</button>
-                  `
-              }
-            </div>
-            <div class="lg-quest-panel">
-              <h3>${this.language === "en" ? "Leadership Game Center" : "领导力游戏中心"}</h3>
-              <p class="muted">${this.language === "en" ? `Wins ${this.save.leadershipGameWins} · Losses ${this.save.leadershipGameLosses}` : `胜 ${this.save.leadershipGameWins} · 负 ${this.save.leadershipGameLosses}`}</p>
-              <p class="muted">${this.language === "en" ? "Five single-player games with teach, train, and battle modes." : "五个单机游戏，每个都有教学、训练、对战模式。"}</p>
-              <button data-action="open-leadership-games">${this.language === "en" ? "Enter Game Center" : "进入游戏中心"}</button>
-            </div>
-            <div class="event-book-panel mobile-collapse">
-              <h3>${this.language === "en" ? "Event Log" : "事件簿"}</h3>
-              <p class="muted">${
-                this.language === "en"
-                  ? `Completed ${this.save.completedRandomEvents.length} / ${randomEventEligibleCount(this.save)} random events for your role and difficulty`
-                  : `已完成 ${this.save.completedRandomEvents.length} / ${randomEventEligibleCount(this.save)} 个当前角色与难度可触发事件`
-              }</p>
-              <div class="event-book-list">
-                ${RANDOM_EVENT_IDS.map((id) => {
-                  const done = this.save.completedRandomEvents.includes(id);
-                  const meta = RANDOM_EVENT_META[id];
-                  const roleLocked = Boolean(
-                    meta?.roles && !meta.roles.includes(this.save.profile.role)
-                  );
-                  const difficultyLocked = Boolean(
-                    meta?.difficulties &&
-                      !meta.difficulties.includes(this.save.difficulty)
-                  );
-                  let title = id;
-                  try {
-                    title = storyNodeDisplay(this.language, this.save,getNode(id)).title;
-                  } catch {
-                    // keep id
-                  }
-                  const lockLabel = roleLocked
-                    ? this.language === "en"
-                      ? "role-only"
-                      : "限角色"
-                    : difficultyLocked
-                      ? this.language === "en"
-                        ? "difficulty-only"
-                        : "限难度"
-                      : "";
-                  return `<span class="${done ? "done" : ""}" title="${escapeAttr(title)}">${done ? "✓" : "○"}${escapeHtml(title)}${lockLabel ? `<em>${lockLabel}</em>` : ""}</span>`;
-                }).join("")}
-              </div>
-            </div>
-            <div class="mini-panel mobile-collapse">
-              <h3>${this.t("currentProgress")}</h3>
-              <strong>${summary.chapterCount} / 9</strong>
-              <p>${this.t("totalAbility")} ${summary.total}</p>
-            </div>
-            <div class="mini-panel mobile-collapse">
-              <h3>${this.t("unlockedTitle")}</h3>
-              <p>${this.save.unlockedChapters.map((id) => chapterDisplay(this.language, getChapter(id)).title).join(this.language === "en" ? ", " : "、")}</p>
-            </div>
-            <div class="map-quick-actions">
-              <button class="primary" data-action="open-report">${this.t("viewReport")}</button>
-              <button data-action="open-duel">${this.t("enterDuel")}</button>
-              <button data-action="open-ability">${this.t("ability")}</button>
-            </div>
-          </aside>
-        </section>
-      </main>
-    `;
   }
 
   /** 上一章章末路线横幅：让玩家看到选择真的带到了下一章。 */
