@@ -79,7 +79,6 @@ import {
   RANDOM_EVENT_IDS,
   RANDOM_EVENT_META,
   randomEventEligibleCount,
-  randomEventVariantContext,
   nextRandomEvent,
   SIDE_QUEST_ARCS,
   getChapter,
@@ -111,15 +110,12 @@ import {
 } from "../core/expedition";
 import { npcStoryFor } from "../core/npcStories";
 import { npcArcFor } from "../core/npcArcs";
-import { duelBankEn } from "../core/duelBank";
-import { EXTRA_MAIN_OPTIONS_EN } from "../core/mainScenarios";
 import {
   LeadershipGamesApp,
   type LeadershipGameId
 } from "./leadership-games";
 import { TeamAcademyApp } from "./team-academy";
 import {
-  DIMENSION_ORDER,
   LEADERSHIP_DIMENSIONS,
   dimensionLevel
 } from "../core/leadership-model";
@@ -170,29 +166,22 @@ import {
   type TrialStageDef
 } from "../core/trials";
 import { hiddenRouteSteps } from "../core/hiddenRoutes";
-import { ROLE_OPTION_SETS } from "../core/roleOptions";
-import { branchVariantFor } from "../core/branchVariants";
 import { ROLE_ROADMAPS } from "../core/roleTraining";
 import { uiString, type Language } from "../core/i18n";
 import { readAnalyticsEvents, trackEvent } from "../core/analytics";
 import {
   ABILITY_EN,
   ABILITY_DETAIL_EN,
-  BRANCH_NODE_EN,
   CHAPTER_EN,
-  FORK_NODE_EN,
-  MAIN_NODE_EN,
-  MAIN_NODE_THEORY_EN,
   NPC_EN,
-  RANDOM_NODE_EN,
   RESOURCE_EN,
-  ROLE_OPTION_EN,
   ROLE_EN,
-  SIDE_ARC_EN,
-  SIDE_NODE_EN
+  SIDE_ARC_EN
 } from "../core/translations";
-import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, relationStatusText, sideArcDisplay, npcAvatarColor, achievementDisplay, challengeDisplay, challengeCategoryLabel, assessmentDisplay, chapterReflectionText, aiArchetypeLabel, leadershipLensText, roleMove, nodeIntel, relationNoteText, resourceChips } from "./display";
+import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, relationStatusText, sideArcDisplay, npcAvatarColor, achievementDisplay, challengeDisplay, challengeCategoryLabel, assessmentDisplay, chapterReflectionText, aiArchetypeLabel, leadershipLensText, roleMove, nodeIntel, relationNoteText, resourceChips, chapterBadge, dimensionMarkup } from "./display";
 import { buildReportMarkdown, downloadText, encodeSaveLink } from "./export";
+import { artAsset, chapterArtStyle } from "./assets";
+import { storyNodeDisplay } from "./nodeView";
 import { renderAbilityRadar, renderGroupRadar } from "./charts";
 import { renderPowerBoard } from "./art";
 import { renderTrainingBoard } from "./trainingArt";
@@ -604,7 +593,7 @@ export class AdaptiveGameApp {
     try {
       const nodeId = this.storyNodeId;
       if (nodeId) {
-        const node = this.storyNodeDisplay(
+        const node = storyNodeDisplay(this.language, this.save,
           getNodeForRole(this.save.profile.role, nodeId)
         );
         scenarioText = [
@@ -741,162 +730,6 @@ export class AdaptiveGameApp {
       [order[i], order[j]] = [order[j], order[i]];
     }
     return order;
-  }
-
-  private storyNodeDisplay(node: StoryNode): StoryNode {
-    if (node.id.startsWith("duel-")) {
-      return this.language === "en" ? duelBankEn(node) : node;
-    }
-    if (
-      this.language === "en" &&
-      node.kind === "main" &&
-      /n[3-9]$/.test(node.id)
-    ) {
-      const enOptions = EXTRA_MAIN_OPTIONS_EN[node.id];
-      if (enOptions) {
-        return {
-          ...node,
-          options: node.options.map((option, index) => ({
-            ...option,
-            ...(enOptions[index] ?? {})
-          }))
-        };
-      }
-    }
-    if (node.kind === "random" && this.language === "zh") {
-      const variant = randomEventVariantContext(
-        this.save.profile.role,
-        this.save.difficulty,
-        this.save.randomEventCycle ?? 0,
-        "zh"
-      );
-      return {
-        ...node,
-        context: `${node.context} ${variant}`.trim()
-      };
-    }
-    if (this.language !== "en") return node;
-    if (node.kind === "side") {
-      const side = SIDE_NODE_EN[node.id];
-      if (!side) return node;
-      return {
-        ...node,
-        title: side.title,
-        context: side.context,
-        stake: side.stake,
-        options: node.options.map((option, index) => ({
-          ...option,
-          ...(side.options[index] ?? {})
-        }))
-      };
-    }
-    if (node.kind === "random") {
-      const random = RANDOM_NODE_EN[node.id];
-      if (!random) return node;
-      const variant = randomEventVariantContext(
-        this.save.profile.role,
-        this.save.difficulty,
-        this.save.randomEventCycle ?? 0,
-        "en"
-      );
-      return {
-        ...node,
-        title: random.title,
-        context: `${random.context} ${variant}`.trim(),
-        stake: random.stake,
-        options: node.options.map((option, index) => ({
-          ...option,
-          ...(random.options[index] ?? {})
-        }))
-      };
-    }
-    if (node.kind === "branch") {
-      const fork = FORK_NODE_EN[node.id];
-      if (fork) {
-        return {
-          ...node,
-          title: fork.title,
-          context: fork.context,
-          stake: fork.stake,
-          options: node.options.map((option, index) => ({
-            ...option,
-            ...(fork.options[index] ?? {})
-          }))
-        };
-      }
-      const branch = BRANCH_NODE_EN[node.id];
-      if (!branch) return node;
-      return {
-        ...node,
-        title: branch.title,
-        context: branch.context,
-        stake: branch.stake,
-        options: node.options.map((option, index) => {
-          const handwritten = branchVariantFor(
-            node.chapterId,
-            option.quality,
-            "en"
-          );
-          if (handwritten) {
-            return {
-              ...option,
-              label: handwritten.label,
-              summary: handwritten.summary,
-              feedback: handwritten.feedback
-            };
-          }
-          const set = ROLE_OPTION_EN[this.save.profile.role][option.quality];
-          const sourceSet =
-            ROLE_OPTION_SETS[this.save.profile.role][option.quality];
-          const sourceIndex = sourceSet.findIndex(
-            (view) => view.label === option.label
-          );
-          const qualityIndex = node.options
-            .slice(0, index)
-            .filter((item) => item.quality === option.quality).length;
-          const view = set[
-            sourceIndex >= 0 ? sourceIndex : qualityIndex % set.length
-          ];
-          return {
-            ...option,
-            label: view.label,
-            summary: view.summary,
-            feedback: view.feedback
-          };
-        })
-      };
-    }
-    const en = MAIN_NODE_EN[node.id];
-    const theories = MAIN_NODE_THEORY_EN[node.id];
-    return en
-      ? {
-          ...node,
-          title: en.title,
-          context: en.context,
-          stake: en.stake,
-          options: node.options.map((option, index) => {
-            const set = ROLE_OPTION_EN[this.save.profile.role][option.quality];
-            const sourceSet =
-              ROLE_OPTION_SETS[this.save.profile.role][option.quality];
-            const sourceIndex = sourceSet.findIndex(
-              (view) => view.label === option.label
-            );
-            const qualityIndex = node.options
-              .slice(0, index)
-              .filter((item) => item.quality === option.quality).length;
-            const view = set[
-              sourceIndex >= 0 ? sourceIndex : qualityIndex % set.length
-            ];
-            return {
-              ...option,
-              label: view.label,
-              summary: view.summary,
-              feedback: view.feedback,
-              theory: theories?.[index] ?? option.theory
-            };
-          })
-        }
-      : node;
   }
 
   private npcStoryMarkup(npc: (typeof NPCS)[number]): string {
@@ -1256,39 +1089,6 @@ export class AdaptiveGameApp {
     this.wireTrainingLinks();
   }
 
-  /** 章节美术用页面绝对 URL，避免 CSS 自定义属性中的相对路径被解析到 assets 目录。 */
-  private chapterArtStyle(chapterId: number): string {
-    const url = new URL(`./art/chapter-${chapterId}.jpg`, window.location.href).href;
-    return `--chapter-art:url('${url}')`;
-  }
-
-  /**
-   * 统一的美术资源 URL 注册表。
-   *
-   * 所有非章节、非 NPC 的补充美术图都通过这里解析路径：
-   * - 放入 public/art 或 public/bg 目录下的图片会被 Vite 原样拷贝到 dist 根
-   * - 若图片尚未生成（文件缺失），浏览器会走 onerror fallback 展示纯色块，不会白屏
-   *
-   * 命名规范（与 scripts/generate-real-art.mjs 同步）：
-   *   menu-card-00 ~ menu-card-10      首页十大模块卡片封面
-   *   power-stage-1 ~ power-stage-9  权力架构九章进度标记
-   *   role-parachute / role-founder / role-highPotential  三张角色立绘（jpg，替代原有 svg 简笔画）
-   *   duel-lobby / duel-match / duel-reveal  1v1 三场景
-   *   ach-cat-story/training/trial/duel/event/rank  成就六大类封面
-   *   ach-badge-base    通用成就徽章底版
-   *   ability-01 ~ ability-10   十项能力小插画
-   *   bg-duel-lobby    1v1 大厅全屏背景（放 bg 目录）
-   */
-  private artAsset(key: string, _opts: { directApi?: boolean } = {}): string {
-    if (!key) return "";
-    // All images now use local Unsplash photos in public/art/ and public/bg/
-    const useBgDir = key.startsWith("bg-");
-    const dir = useBgDir ? "bg" : "art";
-    const ext = key.endsWith(".svg") ? "svg" : "jpg";
-    const filename = key.endsWith(".jpg") || key.endsWith(".svg") ? key : `${key}.${ext}`;
-    return new URL(`./${dir}/${filename}`, window.location.href).href;
-  }
-
   private renderMenu(): void {
     const summary = profileSummary(this.save);
     const started = this.save.profileCreated;
@@ -1422,7 +1222,7 @@ export class AdaptiveGameApp {
               extra = ""
             ) => `
               <button class="menu-card has-art" data-action="${action}" ${extra}>
-                <img class="menu-card-cover" src="${this.artAsset(art)}" alt="" loading="lazy" onerror="this.style.display='none'" />
+                <img class="menu-card-cover" src="${artAsset(art)}" alt="" loading="lazy" onerror="this.style.display='none'" />
                 <span class="menu-card-mask"></span>
                 <span class="card-index">${index}</span>
                 <h2>${en ? titleEn : titleZh}</h2>
@@ -1449,7 +1249,7 @@ export class AdaptiveGameApp {
             const personalCards = [
               this.save.lastStoryNodeId
                 ? `<button class="menu-card resume-card has-art" data-action="resume-last-node">
-                    <img class="menu-card-cover" src="${this.artAsset("menu-card-00")}" alt="" loading="lazy" onerror="this.style.display='none'" />
+                    <img class="menu-card-cover" src="${artAsset("menu-card-00")}" alt="" loading="lazy" onerror="this.style.display='none'" />
                     <span class="menu-card-mask"></span>
                     <span class="card-index">00</span>
                     <h2>${this.t("menuResume")}</h2>
@@ -1548,7 +1348,7 @@ export class AdaptiveGameApp {
                       const active = slot.role === this.save.profile.role;
                       return `
                         <div class="role-slot-card ${active ? "active" : ""} ${slot.exists ? "" : "empty"} has-slot-art">
-                          <img class="role-slot-avatar" src="${this.artAsset(`role-${slot.role}.svg`)}" alt="${roleDisplay(this.language, slot.role).name}" onerror="this.style.opacity='0'" loading="lazy" />
+                          <img class="role-slot-avatar" src="${artAsset(`role-${slot.role}.svg`)}" alt="${roleDisplay(this.language, slot.role).name}" onerror="this.style.opacity='0'" loading="lazy" />
                           <div class="role-slot-body">
                             <strong>${roleDisplay(this.language, slot.role).name}</strong>
                             <span>${slot.exists ? `${escapeHtml(slot.name)} · ${en ? "Chapters" : "章节"} ${slot.chapterCount}/9 · ${en ? "Mastery" : "修炼"} ${slot.masteryPoints}` : (en ? "No save yet" : "未建档")}</span>
@@ -1579,7 +1379,7 @@ export class AdaptiveGameApp {
                     const roleView = roleDisplay(this.language, role.id);
                     return `
                     <button type="button" class="role-card ${this.pendingRole === role.id ? "selected" : ""}" data-action="select-role" data-role="${role.id}">
-                      <img class="role-portrait" src="${this.artAsset(`role-${role.id}.svg`)}" alt="${roleView.name}" onerror="this.onerror=null; this.src='./art/role-${role.id}.svg'" loading="lazy" />
+                      <img class="role-portrait" src="${artAsset(`role-${role.id}.svg`)}" alt="${roleView.name}" onerror="this.onerror=null; this.src='./art/role-${role.id}.svg'" loading="lazy" />
                       <span class="role-name">${roleView.name}</span>
                       <span class="role-desc">${en ? ROLE_EN[role.id].description : role.description}</span>
                       <span class="role-start">${en ? `Start: ${role.startingResources.energy} Energy / ${role.startingResources.trust} Trust` : `起点：${role.startingResources.energy} 精力 / ${role.startingResources.trust} 信任`}</span>
@@ -1818,7 +1618,7 @@ export class AdaptiveGameApp {
               ).length;
               return `
                 <div class="achievement-category-stat has-cat-art">
-                  <img class="ach-cat-cover" src="${this.artAsset(`ach-cat-${category}`)}" alt="" loading="lazy" onerror="this.style.display='none'" />
+                  <img class="ach-cat-cover" src="${artAsset(`ach-cat-${category}`)}" alt="" loading="lazy" onerror="this.style.display='none'" />
                   <span class="ach-cat-mask"></span>
                   <strong>${categoryName[category]}</strong>
                   <span>${done} / ${items.length}</span>
@@ -1882,7 +1682,7 @@ export class AdaptiveGameApp {
                             aria-label="${en ? (favorited ? "Remove from collection" : "Add to collection") : (favorited ? "取消收藏" : "加入收藏")}"
                           >${favorited ? "★" : "☆"}</button>
                           <div class="achievement-icon-wrap">
-                            <img class="achievement-badge" src="${this.artAsset("ach-badge-base")}" alt="" loading="lazy" onerror="this.style.display='none'" />
+                            <img class="achievement-badge" src="${artAsset("ach-badge-base")}" alt="" loading="lazy" onerror="this.style.display='none'" />
                             <span class="achievement-icon">${achievement.icon}</span>
                           </div>
                           <div>
@@ -2060,7 +1860,7 @@ export class AdaptiveGameApp {
           <span>${rankName(this.language, summary.rank)}</span>
         </div>
       </header>
-      <main class="map-shell ${this.mapDetailOpen ? "map-detail-open" : ""}" style="${this.chapterArtStyle(chapter.id)}" aria-label="${this.language === "en" ? "Campaign map" : "主线地图"}">
+      <main class="map-shell ${this.mapDetailOpen ? "map-detail-open" : ""}" style="${chapterArtStyle(chapter.id)}" aria-label="${this.language === "en" ? "Campaign map" : "主线地图"}">
         ${this.expeditionHeroMarkup(chapter.id)}
         ${
           this.save.playCount === 0 && !this.guideSteps().includes("map-intro")
@@ -2117,7 +1917,7 @@ export class AdaptiveGameApp {
           </div>
         </section>
         <section class="chapter-track">
-          ${CHAPTERS.map((item) => this.chapterBadge(item)).join("")}
+          ${CHAPTERS.map((item) => chapterBadge(this.language, this.save, this.selectedChapter,item)).join("")}
         </section>
         <section class="map-body">
           <div class="chapter-detail">
@@ -2193,7 +1993,7 @@ export class AdaptiveGameApp {
                   const civ = stageForChapter(item.id);
                   const title = escapeAttr(this.language === "en" ? civ.relicEn : civ.relicZh);
                   return `<span class="${done ? "found" : "missing"} power-frag-wrap" title="${title}" style="--dot:${civ.color}">
-                    <img class="power-frag" src="${this.artAsset(`power-stage-${item.id}`)}" alt="${title}" onerror="this.style.display='none'" loading="lazy" />
+                    <img class="power-frag" src="${artAsset(`power-stage-${item.id}`)}" alt="${title}" onerror="this.style.display='none'" loading="lazy" />
                     <span class="power-frag-text">${done ? "✓" : "○"}</span>
                   </span>`;
                 }).join("")}
@@ -2321,7 +2121,7 @@ export class AdaptiveGameApp {
                   );
                   let title = id;
                   try {
-                    title = this.storyNodeDisplay(getNode(id)).title;
+                    title = storyNodeDisplay(this.language, this.save,getNode(id)).title;
                   } catch {
                     // keep id
                   }
@@ -2439,7 +2239,7 @@ export class AdaptiveGameApp {
       this.show("map");
       return;
     }
-    const node = this.storyNodeDisplay(
+    const node = storyNodeDisplay(this.language, this.save,
       getNodeForRole(this.save.profile.role, this.storyNodeId)
     );
     const chapter = chapterDisplay(this.language, getChapter(node.chapterId));
@@ -2506,7 +2306,7 @@ export class AdaptiveGameApp {
           <span id="round-timer" class="round-timer" style="display:none"></span>
         </div>
       </header>
-      <main class="story-shell" style="${this.chapterArtStyle(chapter.id)}" aria-label="${this.language === "en" ? "Story scenario" : "剧情情境"}">
+      <main class="story-shell" style="${chapterArtStyle(chapter.id)}" aria-label="${this.language === "en" ? "Story scenario" : "剧情情境"}">
         ${this.routeBannerMarkup(node.chapterId)}
         ${
           this.riskCrisisActive()
@@ -2851,7 +2651,7 @@ export class AdaptiveGameApp {
       return;
     }
     const roleNode = getNodeForRole(this.save.profile.role, nodeId);
-    const nodeView = this.storyNodeDisplay(roleNode);
+    const nodeView = storyNodeDisplay(this.language, this.save,roleNode);
     const options = nodeView.options;
     const en = this.language === "en";
     const expertIndex = options.findIndex(
@@ -3185,7 +2985,7 @@ export class AdaptiveGameApp {
         <button class="link" data-action="open-menu">${this.t("returnHome")}</button>
       </header>
       <main class="ability-shell" aria-label="${this.language === "en" ? "Ability map" : "能力图谱"}">
-        ${this.dimensionMarkup()}
+        ${dimensionMarkup(this.language, this.save)}
         <section class="ability-head">
           <div>
             <p class="eyebrow">${this.t("abilityTitle")}</p>
@@ -3327,7 +3127,7 @@ export class AdaptiveGameApp {
         <button class="link sound-toggle" data-action="toggle-sound" aria-label="${this.language === "en" ? "Toggle sound" : "切换声音"}">${this.muted ? this.t("soundOff") : this.t("soundOn")}</button>
       </header>
       <main class="report-shell" aria-label="${this.language === "en" ? "Review report" : "复盘报告"}">
-        ${this.dimensionMarkup()}
+        ${dimensionMarkup(this.language, this.save)}
         <section class="report-hero">
           <div>
             <p class="eyebrow">${this.t("reportTitle")}</p>
@@ -4107,8 +3907,8 @@ export class AdaptiveGameApp {
   private liveMarkup(): string {
     const en = this.language === "en";
     const scenarioOptions = [
-      `<option value="c1n1">${escapeHtml(this.storyNodeDisplay(getNode("c1n1")).title)}</option>`,
-      `<option value="c1n2">${escapeHtml(this.storyNodeDisplay(getNode("c1n2")).title)}</option>`,
+      `<option value="c1n1">${escapeHtml(storyNodeDisplay(this.language, this.save,getNode("c1n1")).title)}</option>`,
+      `<option value="c1n2">${escapeHtml(storyNodeDisplay(this.language, this.save,getNode("c1n2")).title)}</option>`,
       ...this.customScenarios.map(
         (scenario) =>
           `<option value="${escapeAttr(scenario.id)}">${escapeHtml(scenario.title)}</option>`
@@ -4920,7 +4720,7 @@ export class AdaptiveGameApp {
     const playerIndex = this.duelMode === "remote" ? this.remotePlayerIndex : 0;
     const analysis = engine.roundResults.map((round, index) => {
       const node = round.node;
-      const nodeView = this.storyNodeDisplay(node);
+      const nodeView = storyNodeDisplay(this.language, this.save,node);
       const best = node.options.find((option) => option.quality === "expert") ?? node.options[0];
       const playerPick = round.picks[playerIndex];
       const playerOption = node.options[playerPick] ?? node.options[0];
@@ -5398,9 +5198,9 @@ export class AdaptiveGameApp {
         <button class="link" data-action="open-menu">${this.t("returnHome")}</button>
       </header>
       <main class="duel-lobby has-lobby-art" aria-label="${this.language === "en" ? "Duel lobby" : "1v1 大厅"}">
-        <img class="duel-lobby-bg" src="${this.artAsset("bg-duel-lobby")}" alt="" aria-hidden="true" onerror="this.style.display='none'" />
+        <img class="duel-lobby-bg" src="${artAsset("bg-duel-lobby")}" alt="" aria-hidden="true" onerror="this.style.display='none'" />
         <section class="duel-hero has-hero-art">
-          <img class="duel-hero-art" src="${this.artAsset("duel-lobby")}" alt="" loading="lazy" onerror="this.style.display='none'" />
+          <img class="duel-hero-art" src="${artAsset("duel-lobby")}" alt="" loading="lazy" onerror="this.style.display='none'" />
           <p class="eyebrow">${this.t("duelTitle")}</p>
           <h1>${this.language === "en" ? "Who can make the better call in a complex situation?" : "谁能在复杂局势中做出更好的判断？"}</h1>
           <p class="muted">${this.language === "en" ? "Every round uses a real workplace slice, and choices are scored against an expert baseline. Remote mode connects peer to peer through WebRTC without a server." : "每一回合都使用真实职场切片，选择会被专家基准评分。远程模式通过 WebRTC 点对点连接，无需服务器。"}</p>
@@ -5610,13 +5410,13 @@ export class AdaptiveGameApp {
     }
 
     const node = engine.node;
-    const nodeView = this.storyNodeDisplay(node);
+    const nodeView = storyNodeDisplay(this.language, this.save,node);
     const lastResult = engine.roundResults[engine.currentRound - 1];
     const roundKey = `${engine.currentRound}-${engine.picks[0] ?? ""}-${engine.picks[1] ?? ""}`;
     if (this.duelPredictionPhase) {
       this.root.innerHTML = `
         <main class="duel-predict has-predict-art" aria-label="${this.t("duelPredict")}">
-          <img class="duel-predict-bg" src="${this.artAsset("duel-match")}" alt="" aria-hidden="true" onerror="this.style.display='none'" />
+          <img class="duel-predict-bg" src="${artAsset("duel-match")}" alt="" aria-hidden="true" onerror="this.style.display='none'" />
           <p class="eyebrow">${this.t("duelPredict")}</p>
           <h1>${en ? "Bet on the opponent's style before the reveal" : "揭晓前，先押注对手风格"}</h1>
           <p class="muted">${en ? "Hit the opponent's actual style this round for a +20% score bonus (minimum +2)." : "押中对方本回合的实际风格，获得本回合 20% 分数加成（至少 +2 分）。"}<br />${escapeHtml(nodeView.stake)}</p>
@@ -5666,7 +5466,7 @@ export class AdaptiveGameApp {
     if (this.duelRevealing) {
       this.root.innerHTML =
         '<main class="duel-reveal has-reveal-art" aria-label="' + this.t("duelReveal") + '">' +
-        '<img class="duel-reveal-bg" src="${this.artAsset("duel-reveal")}" alt="" aria-hidden="true" onerror="this.style.display=\'none\'" />' +
+        '<img class="duel-reveal-bg" src="${artAsset("duel-reveal")}" alt="" aria-hidden="true" onerror="this.style.display=\'none\'" />' +
         '<h1>' + this.t("duelReveal") + '</h1>' +
         '<div class="reveal-spinner"></div>' +
         '</main>';
@@ -5683,7 +5483,7 @@ export class AdaptiveGameApp {
         </div>
       </header>
       <main class="duel-shell has-duel-art" data-round-key="${roundKey}" aria-label="${this.language === "en" ? "Duel round" : "对决回合"}">
-        <img class="duel-stage-bg" src="${this.artAsset("duel-match")}" alt="" aria-hidden="true" onerror="this.style.display='none'" />
+        <img class="duel-stage-bg" src="${artAsset("duel-match")}" alt="" aria-hidden="true" onerror="this.style.display='none'" />
         ${
           this.duelTimedOutThisRound
             ? `<div class="duel-timeout-note" role="status">${this.language === "en" ? "This round timed out. The system chose the safest option for you." : "本回合超时，系统已自动选择最稳妥选项。"}</div>`
@@ -5694,7 +5494,7 @@ export class AdaptiveGameApp {
             ? `
               <section class="round-result">
                 <span>${this.language === "en" ? "Previous Round" : "上一回合"}</span>
-                <strong>${escapeHtml(this.storyNodeDisplay(lastResult.node).title)}</strong>
+                <strong>${escapeHtml(storyNodeDisplay(this.language, this.save,lastResult.node).title)}</strong>
                 <p>${engine.players[0].name} ${lastResult.points[0]} ${this.language === "en" ? "pts" : "分"} · ${engine.players[1].name} ${lastResult.points[1]} ${this.language === "en" ? "pts" : "分"}</p>
               </section>
             `
@@ -6100,7 +5900,7 @@ export class AdaptiveGameApp {
         const nodeId = this.dualReviewQueue[this.dualReviewIndex];
         if (!nodeId) break;
         const roleNode = getNodeForRole(this.save.profile.role, nodeId);
-        const options = this.storyNodeDisplay(roleNode).options;
+        const options = storyNodeDisplay(this.language, this.save,roleNode).options;
         const expertIndex = options.findIndex(
           (option) => option.quality === "expert"
         );
@@ -8242,7 +8042,7 @@ export class AdaptiveGameApp {
       );
       const rawOption = roleNode.options[optionIndex];
       const displayOption =
-        this.storyNodeDisplay(roleNode).options[optionIndex];
+        storyNodeDisplay(this.language, this.save,roleNode).options[optionIndex];
       const outcome: ChoiceOutcome = {
         option: displayOption,
         optionIndex,
@@ -8349,7 +8149,7 @@ export class AdaptiveGameApp {
       this.save.profile.role,
       this.storyNodeId
     );
-    outcome.option = this.storyNodeDisplay(roleNode).options[optionIndex];
+    outcome.option = storyNodeDisplay(this.language, this.save,roleNode).options[optionIndex];
     this.lastOutcome = outcome;
     this.lastOutcomeNodeId = this.storyNodeId;
     const baseNode = getNode(this.storyNodeId);
@@ -9388,19 +9188,6 @@ export class AdaptiveGameApp {
     }, 1200);
   }
 
-  private chapterBadge(chapter: ChapterDef): string {
-    const unlocked = this.save.unlockedChapters.includes(chapter.id);
-    const complete = isChapterComplete(this.save, chapter.id);
-    const current = this.selectedChapter === chapter.id;
-    const view = chapterDisplay(this.language, chapter);
-    return `
-      <button class="chapter-badge ${unlocked ? "unlocked" : ""} ${complete ? "complete" : ""} ${current ? "current" : ""}" data-action="select-chapter" data-chapter="${chapter.id}">
-        <span>${chapter.code}</span>
-        <strong>${view.title}</strong>
-      </button>
-    `;
-  }
-
   private questArcMarkup(arc: (typeof SIDE_QUEST_ARCS)[number]): string {
     const doneCount = arc.nodes.filter((id) =>
       isNodeComplete(this.save, id)
@@ -9422,7 +9209,7 @@ export class AdaptiveGameApp {
           ${arc.nodes
             .map((nodeId, index) => {
               const node = getNode(nodeId);
-              const nodeView = this.storyNodeDisplay(node);
+              const nodeView = storyNodeDisplay(this.language, this.save,node);
               const unlocked = this.canEnterSideNode(nodeId);
               const nodeDone = isNodeComplete(this.save, nodeId);
               return `
@@ -9491,7 +9278,7 @@ export class AdaptiveGameApp {
     const index = arc.nodes.indexOf(nodeId);
     if (index > 0 && !isNodeComplete(this.save, arc.nodes[index - 1])) {
       const previousNode = getNode(arc.nodes[index - 1]);
-      const previousView = this.storyNodeDisplay(previousNode);
+      const previousView = storyNodeDisplay(this.language, this.save,previousNode);
       return this.language === "en"
         ? `Complete "${previousView.title}" first`
         : `需先完成「${previousView.title}」`;
@@ -9514,7 +9301,7 @@ export class AdaptiveGameApp {
   private nodeRow(node: StoryNode): string {
     const done = isNodeComplete(this.save, node.id);
     const chapter = getChapter(node.chapterId);
-    const view = this.storyNodeDisplay(node);
+    const view = storyNodeDisplay(this.language, this.save,node);
     const isExtraMain = node.kind === "main" && /n[3-9]$/.test(node.id);
     const kindLabel =
       node.kind === "side"
@@ -9547,37 +9334,6 @@ export class AdaptiveGameApp {
     `;
   }
 
-  private dimensionMarkup(): string {
-    const en = this.language === "en";
-    const bars = DIMENSION_ORDER.map((id) => {
-      const def = LEADERSHIP_DIMENSIONS[id];
-      const exp = this.save.dimensionExp?.[id] ?? 0;
-      const level = dimensionLevel(exp);
-      const color =
-        id === "credibility"
-          ? "#f2c14e"
-          : id === "empathy"
-            ? "#e9826c"
-            : id === "decisiveness"
-              ? "#41c7c0"
-              : id === "vision"
-                ? "#8f8cd9"
-                : "#57c7a3";
-      return `
-        <div class="dimension-row" style="--dim:${color}">
-          <div class="dimension-head">
-            <strong>${en ? def.en : def.zh}</strong>
-            <span>${en ? def.enSub : def.zhSub}</span>
-            <em>Lv.${level}</em>
-          </div>
-          <div class="dimension-bar"><i style="width:${Math.min(100, exp)}%"></i></div>
-          <small>${en ? def.growEn : def.growZh}</small>
-        </div>
-      `;
-    }).join("");
-    return `<section class="dimension-panel"><h2>${en ? "Leadership Profile" : "领导力画像"}</h2><p class="muted">${en ? "Aggregated from your ten abilities." : "由你的十项能力聚合而来。"}</p><div class="dimension-grid">${bars}</div></section>`;
-  }
-
   private abilityCard(id: AbilityId): string {
     const exp = this.save.profile.abilities[id];
     const level = abilityLevel(exp);
@@ -9587,7 +9343,7 @@ export class AdaptiveGameApp {
     const abilityIndex = (ABILITY_ORDER.indexOf(id) + 1).toString().padStart(2, "0");
     return `
       <div class="ability-card has-ability-art">
-        <img class="ability-illust" src="${this.artAsset(`ability-${abilityIndex}`)}" alt="${abilityDisplay(this.language, id).name}" loading="lazy" onerror="this.style.display='none'" />
+        <img class="ability-illust" src="${artAsset(`ability-${abilityIndex}`)}" alt="${abilityDisplay(this.language, id).name}" loading="lazy" onerror="this.style.display='none'" />
         <div class="ability-head">
           <span style="--dot:${ability.color}"></span>
           <div>
@@ -9811,7 +9567,7 @@ export class AdaptiveGameApp {
     let node: StoryNode | null = null;
     try {
       if (nodeId) {
-        node = this.storyNodeDisplay(
+        node = storyNodeDisplay(this.language, this.save,
           getNodeForRole(this.save.profile.role, nodeId)
         );
       }

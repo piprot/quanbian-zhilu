@@ -2,8 +2,13 @@ import { ABILITIES, ROLES, RESOURCE_NAMES } from "../core/abilities";
 import { ACHIEVEMENTS } from "../core/achievements";
 import { ASSESSMENT_QUESTIONS } from "../core/assessment";
 import type { ChallengeState } from "../core/challenges";
-import { optionQualityLabel } from "../core/game";
+import { isChapterComplete, optionQualityLabel } from "../core/game";
 import type { Language } from "../core/i18n";
+import {
+  DIMENSION_ORDER,
+  LEADERSHIP_DIMENSIONS,
+  dimensionLevel
+} from "../core/leadership-model";
 import { NPCS, npcRelation } from "../core/npcs";
 import { CHAPTER_REFLECTIONS, getChapter, NODE_INTEL, SIDE_QUEST_ARCS } from "../core/story";
 import {
@@ -374,4 +379,53 @@ export function resourceChips(
         `
     )
     .join("");
+}
+
+export function chapterBadge(
+  language: Language,
+  save: SaveState,
+  selectedChapter: number,
+  chapter: ChapterDef
+): string {
+  const unlocked = save.unlockedChapters.includes(chapter.id);
+  const complete = isChapterComplete(save, chapter.id);
+  const current = selectedChapter === chapter.id;
+  const view = chapterDisplay(language, chapter);
+  return `
+      <button class="chapter-badge ${unlocked ? "unlocked" : ""} ${complete ? "complete" : ""} ${current ? "current" : ""}" data-action="select-chapter" data-chapter="${chapter.id}">
+        <span>${chapter.code}</span>
+        <strong>${view.title}</strong>
+      </button>
+    `;
+}
+
+export function dimensionMarkup(language: Language, save: SaveState): string {
+  const en = language === "en";
+  const bars = DIMENSION_ORDER.map((id) => {
+    const def = LEADERSHIP_DIMENSIONS[id];
+    const exp = save.dimensionExp?.[id] ?? 0;
+    const level = dimensionLevel(exp);
+    const color =
+      id === "credibility"
+        ? "#f2c14e"
+        : id === "empathy"
+          ? "#e9826c"
+          : id === "decisiveness"
+            ? "#41c7c0"
+            : id === "vision"
+              ? "#8f8cd9"
+              : "#57c7a3";
+    return `
+        <div class="dimension-row" style="--dim:${color}">
+          <div class="dimension-head">
+            <strong>${en ? def.en : def.zh}</strong>
+            <span>${en ? def.enSub : def.zhSub}</span>
+            <em>Lv.${level}</em>
+          </div>
+          <div class="dimension-bar"><i style="width:${Math.min(100, exp)}%"></i></div>
+          <small>${en ? def.growEn : def.growZh}</small>
+        </div>
+      `;
+  }).join("");
+  return `<section class="dimension-panel"><h2>${en ? "Leadership Profile" : "领导力画像"}</h2><p class="muted">${en ? "Aggregated from your ten abilities." : "由你的十项能力聚合而来。"}</p><div class="dimension-grid">${bars}</div></section>`;
 }
