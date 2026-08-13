@@ -86,16 +86,16 @@ const MANIFEST = [
   { file: "bg/bg-victory.jpg", photo: "photo-1610238115932-44c5c930fd3a", w: 1200 },
   { file: "bg/bg-duel-lobby.jpg", photo: "photo-1586165368502-1bad197a6461", w: 1200 },
 
-  // ── Treasure fragments (square 400×400) ──
-  { file: "art/treasure-fragment-1.jpg", photo: "photo-1536743939714-23ec5ac2dbae", w: 400 },
-  { file: "art/treasure-fragment-2.jpg", photo: "photo-1523875194681-bedd468c58bf", w: 400 },
-  { file: "art/treasure-fragment-3.jpg", photo: "photo-1547022145-dfc3f3e1bc03", w: 400 },
-  { file: "art/treasure-fragment-4.jpg", photo: "photo-1529699211952-734e80c4d42b", w: 400 },
-  { file: "art/treasure-fragment-5.jpg", photo: "photo-1587888191477-e74ac6bc9c4b", w: 400 },
-  { file: "art/treasure-fragment-6.jpg", photo: "photo-1547022145-dfc3f3e1bc03", w: 400 },
-  { file: "art/treasure-fragment-7.jpg", photo: "photo-1536743939714-23ec5ac2dbae", w: 400 },
-  { file: "art/treasure-fragment-8.jpg", photo: "photo-1571236207041-5fb70cec466e", w: 400 },
-  { file: "art/treasure-fragment-9.jpg", photo: "photo-1606594914778-09d99f53ecf7", w: 400 },
+  // ── Power stages (square 400×400) ──
+  { file: "art/power-stage-1.jpg", photo: "photo-1536743939714-23ec5ac2dbae", w: 400 },
+  { file: "art/power-stage-2.jpg", photo: "photo-1523875194681-bedd468c58bf", w: 400 },
+  { file: "art/power-stage-3.jpg", photo: "photo-1547022145-dfc3f3e1bc03", w: 400 },
+  { file: "art/power-stage-4.jpg", photo: "photo-1529699211952-734e80c4d42b", w: 400 },
+  { file: "art/power-stage-5.jpg", photo: "photo-1587888191477-e74ac6bc9c4b", w: 400 },
+  { file: "art/power-stage-6.jpg", photo: "photo-1547022145-dfc3f3e1bc03", w: 400 },
+  { file: "art/power-stage-7.jpg", photo: "photo-1536743939714-23ec5ac2dbae", w: 400 },
+  { file: "art/power-stage-8.jpg", photo: "photo-1571236207041-5fb70cec466e", w: 400 },
+  { file: "art/power-stage-9.jpg", photo: "photo-1606594914778-09d99f53ecf7", w: 400 },
 
   // ── Duel scenes (landscape 800×500) ──
   { file: "art/duel-lobby.jpg", photo: "photo-1528819622765-d6bcf132f793", w: 800 },

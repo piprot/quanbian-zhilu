@@ -1,7 +1,10 @@
 /** 美术资源 URL 辅助：把 key 解析为 public/art 或 public/bg 下的静态图地址。 */
 
 export function chapterArtStyle(chapterId: number): string {
-  const url = new URL(`./art/chapter-${chapterId}.jpg`, window.location.href).href;
+  // CSS 自定义属性里的 url() 需要绝对地址，否则会被解析到打包后的 assets/ 目录；
+  // 用 document.baseURI 兜底，避免依赖 window.location.href 的末尾斜杠。
+  const path = `${import.meta.env.BASE_URL}art/chapter-${chapterId}.jpg`;
+  const url = new URL(path, document.baseURI).href;
   return `--chapter-art:url('${url}')`;
 }
 
@@ -29,5 +32,6 @@ export function artAsset(key: string, _opts: { directApi?: boolean } = {}): stri
   const dir = useBgDir ? "bg" : "art";
   const ext = key.endsWith(".svg") ? "svg" : "jpg";
   const filename = key.endsWith(".jpg") || key.endsWith(".svg") ? key : `${key}.${ext}`;
-  return new URL(`./${dir}/${filename}`, window.location.href).href;
+  // 仅用于 <img src>：相对路径由浏览器按文档目录解析，兼容任意子路径部署（base: "./"）。
+  return `${import.meta.env.BASE_URL}${dir}/${filename}`;
 }

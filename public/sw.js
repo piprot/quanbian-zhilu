@@ -35,6 +35,8 @@ self.addEventListener("fetch", (event) => {
     url.pathname.endsWith(".css") ||
     url.pathname.endsWith(".svg") ||
     url.pathname.endsWith(".png") ||
+    url.pathname.endsWith(".jpg") ||
+    url.pathname.endsWith(".jpeg") ||
     url.pathname.endsWith(".webmanifest") ||
     url.pathname.endsWith(".woff2");
 
@@ -73,19 +75,17 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // 非导航、非静态资源的同源 GET（主要是图片等）：网络优先，失败才回退缓存，
+  // 保证每次部署后图片自愈，不被陈旧 cache-first 钉死，也绝不把 HTML 当图片返回。
   event.respondWith(
-    caches.match(request).then(
-      (cached) =>
-        cached ||
-        fetch(request)
-          .then((response) => {
-            const copy = response.clone();
-            caches.open(ASSET_CACHE).then((cache) => cache.put(request, copy));
-            return response;
-          })
-          .catch(() =>
-            caches.match("./index.html").then((cached) => cached || response)
-          )
-    )
+    fetch(request)
+      .then((response) => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(ASSET_CACHE).then((cache) => cache.put(request, copy));
+        }
+        return response;
+      })
+      .catch(() => caches.match(request))
   );
 });
