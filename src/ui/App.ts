@@ -5415,6 +5415,7 @@ export class AdaptiveGameApp {
     if (this.handleTrialClick(action, actionTarget)) return;
     if (this.handleSettingsClick(action, actionTarget)) return;
     if (this.handleCloudClick(action, actionTarget)) return;
+    if (this.handleExportClick(action, actionTarget)) return;
 
     switch (action) {
       case "open-node": {
@@ -6202,107 +6203,6 @@ export class AdaptiveGameApp {
       case "coach-import":
         this.importCoachParticipants();
         break;
-      case "export-save":
-        this.exportSave();
-        this.showToast(
-          this.language === "en"
-            ? "Save exported."
-            : "存档已导出。"
-        );
-        break;
-      case "export-report":
-        this.exportReport();
-        break;
-      case "export-analytics":
-        this.exportAnalytics();
-        break;
-      case "export-return-package":
-        this.exportReturnPackage();
-        break;
-      case "generate-feedback": {
-        const rating =
-          this.root.querySelector<HTMLSelectElement>(
-            "[data-feedback-rating]"
-          )?.value ?? "5";
-        const feedback =
-          this.root.querySelector<HTMLTextAreaElement>(
-            "[data-feedback-text]"
-          )?.value.trim() ?? "";
-        const summary = profileSummary(this.save);
-        const text =
-          `升维 · Ascend · v${APP_VERSION}\n` +
-          `角色：${this.save.profile.role}\n` +
-          `评分：${rating}/5\n` +
-          `综合能力：${summary.total} · 通关章节：${summary.chapterCount}/9\n` +
-          `反馈：${feedback || "-"}`;
-        void navigator.clipboard?.writeText(text);
-        this.showToast(
-          this.language === "en"
-            ? "Feedback copied. Paste it into the coach's collection form."
-            : "反馈已复制，可粘贴给教练或回传表单。"
-        );
-        this.audio.ui();
-        break;
-      }
-      case "export-report-card": {
-        const canvas = this.root.querySelector<HTMLCanvasElement>(
-          "#report-card-canvas"
-        );
-        if (canvas) {
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            const summary = profileSummary(this.save);
-            const decision = decisionProfile(this.save);
-            const bg = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            bg.addColorStop(0, "#0a1013");
-            bg.addColorStop(1, "#17262e");
-            ctx.fillStyle = bg;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#f2c14e";
-            ctx.font = "700 30px 'Microsoft YaHei', sans-serif";
-            ctx.fillText("升维 · Ascend", 48, 70);
-            ctx.fillStyle = "#e7eef2";
-            ctx.font = "700 40px 'Microsoft YaHei', sans-serif";
-            ctx.fillText(
-              `${this.save.profile.name} · ${rankName(this.language, summary.rank)}`,
-              48,
-              150
-            );
-            ctx.fillStyle = "#9fb3c8";
-            ctx.font = "22px 'Microsoft YaHei', sans-serif";
-            ctx.fillText(
-              `${this.language === "en" ? "Total Ability" : "综合能力值"} ${summary.total} · ${this.language === "en" ? "Chapters" : "章节"} ${summary.chapterCount}/9`,
-              48,
-              220
-            );
-            ctx.fillText(
-              `${this.language === "en" ? "Adaptive" : "自适应"} ${decision.counts.expert} · ${this.language === "en" ? "Technical" : "技术性"} ${decision.counts.partial} · ${this.language === "en" ? "Authority" : "权威/回避"} ${decision.counts.risk}`,
-              48,
-              280
-            );
-            ctx.fillText(
-              `${this.language === "en" ? "Best Duel" : "最佳对局"} ${this.save.bestScore ?? 0} · ${this.language === "en" ? "Mastery" : "修炼"} ${this.save.masteryPoints}`,
-              48,
-              330
-            );
-            ctx.fillStyle = "#f2c14e";
-            ctx.fillText(
-              this.language === "en"
-                ? "Ascend · adaptive leadership scenario game"
-                : "升维 · 自适应领导力情境游戏",
-              48,
-              440
-            );
-            const url = canvas.toDataURL("image/png");
-            const anchor = document.createElement("a");
-            anchor.href = url;
-            anchor.download = `${this.language === "en" ? "Ascend-report" : "升维报告卡片"}.png`;
-            anchor.click();
-          }
-        }
-        this.audio.ui();
-        break;
-      }
       case "claim-challenge": {
         const challengeId = actionTarget.dataset.challenge ?? "";
         const today = todayKey();
@@ -7541,6 +7441,117 @@ export class AdaptiveGameApp {
       case "cloud-reconnect":
         void this.cloudReconnect();
         return true;
+      default:
+        return false;
+    }
+  }
+
+  private handleExportClick(
+    action: string,
+    actionTarget: HTMLElement
+  ): boolean {
+    switch (action) {
+      case "export-save":
+        this.exportSave();
+        this.showToast(
+          this.language === "en"
+            ? "Save exported."
+            : "存档已导出。"
+        );
+        return true;
+      case "export-report":
+        this.exportReport();
+        return true;
+      case "export-analytics":
+        this.exportAnalytics();
+        return true;
+      case "export-return-package":
+        this.exportReturnPackage();
+        return true;
+      case "generate-feedback": {
+        const rating =
+          this.root.querySelector<HTMLSelectElement>(
+            "[data-feedback-rating]"
+          )?.value ?? "5";
+        const feedback =
+          this.root.querySelector<HTMLTextAreaElement>(
+            "[data-feedback-text]"
+          )?.value.trim() ?? "";
+        const summary = profileSummary(this.save);
+        const text =
+          `升维 · Ascend · v${APP_VERSION}\n` +
+          `角色：${this.save.profile.role}\n` +
+          `评分：${rating}/5\n` +
+          `综合能力：${summary.total} · 通关章节：${summary.chapterCount}/9\n` +
+          `反馈：${feedback || "-"}`;
+        void navigator.clipboard?.writeText(text);
+        this.showToast(
+          this.language === "en"
+            ? "Feedback copied. Paste it into the coach's collection form."
+            : "反馈已复制，可粘贴给教练或回传表单。"
+        );
+        this.audio.ui();
+        return true;
+      }
+      case "export-report-card": {
+        const canvas = this.root.querySelector<HTMLCanvasElement>(
+          "#report-card-canvas"
+        );
+        if (canvas) {
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            const summary = profileSummary(this.save);
+            const decision = decisionProfile(this.save);
+            const bg = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            bg.addColorStop(0, "#0a1013");
+            bg.addColorStop(1, "#17262e");
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#f2c14e";
+            ctx.font = "700 30px 'Microsoft YaHei', sans-serif";
+            ctx.fillText("升维 · Ascend", 48, 70);
+            ctx.fillStyle = "#e7eef2";
+            ctx.font = "700 40px 'Microsoft YaHei', sans-serif";
+            ctx.fillText(
+              `${this.save.profile.name} · ${rankName(this.language, summary.rank)}`,
+              48,
+              150
+            );
+            ctx.fillStyle = "#9fb3c8";
+            ctx.font = "22px 'Microsoft YaHei', sans-serif";
+            ctx.fillText(
+              `${this.language === "en" ? "Total Ability" : "综合能力值"} ${summary.total} · ${this.language === "en" ? "Chapters" : "章节"} ${summary.chapterCount}/9`,
+              48,
+              220
+            );
+            ctx.fillText(
+              `${this.language === "en" ? "Adaptive" : "自适应"} ${decision.counts.expert} · ${this.language === "en" ? "Technical" : "技术性"} ${decision.counts.partial} · ${this.language === "en" ? "Authority" : "权威/回避"} ${decision.counts.risk}`,
+              48,
+              280
+            );
+            ctx.fillText(
+              `${this.language === "en" ? "Best Duel" : "最佳对局"} ${this.save.bestScore ?? 0} · ${this.language === "en" ? "Mastery" : "修炼"} ${this.save.masteryPoints}`,
+              48,
+              330
+            );
+            ctx.fillStyle = "#f2c14e";
+            ctx.fillText(
+              this.language === "en"
+                ? "Ascend · adaptive leadership scenario game"
+                : "升维 · 自适应领导力情境游戏",
+              48,
+              440
+            );
+            const url = canvas.toDataURL("image/png");
+            const anchor = document.createElement("a");
+            anchor.href = url;
+            anchor.download = `${this.language === "en" ? "Ascend-report" : "升维报告卡片"}.png`;
+            anchor.click();
+          }
+        }
+        this.audio.ui();
+        return true;
+      }
       default:
         return false;
     }
