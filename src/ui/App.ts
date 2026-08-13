@@ -40,7 +40,6 @@ import {
   createProfile,
   decisionProfile,
   deleteRoleSlot,
-  globalArchiveStats,
   importSaveJson,
   isChapterComplete,
   isChapterPassed,
@@ -158,6 +157,7 @@ import { escapeAttr, escapeHtml, formatDelta } from "./escape";
 import { abilityView, endingView, reportView } from "./reportView";
 import { difficultySelector, settingsView } from "./settingsView";
 import { achievementsView } from "./achievementsView";
+import { profileView } from "./profileView";
 import {
   chapterTrainingMarkup,
   expeditionHeroMarkup,
@@ -1099,105 +1099,11 @@ export class AdaptiveGameApp {
   }
 
   private renderProfile(): void {
-    const en = this.language === "en";
-    this.root.innerHTML = `
-      <header class="topbar">
-        <div class="brand">${this.t("brand")}</div>
-        <button class="link" data-action="open-menu">${this.t("returnHome")}</button>
-      </header>
-      <main class="narrow-shell" aria-label="${this.language === "en" ? "Profile creation" : "创建档案"}">
-        ${
-          this.save.profileCreated
-            ? `
-              <section class="role-slot-panel">
-                <p class="eyebrow">${en ? "Role Archives" : "角色档案"}</p>
-                <h2>${en ? "Switch roles without deleting progress" : "切换角色，无需删档"}</h2>
-                <p class="role-slot-totals">${(() => {
-                  const stats = globalArchiveStats();
-                  const savedRoles = stats.savedRoles;
-                  const totalMastery = stats.totalMastery;
-                  const completedRoles = stats.completedRoles;
-                  return en
-                    ? `Saved roles ${savedRoles}/3 · Mastery ${totalMastery} · Completed ${completedRoles}/3 · Chapters ${stats.totalChapters}/27 · Duels ${stats.totalDuels} · Trials ${stats.totalTrials} · Global achievements ${stats.uniqueAchievements}/${ACHIEVEMENTS.length}`
-                    : `已建档 ${savedRoles}/3 · 累计修炼 ${totalMastery} · 通关角色 ${completedRoles}/3 · 章节 ${stats.totalChapters}/27 · 对局 ${stats.totalDuels} · 试炼 ${stats.totalTrials} · 全局成就 ${stats.uniqueAchievements}/${ACHIEVEMENTS.length}`;
-                })()}</p>
-                ${
-                  (() => {
-                    const stats = globalArchiveStats();
-                    const allRolesDone = stats.savedRoles === 3 && stats.completedRoles === 3;
-                    const masteryFull = stats.totalMastery >= 100;
-                    const label = allRolesDone
-                      ? en
-                        ? "All-role completion achieved"
-                        : "全角色通关达成"
-                      : masteryFull
-                        ? en
-                          ? "100+ cumulative mastery achieved"
-                          : "累计修炼 100+ 达成"
-                        : en
-                          ? "Global archive grows across roles"
-                          : "跨角色全局档案持续积累";
-                    return `<div class="role-global-badge">${label}</div>`;
-                  })()
-                }
-                <div class="role-slot-list">
-                  ${roleSlotSummaries()
-                    .map((slot) => {
-                      const active = slot.role === this.save.profile.role;
-                      return `
-                        <div class="role-slot-card ${active ? "active" : ""} ${slot.exists ? "" : "empty"} has-slot-art">
-                          <img class="role-slot-avatar" src="${artAsset(`role-${slot.role}.svg`)}" alt="${roleDisplay(this.language, slot.role).name}" onerror="this.style.opacity='0'" loading="lazy" />
-                          <div class="role-slot-body">
-                            <strong>${roleDisplay(this.language, slot.role).name}</strong>
-                            <span>${slot.exists ? `${escapeHtml(slot.name)} · ${en ? "Chapters" : "章节"} ${slot.chapterCount}/9 · ${en ? "Mastery" : "修炼"} ${slot.masteryPoints}` : (en ? "No save yet" : "未建档")}</span>
-                            <button data-action="${slot.exists ? "switch-role" : "new-role"}" data-role="${slot.role}">${slot.exists ? (active ? (en ? "Current" : "当前") : (en ? "Switch" : "切换")) : (en ? "Create" : "新建")}</button>
-                          </div>
-                        </div>
-                      `;
-                    })
-                    .join("")}
-                </div>
-              </section>
-            `
-            : ""
-        }
-        <section class="panel profile-panel">
-          <p class="eyebrow">${en ? "Build Your Leadership Profile" : "建立领导力档案"}</p>
-          <h1>${en ? "Choose Your Starting Identity" : "选择你的初始身份"}</h1>
-          <p class="muted">${en ? "Your identity sets starting resources and abilities, not your final ceiling." : "身份决定起点资源与初始能力，不决定最终上限。"}</p>
-          <form class="profile-form" data-form="profile">
-            <label class="field">
-              <span>${en ? "Your Name" : "你的名字"}</span>
-              <input name="playerName" maxlength="12" placeholder="${en ? "e.g. Alex" : "例如：林远"}" value="${escapeAttr(this.save.profile.name === "你" ? "" : this.save.profile.name)}" />
-            </label>
-            <div class="role-grid">
-              ${(Object.values(ROLES) as Array<(typeof ROLES)[RoleId]>)
-                .map(
-                  (role) => {
-                    const roleView = roleDisplay(this.language, role.id);
-                    return `
-                    <button type="button" class="role-card ${this.pendingRole === role.id ? "selected" : ""}" data-action="select-role" data-role="${role.id}">
-                      <img class="role-portrait" src="${artAsset(`role-${role.id}.svg`)}" alt="${roleView.name}" onerror="this.onerror=null; this.src='./art/role-${role.id}.svg'" loading="lazy" />
-                      <span class="role-name">${roleView.name}</span>
-                      <span class="role-desc">${en ? ROLE_EN[role.id].description : role.description}</span>
-                      <span class="role-start">${en ? `Start: ${role.startingResources.energy} Energy / ${role.startingResources.trust} Trust` : `起点：${role.startingResources.energy} 精力 / ${role.startingResources.trust} 信任`}</span>
-                    </button>
-                  `;
-                  }
-                )
-                .join("")}
-            </div>
-            <button class="primary" data-action="create-profile">${en ? "Start Your Journey" : "开启征程"}</button>
-            <div class="trial-role-preview">
-              <strong>${en ? `First chapter trial starts as ${roleDisplay(this.language, this.pendingRole).name}` : `首章试玩将以「${roleDisplay(this.language, this.pendingRole).name}」开局`}</strong>
-              <p>${en ? ROLE_EN[this.pendingRole].objective : ROLES[this.pendingRole].objective}</p>
-            </div>
-            <button data-action="start-without-assessment">${en ? `Start Trial as ${roleDisplay(this.language, this.pendingRole).name}` : `以「${roleDisplay(this.language, this.pendingRole).name}」进入首章试玩`}</button>
-            <small class="profile-note">${this.t("assessmentLater")}</small>
-          </form>
-        </section>
-      </main>
-    `;
+    this.root.innerHTML = profileView(
+      this.save,
+      this.language,
+      this.pendingRole
+    );
   }
 
   private renderAssessment(): void {
