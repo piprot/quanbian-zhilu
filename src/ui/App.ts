@@ -5422,6 +5422,7 @@ export class AdaptiveGameApp {
     if (this.handleEndingClick(action, actionTarget)) return;
     if (this.handleReviewClick(action, actionTarget)) return;
     if (this.handleMapClick(action, actionTarget)) return;
+    if (this.handleStoryTransitionClick(action, actionTarget)) return;
 
     switch (action) {
       case "open-node": {
@@ -5660,134 +5661,6 @@ export class AdaptiveGameApp {
         );
         this.audio.ui();
         break;
-      case "continue-story":
-        if (
-          this.replayMode &&
-          this.lastOutcome &&
-          this.storyNodeId
-        ) {
-          const chapterId = getNode(this.storyNodeId).chapterId;
-          recordAlternateEnding(this.save, `replay-${chapterId}`);
-        }
-        this.lastOutcome = undefined;
-        this.lastOutcomeNodeId = undefined;
-        this.lastUnlockedAchievement = undefined;
-        this.pendingBranchNodeId = undefined;
-        this.pendingChapterTransition = undefined;
-        this.interferenceText = undefined;
-        this.show("map");
-        break;
-      case "choose-route": {
-        const chapterId = Number(actionTarget.dataset.chapter);
-        const route = actionTarget.dataset.route;
-        if (
-          Number.isFinite(chapterId) &&
-          (route === "expert" || route === "risk" || route === "partial")
-        ) {
-          this.save.routePath[chapterId] = route;
-          this.persistSave();
-          trackEvent("route_choice", { chapterId, route });
-          this.showToast(
-            this.language === "en"
-              ? `Route set to ${route === "expert" ? "Precision" : route === "risk" ? "Pressure" : "Incremental"}.`
-              : `路线已选择：${route === "expert" ? "精准路线" : route === "risk" ? "高压路线" : "渐进路线"}。`
-          );
-          this.pendingForkNodeId = forkNodeForRoute(chapterId, route);
-          this.renderChapterTransition();
-        }
-        break;
-      }
-      case "continue-transition":
-        if (this.pendingChapterTransition) {
-          this.audio.ui();
-          this.show("chapterTransition");
-        }
-        break;
-      case "continue-transition-map": {
-        const forkId = this.pendingForkNodeId;
-        if (forkId) {
-          this.audio.ui();
-          this.storyNodeId = forkId;
-          this.storyHintRevealed = false;
-          this.pendingBranchNodeId = undefined;
-          this.lastOutcome = undefined;
-          this.lastOutcomeNodeId = undefined;
-          this.lastUnlockedAchievement = undefined;
-          this.interferenceText = undefined;
-          this.show("story");
-          this.startRoundTimer();
-          break;
-        }
-        const completed = this.pendingChapterTransition;
-        this.pendingChapterTransition = undefined;
-        this.lastOutcome = undefined;
-        this.lastOutcomeNodeId = undefined;
-        this.lastUnlockedAchievement = undefined;
-        if (completed && completed < CHAPTERS.length) {
-          this.selectedChapter = completed + 1;
-        }
-        this.audio.ui();
-        this.show("map");
-        break;
-      }
-      case "enter-fork": {
-        const forkId = this.pendingForkNodeId;
-        if (forkId) {
-          this.audio.ui();
-          this.storyNodeId = forkId;
-          this.storyHintRevealed = false;
-          this.pendingBranchNodeId = undefined;
-          this.lastOutcome = undefined;
-          this.lastOutcomeNodeId = undefined;
-          this.lastUnlockedAchievement = undefined;
-          this.interferenceText = undefined;
-          this.show("story");
-          this.startRoundTimer();
-        }
-        break;
-      }
-      case "finish-fork": {
-        this.pendingForkNodeId = undefined;
-        this.pendingBranchNodeId = undefined;
-        this.lastOutcome = undefined;
-        this.lastOutcomeNodeId = undefined;
-        this.lastUnlockedAchievement = undefined;
-        this.audio.ui();
-        if (this.pendingChapterTransition) {
-          this.renderChapterTransition();
-        } else {
-          this.show("map");
-        }
-        break;
-      }
-      case "continue-branch": {
-        const branchId = this.pendingBranchNodeId;
-        if (branchId) {
-          if (branchId.startsWith("ability-")) {
-            this.hiddenBranchAbilityId = branchId.slice(
-              "ability-".length
-            ) as AbilityId;
-            this.hiddenRouteStep =
-              this.save.hiddenRouteProgress[this.hiddenBranchAbilityId] ?? 0;
-            this.hiddenRouteLastAnswer = undefined;
-            this.hiddenRouteLastCorrect = undefined;
-            this.pendingBranchNodeId = undefined;
-            this.audio.ui();
-            this.show("hiddenBranch");
-            break;
-          }
-          this.storyNodeId = branchId;
-          this.storyHintRevealed = false;
-          this.pendingBranchNodeId = undefined;
-          this.lastOutcome = undefined;
-          this.lastOutcomeNodeId = undefined;
-          this.interferenceText = undefined;
-          this.audio.ui();
-          this.show("story");
-          this.startRoundTimer();
-        }
-        break;
-      }
       case "reset-profile":
         if (
           window.confirm(
@@ -7615,6 +7488,144 @@ export class AdaptiveGameApp {
       case "integrity-answer":
         this.answerIntegrityGate(actionTarget);
         return true;
+      default:
+        return false;
+    }
+  }
+
+  private handleStoryTransitionClick(
+    action: string,
+    actionTarget: HTMLElement
+  ): boolean {
+    switch (action) {
+      case "continue-story":
+        if (
+          this.replayMode &&
+          this.lastOutcome &&
+          this.storyNodeId
+        ) {
+          const chapterId = getNode(this.storyNodeId).chapterId;
+          recordAlternateEnding(this.save, `replay-${chapterId}`);
+        }
+        this.lastOutcome = undefined;
+        this.lastOutcomeNodeId = undefined;
+        this.lastUnlockedAchievement = undefined;
+        this.pendingBranchNodeId = undefined;
+        this.pendingChapterTransition = undefined;
+        this.interferenceText = undefined;
+        this.show("map");
+        return true;
+      case "choose-route": {
+        const chapterId = Number(actionTarget.dataset.chapter);
+        const route = actionTarget.dataset.route;
+        if (
+          Number.isFinite(chapterId) &&
+          (route === "expert" || route === "risk" || route === "partial")
+        ) {
+          this.save.routePath[chapterId] = route;
+          this.persistSave();
+          trackEvent("route_choice", { chapterId, route });
+          this.showToast(
+            this.language === "en"
+              ? `Route set to ${route === "expert" ? "Precision" : route === "risk" ? "Pressure" : "Incremental"}.`
+              : `路线已选择：${route === "expert" ? "精准路线" : route === "risk" ? "高压路线" : "渐进路线"}。`
+          );
+          this.pendingForkNodeId = forkNodeForRoute(chapterId, route);
+          this.renderChapterTransition();
+        }
+        return true;
+      }
+      case "continue-transition":
+        if (this.pendingChapterTransition) {
+          this.audio.ui();
+          this.show("chapterTransition");
+        }
+        return true;
+      case "continue-transition-map": {
+        const forkId = this.pendingForkNodeId;
+        if (forkId) {
+          this.audio.ui();
+          this.storyNodeId = forkId;
+          this.storyHintRevealed = false;
+          this.pendingBranchNodeId = undefined;
+          this.lastOutcome = undefined;
+          this.lastOutcomeNodeId = undefined;
+          this.lastUnlockedAchievement = undefined;
+          this.interferenceText = undefined;
+          this.show("story");
+          this.startRoundTimer();
+          return true;
+        }
+        const completed = this.pendingChapterTransition;
+        this.pendingChapterTransition = undefined;
+        this.lastOutcome = undefined;
+        this.lastOutcomeNodeId = undefined;
+        this.lastUnlockedAchievement = undefined;
+        if (completed && completed < CHAPTERS.length) {
+          this.selectedChapter = completed + 1;
+        }
+        this.audio.ui();
+        this.show("map");
+        return true;
+      }
+      case "enter-fork": {
+        const forkId = this.pendingForkNodeId;
+        if (forkId) {
+          this.audio.ui();
+          this.storyNodeId = forkId;
+          this.storyHintRevealed = false;
+          this.pendingBranchNodeId = undefined;
+          this.lastOutcome = undefined;
+          this.lastOutcomeNodeId = undefined;
+          this.lastUnlockedAchievement = undefined;
+          this.interferenceText = undefined;
+          this.show("story");
+          this.startRoundTimer();
+        }
+        return true;
+      }
+      case "finish-fork": {
+        this.pendingForkNodeId = undefined;
+        this.pendingBranchNodeId = undefined;
+        this.lastOutcome = undefined;
+        this.lastOutcomeNodeId = undefined;
+        this.lastUnlockedAchievement = undefined;
+        this.audio.ui();
+        if (this.pendingChapterTransition) {
+          this.renderChapterTransition();
+        } else {
+          this.show("map");
+        }
+        return true;
+      }
+      case "continue-branch": {
+        const branchId = this.pendingBranchNodeId;
+        if (branchId) {
+          if (branchId.startsWith("ability-")) {
+            this.hiddenBranchAbilityId = branchId.slice(
+              "ability-".length
+            ) as AbilityId;
+            this.hiddenRouteStep =
+              this.save.hiddenRouteProgress[this.hiddenBranchAbilityId] ?? 0;
+            this.hiddenRouteLastAnswer = undefined;
+            this.hiddenRouteLastCorrect = undefined;
+            this.pendingBranchNodeId = undefined;
+            this.audio.ui();
+            this.show("hiddenBranch");
+            return true;
+          }
+          this.storyNodeId = branchId;
+          this.storyHintRevealed = false;
+          this.pendingBranchNodeId = undefined;
+          this.lastOutcome = undefined;
+          this.lastOutcomeNodeId = undefined;
+          this.interferenceText = undefined;
+          this.audio.ui();
+          this.show("story");
+          this.startRoundTimer();
+        }
+        return true;
+      }
       default:
         return false;
     }
