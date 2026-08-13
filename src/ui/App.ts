@@ -149,7 +149,7 @@ import { hiddenRouteSteps } from "../core/hiddenRoutes";
 import { uiString, type Language } from "../core/i18n";
 import { readAnalyticsEvents, trackEvent } from "../core/analytics";
 import { ROLE_EN } from "../core/translations";
-import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, sideArcDisplay, npcAvatarColor, achievementDisplay, challengeDisplay, challengeCategoryLabel, assessmentDisplay, chapterReflectionText, aiArchetypeLabel, leadershipLensText, roleMove, nodeIntel, resourceChips, chapterBadge, dimensionMarkup } from "./display";
+import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, npcAvatarColor, achievementDisplay, challengeDisplay, challengeCategoryLabel, assessmentDisplay, chapterReflectionText, aiArchetypeLabel, leadershipLensText, roleMove, nodeIntel, resourceChips, chapterBadge, dimensionMarkup } from "./display";
 import { buildReportMarkdown, downloadText, encodeSaveLink } from "./export";
 import { artAsset, chapterArtStyle } from "./assets";
 import { storyNodeDisplay } from "./nodeView";
@@ -168,6 +168,10 @@ import {
 } from "./trainerViews";
 import { chapterTransitionView } from "./transitionView";
 import { coachView } from "./coachView";
+import {
+  nodeRow,
+  questArcMarkup
+} from "./mapHelpers";
 import {
   chapterTrainingMarkup,
   expeditionHeroMarkup,
@@ -1269,7 +1273,7 @@ export class AdaptiveGameApp {
               <p>${escapeHtml(this.language === "en" ? stageForChapter(chapter.id).clueEn : stageForChapter(chapter.id).clueZh)}</p>
             </div>
             <div class="node-list">
-              ${mainNodes.map((node) => this.nodeRow(node)).join("")}
+              ${mainNodes.map((node) => nodeRow(node, this.save, this.language)).join("")}
             </div>
             ${
               chapterDone
@@ -1296,7 +1300,7 @@ export class AdaptiveGameApp {
             <section class="quest-board">
               <h3>${this.t("sideQuestArcsTitle")}</h3>
               <p class="muted">${this.t("sideQuestHint")}</p>
-              ${SIDE_QUEST_ARCS.map((arc) => this.questArcMarkup(arc)).join("")}
+              ${SIDE_QUEST_ARCS.map((arc) => questArcMarkup(arc, this.save, this.language)).join("")}
             </section>
           </div>
           <aside class="map-side">
@@ -7293,152 +7297,6 @@ export class AdaptiveGameApp {
     window.setTimeout(() => {
       target.textContent = original;
     }, 1200);
-  }
-
-  private questArcMarkup(arc: (typeof SIDE_QUEST_ARCS)[number]): string {
-    const doneCount = arc.nodes.filter((id) =>
-      isNodeComplete(this.save, id)
-    ).length;
-    const done = doneCount === arc.nodes.length;
-    const view = sideArcDisplay(this.language, arc);
-    return `
-      <div class="quest-arc ${done ? "complete" : ""}">
-        <div class="quest-arc-head">
-          <div>
-            <strong>${view.title}</strong>
-            <span>${doneCount} / ${arc.nodes.length} ${this.language === "en" ? "nodes" : "节点"}</span>
-          </div>
-          <small>${done ? (this.language === "en" ? "Complete" : "已完成") : (this.language === "en" ? "In Progress" : "进行中")}</small>
-        </div>
-        <p class="quest-summary">${escapeHtml(view.summary)}</p>
-        <p class="quest-intro">${escapeHtml(view.intro)}</p>
-        <div class="quest-nodes">
-          ${arc.nodes
-            .map((nodeId, index) => {
-              const node = getNode(nodeId);
-              const nodeView = storyNodeDisplay(this.language, this.save,node);
-              const unlocked = this.canEnterSideNode(nodeId);
-              const nodeDone = isNodeComplete(this.save, nodeId);
-              return `
-                <button class="quest-node ${nodeDone ? "done" : ""} ${unlocked ? "" : "locked"}" data-action="open-node" data-node="${nodeId}" ${unlocked && !nodeDone ? "" : "disabled aria-disabled=\"true\""}>
-                  <span>${index + 1}</span>
-                  <div>
-                    <strong>${escapeHtml(nodeView.title)}</strong>
-                    <em>${nodeDone ? (this.language === "en" ? "Complete" : "已完成") : unlocked ? (this.language === "en" ? "Available" : "可接取") : escapeHtml(this.sideNodeLockReason(nodeId))}</em>
-                  </div>
-                </button>
-              `;
-            })
-            .join("")}
-        </div>
-        ${done ? `<p class="quest-conclusion">${escapeHtml(view.conclusion)}</p>` : ""}
-      </div>
-    `;
-  }
-
-  private canEnterSideNode(nodeId: string): boolean {
-    const arc = SIDE_QUEST_ARCS.find((item) => item.nodes.includes(nodeId));
-    if (!arc) {
-      return false;
-    }
-    if (
-      arc.id === "trust_rebuild" &&
-      this.save.profile.resources.trust < 30
-    ) {
-      return false;
-    }
-    if (
-      arc.id === "resilience" &&
-      this.save.profile.resources.influence < 30
-    ) {
-      return false;
-    }
-    const index = arc.nodes.indexOf(nodeId);
-    if (index > 0) {
-      return isNodeComplete(this.save, arc.nodes[index - 1]);
-    }
-    const node = getNode(nodeId);
-    return getChapter(node.chapterId).nodeIds.some((mainId) =>
-      isNodeComplete(this.save, mainId)
-    );
-  }
-
-  private sideNodeLockReason(nodeId: string): string {
-    const arc = SIDE_QUEST_ARCS.find((item) => item.nodes.includes(nodeId));
-    if (!arc) {
-      return this.language === "en" ? "Locked" : "未解锁";
-    }
-    if (
-      arc.id === "trust_rebuild" &&
-      this.save.profile.resources.trust < 30
-    ) {
-      return this.language === "en" ? "Needs Trust 30+" : "需要信任 30+";
-    }
-    if (
-      arc.id === "resilience" &&
-      this.save.profile.resources.influence < 30
-    ) {
-      return this.language === "en"
-        ? "Needs Influence 30+"
-        : "需要影响力 30+";
-    }
-    const index = arc.nodes.indexOf(nodeId);
-    if (index > 0 && !isNodeComplete(this.save, arc.nodes[index - 1])) {
-      const previousNode = getNode(arc.nodes[index - 1]);
-      const previousView = storyNodeDisplay(this.language, this.save,previousNode);
-      return this.language === "en"
-        ? `Complete "${previousView.title}" first`
-        : `需先完成「${previousView.title}」`;
-    }
-    const node = getNode(nodeId);
-    const mainIds = getChapter(node.chapterId).nodeIds;
-    const doneMain = mainIds.filter((id) =>
-      isNodeComplete(this.save, id)
-    ).length;
-    const chapterReady = mainIds.some((mainId) =>
-      isNodeComplete(this.save, mainId)
-    );
-    return chapterReady
-      ? (this.language === "en" ? "Available" : "可接取")
-      : this.language === "en"
-        ? `Finish this chapter's main scenarios first (${doneMain}/${mainIds.length})`
-        : `需先完成本章主线情境（${doneMain}/${mainIds.length}）`;
-  }
-
-  private nodeRow(node: StoryNode): string {
-    const done = isNodeComplete(this.save, node.id);
-    const chapter = getChapter(node.chapterId);
-    const view = storyNodeDisplay(this.language, this.save,node);
-    const isExtraMain = node.kind === "main" && /n[3-9]$/.test(node.id);
-    const kindLabel =
-      node.kind === "side"
-        ? this.t("storyKindSide")
-        : node.kind === "branch"
-          ? this.t("storyKindBranch")
-          : node.kind === "random"
-            ? this.t("storyKindRandom")
-            : isExtraMain
-              ? this.language === "en"
-                ? "Extended Main Scenario"
-                : "主线扩展情境"
-              : this.t("storyKindMain");
-    const statusLabel = done
-      ? this.language === "en"
-        ? "Complete"
-        : "已完成"
-      : this.language === "en"
-        ? "Available"
-        : "可进入";
-    return `
-      <button class="node-row ${done ? "done" : ""}" data-action="open-node" data-node="${node.id}" ${done ? "disabled aria-disabled=\"true\"" : ""}>
-        <span class="node-state">${done ? "✓" : node.kind === "side" ? "支" : chapter.code}</span>
-        <span>
-          <strong>${escapeHtml(view.title)}</strong>
-          <em>${kindLabel}</em>
-        </span>
-        <small>${statusLabel}</small>
-      </button>
-    `;
   }
 
   private adaptiveHint(node: StoryNode): string {
