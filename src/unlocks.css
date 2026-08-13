@@ -1,0 +1,35 @@
+.trial-unlocks {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.unlock-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.unlock-list span {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.unlock-list span.unlocked {
+  border-color: rgba(242, 193, 78, 0.4);
+  background: rgba(242, 193, 78, 0.08);
+  color: var(--ink);
+}
+
+@media (max-width: 760px) {
+  .unlock-list {
+    grid-template-columns: 1fr;
+  }
+}

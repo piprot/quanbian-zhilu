@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a1320"/>
+      <stop offset="0.55" stop-color="#15283c"/>
+      <stop offset="1" stop-color="#081014"/>
+    </linearGradient>
+    <linearGradient id="horizon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4fd2cc" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#4fd2cc" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.72" cy="0.32" r="0.55">
+      <stop offset="0" stop-color="#f2c14e" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#f2c14e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#glow)"/>
+  <rect y="560" width="1600" height="340" fill="url(#horizon)"/>
+  <g fill="#0a131c">
+    <path d="M0 720 L180 560 L360 700 L560 520 L760 690 L980 540 L1180 710 L1380 570 L1600 700 L1600 900 L0 900 Z"/>
+    <path d="M0 790 L240 660 L460 800 L680 640 L920 790 L1160 650 L1380 800 L1600 700 L1600 900 L0 900 Z" fill-opacity="0.85"/>
+  </g>
+  <g stroke="#9fb3c8" stroke-opacity="0.07" stroke-width="1">
+    <path d="M0 180h1600M0 360h1600M0 540h1600M0 720h1600M200 0v900M400 0v900M600 0v900M800 0v900M1000 0v900M1200 0v900M1400 0v900"/>
+  </g>
+  <g fill="none" stroke="#4fd2cc" stroke-opacity="0.5">
+    <circle cx="820" cy="330" r="156" stroke-width="2"/>
+    <circle cx="820" cy="330" r="112.32" stroke-width="1.2"/>
+    <circle cx="820" cy="330" r="65.52" stroke-width="1.2"/>
+    <path d="M664 330h312M820 174v312" stroke-opacity="0.22"/>
+  </g>
+  <g stroke="#f2c14e" stroke-opacity="0.35" stroke-width="1.4">
+    <path d="M820 330L679.6 244.2"/>
+    <path d="M820 330L968.2 275.4"/>
+    <path d="M820 330L734.2 447"/>
+    <path d="M820 330L913.6 454.8"/>
+    <path d="M820 330L843.4 181.8"/>
+    <path d="M820 330L788.8 384.6"/>
+  </g>
+  <g>
+    <circle cx="679.6" cy="244.2" r="6" fill="#f2c14e" fill-opacity="0.75"/>
+    <circle cx="968.2" cy="275.4" r="5" fill="#4fd2cc" fill-opacity="0.83"/>
+    <circle cx="734.2" cy="447" r="6" fill="#f2c14e" fill-opacity="0.91"/>
+    <circle cx="913.6" cy="454.8" r="5" fill="#4fd2cc" fill-opacity="0.75"/>
+    <circle cx="843.4" cy="181.8" r="6" fill="#f2c14e" fill-opacity="0.83"/>
+    <circle cx="788.8" cy="384.6" r="5" fill="#4fd2cc" fill-opacity="0.91"/>
+    <circle cx="820" cy="330" r="10" fill="#f2c14e"/>
+  </g>
+  <g opacity="0.9">
+    <rect x="120" y="700" width="260" height="8" rx="4" fill="#15283c"/>
+    <rect x="120" y="716" width="190" height="8" rx="4" fill="#4fd2cc" fill-opacity="0.7"/>
+    <rect x="1240" y="700" width="240" height="8" rx="4" fill="#15283c"/>
+    <rect x="1240" y="716" width="134" height="8" rx="4" fill="#f2c14e" fill-opacity="0.7"/>
+  </g>
+  <text x="80" y="110" fill="#e7eef2" font-size="46" font-family="Georgia, serif" font-weight="700" opacity="0.9">I</text>
+  <text x="80" y="150" fill="#4fd2cc" font-size="18" font-family="Verdana, sans-serif" letter-spacing="4">DIAGNOSE</text>
+</svg>

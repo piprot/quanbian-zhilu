@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.vite/
+*.log
+server/data/
+.env
+
+# build workaround artifacts (sandbox safe-delete shim)
+dist.bak-*/
+
+# 本机特有：cc-switch 本地配置与 Claude 项目指令（含本机绝对路径），不纳入版本控制
+CLAUDE.md
+.claude/

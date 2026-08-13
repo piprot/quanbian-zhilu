@@ -1,0 +1,501 @@
+.trial-shell,
+.trial-battle-shell {
+  width: min(1120px, 100%);
+}
+
+.trial-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  align-items: center;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.trial-hero h1 {
+  margin: 6px 0 10px;
+  line-height: 1.25;
+}
+
+.trial-energy-panel {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.trial-energy-panel span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.trial-energy-panel strong {
+  display: block;
+  margin: 8px 0;
+  color: var(--gold);
+  font-size: 28px;
+}
+
+.trial-energy-bar,
+.trial-stage-bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.trial-energy-bar i,
+.trial-stage-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--teal);
+}
+
+.hp-bar i {
+  background: var(--coral);
+}
+
+.trial-energy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.trial-energy-panel small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.trial-loot-panel,
+.trial-stages,
+.trial-practice {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.trial-next-step {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(65, 199, 192, 0.4);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.trial-next-step p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.trial-next-step button {
+  margin-top: 10px;
+}
+
+.practice-editor {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid rgba(65, 199, 192, 0.4);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.practice-editor textarea {
+  width: 100%;
+  min-height: 110px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.practice-editor button {
+  margin-top: 10px;
+}
+
+.trial-loot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trial-loot span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(242, 193, 78, 0.1);
+  color: var(--gold);
+  font-size: 12px;
+}
+
+.trial-stage-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.trial-stage-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.trial-stage-card.open {
+  border-color: rgba(65, 199, 192, 0.45);
+}
+
+.trial-stage-card.cleared {
+  border-color: rgba(242, 193, 78, 0.45);
+}
+
+.trial-stage-card.locked {
+  opacity: 0.58;
+}
+
+.trial-stage-head {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 6px 8px;
+  align-items: center;
+}
+
+.trial-stage-head > span {
+  grid-row: span 2;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--panel-3);
+  color: var(--gold);
+  font-weight: 800;
+}
+
+.trial-stage-head strong {
+  color: var(--ink);
+}
+
+.trial-stage-head em {
+  color: var(--muted);
+  font-style: normal;
+  font-size: 12px;
+}
+
+.trial-stage-card > p {
+  margin: 0;
+  color: var(--gold);
+  font-size: 12px;
+}
+
+.trial-stage-meta {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.trial-lock {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.trial-lock-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.practice-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.practice-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.practice-card h3 {
+  margin: 0;
+}
+
+.practice-card small {
+  color: var(--muted);
+}
+
+.practice-card blockquote {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--gold);
+  background: rgba(242, 193, 78, 0.07);
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.practice-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.practice-reward {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.practice-reward span {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(65, 199, 192, 0.1);
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.practice-done {
+  color: var(--gold);
+  font-size: 12px;
+}
+
+.trial-boss-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.trial-boss-panel h1 {
+  margin: 6px 0;
+}
+
+.trial-boss-stats {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: right;
+}
+
+.trial-faction-bars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.trial-faction-bars span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.trial-question-panel,
+.trial-battle-result {
+  margin-top: 14px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.trial-phase-panel {
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid rgba(65, 199, 192, 0.4);
+  border-radius: 8px;
+  background: rgba(65, 199, 192, 0.07);
+}
+
+.trial-phase-panel p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.trial-scene-panel {
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid rgba(242, 193, 78, 0.35);
+  border-radius: 8px;
+  background:
+    linear-gradient(150deg, rgba(242, 193, 78, 0.08), transparent 70%),
+    var(--panel-2);
+}
+
+.trial-scene-panel p {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.8;
+}
+
+.trial-ally-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.trial-ally-options button {
+  min-height: 48px;
+}
+
+.trial-new-info {
+  margin-bottom: 14px;
+  padding: 14px;
+  border-left: 3px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+  background: rgba(242, 193, 78, 0.08);
+}
+
+.trial-new-info h3 {
+  margin: 0 0 6px;
+  color: var(--gold);
+  font-size: 14px;
+}
+
+.trial-new-info p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.trial-summary-panel {
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.trial-summary-panel textarea {
+  width: 100%;
+  min-height: 110px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.trial-summary-panel button {
+  margin-top: 10px;
+}
+
+.trial-question-panel h2 {
+  line-height: 1.5;
+}
+
+.trial-options {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.trial-option {
+  width: 100%;
+  min-height: 54px;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.trial-battle-result.win {
+  border-color: rgba(65, 199, 192, 0.5);
+}
+
+.trial-branch-label {
+  color: var(--gold);
+  font-weight: 800;
+}
+
+.trial-battle-result.lose {
+  border-color: rgba(233, 130, 108, 0.5);
+}
+
+.trial-answer-review {
+  display: grid;
+  gap: 6px;
+  margin: 14px 0;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.trial-answer-review p {
+  margin: 0 0 10px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.trial-resolution-panel {
+  margin: 14px 0;
+  padding: 16px;
+  border: 1px solid rgba(233, 130, 108, 0.4);
+  border-radius: 8px;
+  background: rgba(233, 130, 108, 0.07);
+}
+
+.trial-resolution-panel p {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.8;
+}
+
+.trial-suspect-impact {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.trial-suspect-impact.good {
+  color: #41c7c0;
+}
+
+.trial-suspect-impact.bad {
+  color: #e9826c;
+}
+
+@media (max-width: 760px) {
+  .trial-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .trial-stage-list,
+  .practice-list {
+    grid-template-columns: 1fr;
+  }
+
+  .trial-boss-panel {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .trial-boss-stats {
+    text-align: left;
+  }
+}

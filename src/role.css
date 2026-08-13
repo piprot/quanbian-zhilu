@@ -1,0 +1,13 @@
+.role-apply-grid.role-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.role-split-note {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(65, 199, 192, 0.07);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}

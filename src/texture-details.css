@@ -1,0 +1,782 @@
+/**
+ * 东方美学纹理与装饰细节 (Eastern Aesthetic Texture & Detail Overlays)
+ *
+ * 本文件为领导力训练网页游戏提供纯 CSS 实现的东方风格视觉纹理：
+ *   1. 宣纸纹理     — 模拟宣纸纤维的细微颗粒感
+ *   2. 卷轴边框     — 仿木质卷轴杆 + 绳索装饰边框
+ *   3. 印章水印     — 成就/完成页面的朱砂印章标记
+ *   4. 水墨背景点缀 — 淡雅的水墨晕染装饰元素
+ *
+ * 色彩体系（五色）：
+ *   - 赭石 #9C6B3C  — 温暖的大地色，用于木质元素
+ *   - 靛青 #3A6B7E  — 沉稳的青蓝色，用于点缀与强调
+ *   - 黛色 #4A4266  — 深邃的紫灰色，用于文字与暗部
+ *   - 朱砂 #C84032  — 鲜明的朱红色，用于印章与重要标记
+ *   - 宣纸白 #F5F0E8 — 柔和的暖白色，用于背景底色
+ *
+ * 技术要点：
+ *   - 全部使用纯 CSS 实现，无外部图片依赖
+ *   - 使用 CSS 渐变、伪元素、mix-blend-mode 等技术
+ *   - 遵循 prefers-reduced-motion 媒体查询，尊重用户动画偏好
+ *   - 性能优化：使用 will-change 和 transform 提升合成层
+ *
+ * @author SOLO Agent
+ * @version 1.0.0
+ */
+
+/* ============================================================
+   CSS 自定义属性（色彩变量）
+   便于全局引用与主题切换
+   ============================================================ */
+
+:root {
+  /* 东方五色 */
+  --color-zheshi:    #9C6B3C;  /* 赭石 — 大地暖棕 */
+  --color-dianqing:  #3A6B7E;  /* 靛青 — 沉稳青蓝 */
+  --color-daise:     #4A4266;  /* 黛色 — 深邃紫灰 */
+  --color-zhusha:    #C84032;  /* 朱砂 — 鲜明朱红 */
+  --color-xuanzhi:   #F5F0E8;  /* 宣纸白 — 柔和暖白 */
+
+  /* 辅助色（基于五色的透明度变体） */
+  --color-zheshi-light: rgba(156, 107, 60, 0.3);
+  --color-dianqing-light: rgba(58, 107, 126, 0.15);
+  --color-daise-dark: rgba(74, 66, 102, 0.8);
+  --color-zhusha-light: rgba(200, 64, 50, 0.12);
+  --color-xuanzhi-dark: rgba(245, 240, 232, 0.6);
+}
+
+/* ============================================================
+   1. 宣纸纹理 (Rice Paper / 宣纸 Texture)
+   ============================================================
+
+   实现原理：
+   使用多层不同大小、位置、透明度的径向渐变叠加，
+   模拟宣纸中随机分布的植物纤维与细微颗粒。
+   通过 mix-blend-mode: multiply 使纹理与底色自然融合。
+
+   使用方式：
+   在需要宣纸纹理的元素上添加 class="xuanzhi-texture"
+   该 class 会通过 ::before 伪元素叠加纹理层
+*/
+
+.xuanzhi-texture {
+  position: relative; /* 为伪元素提供定位上下文 */
+}
+
+.xuanzhi-texture::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none; /* 不影响子元素的鼠标交互 */
+  z-index: 1;
+
+  /*
+   * 多层径向渐变叠加模拟宣纸纤维：
+   *
+   * 第 1-3 层：大颗粒纤维斑点（大半径、极低透明度）
+   * 第 4-6 层：中等颗粒（中半径、稍高透明度）
+   * 第 7-9 层：细微颗粒（小半径、模拟纸面粗糙感）
+   *
+   * 每个渐变的中心点位置使用不同坐标，确保纹理分布自然随机
+   */
+  background:
+    /* 大颗粒纤维 — 模拟较长的植物纤维 */
+    radial-gradient(ellipse 80px 60px at 15% 20%, rgba(156, 107, 60, 0.03) 0%, transparent 70%),
+    radial-gradient(ellipse 60px 90px at 75% 60%, rgba(156, 107, 60, 0.025) 0%, transparent 65%),
+    radial-gradient(ellipse 100px 40px at 45% 85%, rgba(156, 107, 60, 0.02) 0%, transparent 60%),
+
+    /* 中等颗粒 — 模拟纸面不均匀的纤维团 */
+    radial-gradient(circle 20px at 30% 40%, rgba(74, 66, 102, 0.03) 0%, transparent 80%),
+    radial-gradient(circle 15px at 65% 25%, rgba(74, 66, 102, 0.025) 0%, transparent 75%),
+    radial-gradient(circle 25px at 85% 75%, rgba(74, 66, 102, 0.02) 0%, transparent 70%),
+
+    /* 细微颗粒 — 模拟纸面的微观粗糙感 */
+    radial-gradient(circle 5px at 10% 50%, rgba(156, 107, 60, 0.04) 0%, transparent 90%),
+    radial-gradient(circle 4px at 50% 10%, rgba(156, 107, 60, 0.035) 0%, transparent 85%),
+    radial-gradient(circle 6px at 90% 30%, rgba(156, 107, 60, 0.03) 0%, transparent 80%);
+
+  /*
+   * mix-blend-mode: multiply（正片叠底）
+   * 使纹理的暗色部分与底色自然混合，亮色部分透明
+   * 模拟真实宣纸纤维在光线下的视觉效果
+   */
+  mix-blend-mode: multiply;
+
+  /* 极低整体透明度，确保纹理仅为"隐约可见"的质感 */
+  opacity: 0.04;
+}
+
+/* ============================================================
+   2. 卷轴边框 (Scroll Border / 卷轴边框)
+   ============================================================
+
+   实现原理：
+   使用 CSS 渐变模拟木质卷轴杆（顶部和底部）
+   使用边框样式模拟绳索缠绕的侧面装饰
+
+   结构示意：
+   ┌═══════════════════════════┐  ← 木质卷轴杆（顶部）
+   ║                           ║
+   ║      内容区域              ║  ← 绳索纹理侧边
+   ║                           ║
+   ╚═══════════════════════════╝  ← 木质卷轴杆（底部）
+
+   使用方式：
+   在内容面板元素上添加 class="scroll-border"
+*/
+
+.scroll-border {
+  position: relative;
+  background-color: var(--color-xuanzhi);
+
+  /* 内边距为卷轴杆预留空间 */
+  padding: 28px 20px;
+
+  /* 基础边框：使用赭石色作为边框底色 */
+  border: 2px solid var(--color-zheshi);
+  border-left: 6px solid var(--color-zheshi);
+  border-right: 6px solid var(--color-zheshi);
+
+  /* 圆角模拟卷轴的自然弧度 */
+  border-radius: 4px;
+
+  /* 内阴影模拟卷轴内部的深度感 */
+  box-shadow:
+    inset 0 4px 8px rgba(156, 107, 60, 0.1),   /* 顶部内阴影 */
+    inset 0 -4px 8px rgba(156, 107, 60, 0.1),   /* 底部内阴影 */
+    0 2px 12px rgba(74, 66, 102, 0.08);          /* 外部投影 */
+}
+
+/* 顶部卷轴杆 — 使用 ::before 伪元素 */
+.scroll-border::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  height: 24px;
+  z-index: 2;
+
+  /*
+   * 木质纹理渐变：
+   * 使用线性渐变模拟木纹的明暗交替条纹
+   * 多个色标（color stop）创造深浅不一的木色层次
+   */
+  background: linear-gradient(
+    180deg,
+    #8B6333 0%,     /* 深木色 — 顶部阴影 */
+    #A87D4A 15%,    /* 中木色 — 受光面 */
+    #C4975E 30%,    /* 浅木色 — 高光区域 */
+    #B08548 45%,    /* 中木色 — 过渡 */
+    #9C7340 60%,    /* 深木色 — 木纹暗线 */
+    #B88F55 75%,    /* 浅木色 — 次高光 */
+    #A07842 90%,    /* 中木色 — 过渡 */
+    #8B6333 100%    /* 深木色 — 底部阴影 */
+  );
+
+  /* 圆角匹配外框 */
+  border-radius: 4px 4px 0 0;
+
+  /* 卷轴杆的立体感投影 */
+  box-shadow:
+    0 2px 4px rgba(74, 66, 102, 0.15),  /* 下方投影 */
+    inset 0 1px 0 rgba(255, 255, 255, 0.2); /* 顶部高光 */
+}
+
+/* 底部卷轴杆 — 使用 ::after 伪元素 */
+.scroll-border::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: -2px;
+  right: -2px;
+  height: 24px;
+  z-index: 2;
+
+  /* 底部木纹渐变（与顶部略有差异，增加自然感） */
+  background: linear-gradient(
+    180deg,
+    #8B6333 0%,
+    #A07842 12%,
+    #B88F55 28%,
+    #9C7340 42%,
+    #C4975E 58%,
+    #B08548 72%,
+    #A87D4A 88%,
+    #8B6333 100%
+  );
+
+  border-radius: 0 0 4px 4px;
+
+  box-shadow:
+    0 -2px 4px rgba(74, 66, 102, 0.15),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/*
+ * 绳索纹理侧边装饰
+ * 通过在左侧和右侧添加重复线性渐变，
+ * 模拟麻绳缠绕卷轴的纹理效果
+ */
+.scroll-border-rope {
+  /*
+   * 重复线性渐变模拟绳索缠绕：
+   * 每条"绳索"由一个亮色条纹和一个暗色条纹组成
+   * 10px 的间距模拟绳索的粗细与间隔
+   */
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+
+  border-image: repeating-linear-gradient(
+    0deg,                    /* 垂直方向（沿边框上下排列） */
+    var(--color-zheshi) 0px,
+    #B88F55 3px,             /* 绳索亮面 */
+    var(--color-zheshi) 5px,
+    #7A5528 7px,             /* 绳索暗面（缝隙） */
+    var(--color-zheshi) 10px
+  ) 8;
+}
+
+/* ============================================================
+   3. 印章水印 (Seal Watermark / 印章水印)
+   ============================================================
+
+   实现原理：
+   使用 CSS 渐变与形状模拟一枚朱砂红圆形印章
+   包含外圈、内圈、以及模拟篆书字符的几何图案
+
+   使用方式：
+   在成就/完成页面的容器上添加 class="seal-watermark"
+   印章将自动定位在右下角
+*/
+
+.seal-watermark {
+  position: relative;
+}
+
+.seal-watermark::after {
+  content: '';
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  width: 80px;
+  height: 80px;
+  pointer-events: none;
+  z-index: 10;
+
+  /*
+   * 印章图案由多层渐变叠加构成：
+   *
+   * 第 1 层：外圈 — 朱砂红圆环
+   * 第 2 层：内圈 — 稍小的同心圆环
+   * 第 3-6 层：模拟篆书字符的几何笔画（横竖线条）
+   *
+   * 整体透明度 0.35，模拟真实印章盖在纸上的半透明效果
+   */
+  background:
+    /* 模拟篆书"成"字的笔画 — 横画 */
+    linear-gradient(
+      0deg,
+      transparent 30%,
+      var(--color-zhusha) 30%,
+      var(--color-zhusha) 34%,
+      transparent 34%,
+      transparent 52%,
+      var(--color-zhusha) 52%,
+      var(--color-zhusha) 56%,
+      transparent 56%
+    ),
+
+    /* 模拟篆书"成"字的笔画 — 竖画 */
+    linear-gradient(
+      90deg,
+      transparent 35%,
+      var(--color-zhusha) 35%,
+      var(--color-zhusha) 39%,
+      transparent 39%,
+      transparent 61%,
+      var(--color-zhusha) 61%,
+      var(--color-zhusha) 65%,
+      transparent 65%
+    ),
+
+    /* 模拟篆书笔画 — 斜画（撇） */
+    linear-gradient(
+      135deg,
+      transparent 25%,
+      var(--color-zhusha) 25%,
+      var(--color-zhusha) 28%,
+      transparent 28%,
+      transparent 60%,
+      var(--color-zhusha) 60%,
+      var(--color-zhusha) 63%,
+      transparent 63%
+    ),
+
+    /* 内圈装饰环 */
+    radial-gradient(
+      circle,
+      transparent 52%,
+      var(--color-zhusha) 52%,
+      var(--color-zhusha) 55%,
+      transparent 55%,
+      transparent 68%,
+      var(--color-zhusha) 68%,
+      var(--color-zhusha) 71%,
+      transparent 71%
+    ),
+
+    /* 外圈 — 印章边框 */
+    radial-gradient(
+      circle,
+      transparent 78%,
+      var(--color-zhusha) 78%,
+      var(--color-zhusha) 85%,
+      transparent 85%
+    );
+
+  /* 圆形裁剪 */
+  border-radius: 50%;
+
+  /* 半透明效果，模拟真实印章的墨色浓淡 */
+  opacity: 0.35;
+
+  /* 轻微旋转，模拟盖章时的不正感，增加真实感 */
+  transform: rotate(-8deg);
+
+  /* 性能优化：提示浏览器此元素将被变换 */
+  will-change: transform;
+}
+
+/*
+ * 印章水印 — 大号变体
+ * 用于重要成就或里程碑页面
+ */
+.seal-watermark--large::after {
+  width: 120px;
+  height: 120px;
+  bottom: 32px;
+  right: 32px;
+  opacity: 0.4;
+}
+
+/*
+ * 印章水印 — 金色变体
+ * 用于最高级别的成就（如"通关""大师"等）
+ */
+.seal-watermark--gold::after {
+  /* 将朱砂色替换为金色系 */
+  background:
+    linear-gradient(
+      0deg,
+      transparent 30%,
+      var(--color-zheshi) 30%,
+      var(--color-zheshi) 34%,
+      transparent 34%,
+      transparent 52%,
+      var(--color-zheshi) 52%,
+      var(--color-zheshi) 56%,
+      transparent 56%
+    ),
+    linear-gradient(
+      90deg,
+      transparent 35%,
+      var(--color-zheshi) 35%,
+      var(--color-zheshi) 39%,
+      transparent 39%,
+      transparent 61%,
+      var(--color-zheshi) 61%,
+      var(--color-zheshi) 65%,
+      transparent 65%
+    ),
+    linear-gradient(
+      135deg,
+      transparent 25%,
+      var(--color-zheshi) 25%,
+      var(--color-zheshi) 28%,
+      transparent 28%,
+      transparent 60%,
+      var(--color-zheshi) 60%,
+      var(--color-zheshi) 63%,
+      transparent 63%
+    ),
+    radial-gradient(
+      circle,
+      transparent 52%,
+      var(--color-zheshi) 52%,
+      var(--color-zheshi) 55%,
+      transparent 55%,
+      transparent 68%,
+      var(--color-zheshi) 68%,
+      var(--color-zheshi) 71%,
+      transparent 71%
+    ),
+    radial-gradient(
+      circle,
+      transparent 78%,
+      var(--color-zheshi) 78%,
+      var(--color-zheshi) 85%,
+      transparent 85%
+    );
+
+  border-radius: 50%;
+  opacity: 0.45;
+  transform: rotate(-8deg);
+}
+
+/* ============================================================
+   4. 水墨背景点缀 (Ink Wash Background Accents)
+   ============================================================
+
+   实现原理：
+   使用大面积、极低透明度的径向渐变模拟水墨在宣纸上的晕染效果
+   多个不规则形状的"墨斑"散布在背景中，营造写意氛围
+
+   使用方式：
+   在页面根容器或背景层上添加 class="ink-wash-bg"
+*/
+
+.ink-wash-bg {
+  position: relative;
+  background-color: var(--color-xuanzhi);
+}
+
+/* 水墨晕染层 — 使用 ::before 伪元素 */
+.ink-wash-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  /*
+   * 水墨晕染效果：
+   * 使用多个大尺寸、极低透明度的径向渐变
+   * 模拟墨滴落在宣纸上自然扩散的形态
+   *
+   * 每个"墨斑"的特征：
+   * - 位置随机分布
+   * - 大小不一（模拟不同墨量）
+   * - 透明度极低（0.02-0.06），确保仅为氛围点缀
+   * - 使用黛色或靛青作为墨色基调
+   */
+  background:
+    /* 主墨斑 — 右上角大面积晕染 */
+    radial-gradient(
+      ellipse 400px 300px at 80% 15%,
+      rgba(74, 66, 102, 0.05) 0%,
+      rgba(74, 66, 102, 0.03) 30%,
+      rgba(74, 66, 102, 0.01) 60%,
+      transparent 80%
+    ),
+
+    /* 次墨斑 — 左下角 */
+    radial-gradient(
+      ellipse 350px 250px at 20% 80%,
+      rgba(58, 107, 126, 0.04) 0%,
+      rgba(58, 107, 126, 0.02) 35%,
+      rgba(58, 107, 126, 0.008) 65%,
+      transparent 85%
+    ),
+
+    /* 小墨点 — 中部偏左 */
+    radial-gradient(
+      circle 150px at 35% 45%,
+      rgba(74, 66, 102, 0.03) 0%,
+      rgba(74, 66, 102, 0.015) 40%,
+      transparent 70%
+    ),
+
+    /* 远山影 — 底部横向淡影 */
+    radial-gradient(
+      ellipse 800px 120px at 50% 95%,
+      rgba(74, 66, 102, 0.04) 0%,
+      rgba(74, 66, 102, 0.02) 40%,
+      transparent 70%
+    ),
+
+    /* 飘渺烟 — 左上角轻烟 */
+    radial-gradient(
+      ellipse 200px 350px at 10% 20%,
+      rgba(58, 107, 126, 0.025) 0%,
+      rgba(58, 107, 126, 0.01) 50%,
+      transparent 75%
+    );
+
+  /* 正片叠底混合模式，使墨色与底色自然融合 */
+  mix-blend-mode: multiply;
+}
+
+/*
+ * 水墨点缀层 — 使用 ::after 伪元素
+ * 添加更小的墨点与飞白效果
+ */
+.ink-wash-bg::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  /*
+   * 飞白效果：
+   * 使用多个小尺寸渐变模拟毛笔快速运笔时
+   * 墨色不均匀留下的"飞白"痕迹
+   */
+  background:
+    /* 飞白点 1 */
+    radial-gradient(
+      ellipse 80px 20px at 60% 30%,
+      rgba(74, 66, 102, 0.03) 0%,
+      transparent 70%
+    ),
+
+    /* 飞白点 2 */
+    radial-gradient(
+      ellipse 60px 15px at 25% 65%,
+      rgba(74, 66, 102, 0.025) 0%,
+      transparent 65%
+    ),
+
+    /* 飞白点 3 */
+    radial-gradient(
+      ellipse 40px 10px at 70% 70%,
+      rgba(58, 107, 126, 0.02) 0%,
+      transparent 60%
+    ),
+
+    /* 墨滴 1 — 小圆点 */
+    radial-gradient(
+      circle 8px at 45% 25%,
+      rgba(74, 66, 102, 0.04) 0%,
+      transparent 80%
+    ),
+
+    /* 墨滴 2 */
+    radial-gradient(
+      circle 6px at 78% 55%,
+      rgba(74, 66, 102, 0.035) 0%,
+      transparent 75%
+    ),
+
+    /* 墨滴 3 */
+    radial-gradient(
+      circle 10px at 15% 40%,
+      rgba(58, 107, 126, 0.03) 0%,
+      transparent 70%
+    );
+
+  mix-blend-mode: multiply;
+}
+
+/* ============================================================
+   5. 组合使用示例类
+   ============================================================
+
+   以下类展示了如何将上述纹理效果组合使用
+   创建完整的东方美学界面风格
+*/
+
+/* 东方风格内容卡片 — 组合宣纸纹理 + 卷轴边框 */
+.eastern-card {
+  background-color: var(--color-xuanzhi);
+  position: relative;
+}
+
+/* 确保纹理层在内容之下 */
+.eastern-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* 东方风格全屏背景 — 水墨底色 + 宣纸纹理 */
+.eastern-page-bg {
+  background-color: var(--color-xuanzhi);
+  position: relative;
+  min-height: 100vh;
+}
+
+/*
+ * 为全屏背景同时添加宣纸纹理
+ * 由于 ink-wash-bg 已使用 ::before 和 ::after
+ * 宣纸纹理需要通过额外的包装元素实现
+ */
+.eastern-page-bg .xuanzhi-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ============================================================
+   6. 辅助装饰元素
+   ============================================================ */
+
+/*
+ * 靛青分隔线
+ * 用于段落/章节之间的装饰性分隔
+ * 模拟毛笔横向一划的效果
+ */
+.ink-divider {
+  height: 2px;
+  border: none;
+  margin: 24px 0;
+
+  /*
+   * 渐变模拟毛笔横划：
+   * 两端细淡、中间浓重，模拟起笔与收笔的力道变化
+   */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-dianqing) 15%,
+    var(--color-dianqing) 50%,
+    var(--color-dianqing) 85%,
+    transparent 100%
+  );
+
+  opacity: 0.3;
+}
+
+/*
+ * 朱砂强调色
+ * 用于重要文字或标记的朱砂红色效果
+ * 带有微弱的水墨扩散感
+ */
+.zhusha-accent {
+  color: var(--color-zhusha);
+  text-shadow:
+    0 0 8px rgba(200, 64, 50, 0.15),  /* 朱砂光晕 */
+    0 0 2px rgba(200, 64, 50, 0.1);   /* 墨迹扩散 */
+}
+
+/*
+ * 黛色标题文字
+ * 用于章节标题的深色调
+ * 带有水墨质感的文字阴影
+ */
+.daise-title {
+  color: var(--color-daise);
+  text-shadow:
+    1px 1px 2px rgba(74, 66, 102, 0.1),   /* 水墨投影 */
+    0 0 6px rgba(74, 66, 102, 0.05);       /* 墨色扩散 */
+}
+
+/* ============================================================
+   7. 动画与交互增强
+   ============================================================
+
+   为印章水印添加微妙的浮现动画
+   在成就解锁时增加仪式感
+*/
+
+/* 印章浮现动画 */
+@keyframes seal-appear {
+  0% {
+    opacity: 0;
+    transform: rotate(-8deg) scale(1.5); /* 从大变小，模拟盖章动作 */
+  }
+  60% {
+    opacity: 0.4;
+    transform: rotate(-8deg) scale(0.95); /* 略微过冲 */
+  }
+  100% {
+    opacity: 0.35;
+    transform: rotate(-8deg) scale(1);    /* 最终状态 */
+  }
+}
+
+/* 为带动画类的印章添加浮现效果 */
+.seal-watermark--animated::after {
+  animation: seal-appear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/*
+ * 水墨淡入动画
+ * 用于页面加载时水墨背景的缓慢显现
+ */
+@keyframes ink-fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.ink-wash-bg--fade-in::before,
+.ink-wash-bg--fade-in::after {
+  animation: ink-fade-in 2s ease-out forwards;
+}
+
+/* ============================================================
+   8. 无障碍与性能优化
+   ============================================================
+
+   遵循 prefers-reduced-motion 媒体查询
+   当用户系统设置了"减少动画"时，禁用所有动画效果
+   这是对用户偏好的尊重，也是 WCAG 2.1 的要求
+*/
+
+@media (prefers-reduced-motion: reduce) {
+  /* 禁用所有动画 */
+  .seal-watermark--animated::after {
+    animation: none;
+    opacity: 0.35;
+    transform: rotate(-8deg);
+  }
+
+  .ink-wash-bg--fade-in::before,
+  .ink-wash-bg--fade-in::after {
+    animation: none;
+    opacity: 1;
+  }
+
+  /* 移除 will-change 提示，减少 GPU 内存占用 */
+  .seal-watermark::after {
+    will-change: auto;
+  }
+}
+
+/* ============================================================
+   9. 打印样式优化
+   ============================================================
+
+   打印时移除装饰性纹理，节省墨水
+   保留核心内容结构
+*/
+
+@media print {
+  .xuanzhi-texture::before,
+  .ink-wash-bg::before,
+  .ink-wash-bg::after {
+    display: none;
+  }
+
+  .scroll-border {
+    border: 1px solid #ccc;
+    box-shadow: none;
+    padding: 12px;
+  }
+
+  .scroll-border::before,
+  .scroll-border::after {
+    display: none;
+  }
+
+  .seal-watermark::after {
+    opacity: 0.2;
+  }
+}

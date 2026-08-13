@@ -1,0 +1,429 @@
+.training-shell,
+.training-result-shell {
+  width: min(1120px, 100%);
+}
+
+.training-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.training-hero h1 {
+  margin: 6px 0 10px;
+  line-height: 1.25;
+}
+
+.training-ability-tag {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.training-ability-tag::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--dot);
+}
+
+.training-ability-tag strong {
+  color: var(--ink);
+}
+
+.training-ability-tag span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.training-board {
+  width: 100%;
+  height: 220px;
+  min-height: 180px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.training-flow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.training-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.training-panel {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.training-panel h2,
+.training-panel h3 {
+  margin-top: 0;
+}
+
+.training-panel h2 {
+  color: var(--gold);
+  font-size: 16px;
+}
+
+.training-panel h3 {
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.training-route,
+.training-points {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.training-formula-panel code {
+  display: block;
+  margin: 10px 0;
+  padding: 12px;
+  border-left: 3px solid var(--teal);
+  border-radius: 0 8px 8px 0;
+  background: rgba(65, 199, 192, 0.08);
+  color: var(--ink);
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  line-height: 1.55;
+}
+
+.role-application-panel,
+.worked-examples-panel,
+.training-story-panel {
+  margin-top: 14px;
+}
+
+.role-apply-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.role-apply-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--muted);
+}
+
+.role-apply-card.active {
+  border-color: var(--teal);
+  background: rgba(65, 199, 192, 0.1);
+}
+
+.role-apply-card strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.role-apply-card p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.worked-examples {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.worked-examples article {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.worked-examples article p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.worked-examples .application {
+  color: var(--ink);
+}
+
+.training-story-panel .story-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.story-meta span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.training-story-panel h3 {
+  margin: 10px 0 8px;
+  font-size: 20px;
+}
+
+.training-story-panel > p {
+  color: var(--muted);
+  line-height: 1.85;
+}
+
+.training-story-panel blockquote {
+  margin: 14px 0;
+  padding: 14px 16px;
+  border-left: 3px solid var(--gold);
+  border-radius: 0 8px 8px 0;
+  background: rgba(242, 193, 78, 0.07);
+  color: var(--ink);
+  line-height: 1.7;
+}
+
+.training-quiz-shell {
+  padding-top: 18px;
+}
+
+.training-quiz-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.training-quiz-head h1 {
+  margin: 6px 0 0;
+  line-height: 1.3;
+}
+
+.training-quiz-head > strong {
+  color: var(--gold);
+  font-size: 22px;
+}
+
+.training-question {
+  margin-top: 18px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.training-question h2 {
+  margin: 0 0 18px;
+  line-height: 1.5;
+}
+
+.training-options {
+  display: grid;
+  gap: 10px;
+}
+
+.training-option {
+  width: 100%;
+  min-height: 52px;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.training-option.selected {
+  border-color: var(--teal);
+  background: rgba(65, 199, 192, 0.14);
+}
+
+.training-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.training-result-shell {
+  padding-top: 18px;
+}
+
+.training-result-hero {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.training-result-hero h1 {
+  margin: 6px 0;
+  color: var(--gold);
+  font-size: 48px;
+}
+
+.training-mastery-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid var(--teal);
+  border-radius: 999px;
+  background: rgba(65, 199, 192, 0.1);
+  color: var(--ink);
+}
+
+.training-reward {
+  display: grid;
+  gap: 4px;
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.training-reward span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.training-reward strong {
+  color: var(--teal);
+}
+
+.training-reward small {
+  color: var(--muted);
+}
+
+.training-review {
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.training-review-card {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.training-review-card > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.training-review-card.correct > span {
+  background: rgba(65, 199, 192, 0.85);
+}
+
+.training-review-card.wrong > span {
+  background: rgba(233, 130, 108, 0.85);
+}
+
+.training-review-card h3 {
+  margin: 0 0 8px;
+}
+
+.training-review-card p {
+  margin: 6px 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.training-solution {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(65, 199, 192, 0.07);
+}
+
+.training-solution ol {
+  margin: 6px 0 0;
+  padding-left: 20px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.reference-answer strong {
+  margin-right: 6px;
+  color: var(--gold);
+}
+
+.training-review-card em {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-style: normal;
+  line-height: 1.6;
+}
+
+.training-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.ability-training-button {
+  width: 100%;
+  min-height: 40px;
+  border-color: rgba(65, 199, 192, 0.45);
+  background: rgba(65, 199, 192, 0.08);
+  color: var(--ink);
+}
+
+.training-link {
+  width: 100%;
+  text-align: left;
+  color: var(--ink);
+}
+
+@media (max-width: 760px) {
+  .training-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .training-board {
+    height: 180px;
+  }
+
+  .training-flow,
+  .training-columns,
+  .role-apply-grid,
+  .worked-examples {
+    grid-template-columns: 1fr;
+  }
+
+  .training-result-hero h1 {
+    font-size: 38px;
+  }
+}

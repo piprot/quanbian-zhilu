@@ -1,0 +1,449 @@
+/* ============================================================
+   NPC 悬浮效果 & 角色信息浮层 — 东方美学风格
+   适用于：领导力培训网页游戏「圣维之道」
+   设计语言：水墨丹青、古朴典雅
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   一、CSS 自定义属性（便于全局调整）
+   东方传统色谱：赭石、靛青、黛色、赤金
+   ------------------------------------------------------------ */
+:root {
+  /* 主色调 —— 取自中国传统色 */
+  --npc-zheshi: #9C6B3C;        /* 赭石：温暖的大地色，用于主边框 */
+  --npc-dianqing: #3A6B7E;      /* 靛青：沉稳的蓝绿色，用于辅助高亮 */
+  --npc-daise: #4A4266;         /* 黛色：深邃的紫灰色，用于背景渐变 */
+  --npc-chijin: #C4955A;        /* 赤金：柔和的金色，用于发光效果 */
+  --npc-mose: #2C2C2C;          /* 墨色：近黑色，用于文字和遮罩 */
+  --npc-xuanzhi: #F5ECD7;       /* 宣纸色：温暖的米白色，用于文字底色 */
+  --npc-qingbai: #E8DCC8;       /* 青白：淡色背景辅助 */
+
+  /* 动画参数 */
+  --npc-hover-duration: 0.3s;   /* 悬浮过渡时长 */
+  --npc-hover-scale: 1.08;      /* 悬浮放大倍率 */
+  --npc-glow-spread: 12px;      /* 金色光晕扩散范围 */
+  --npc-tooltip-delay: 0.15s;   /* 信息浮层出现延迟 */
+
+  /* 字体 —— 书法风格 */
+  --npc-font-calligraphy: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+  --npc-font-body: "STSong", "SimSun", "宋体", "Noto Serif SC", serif;
+}
+
+/* ------------------------------------------------------------
+   二、NPC 卡片基础样式
+   每个 NPC 以卡片形式呈现，含肖像和姓名
+   ------------------------------------------------------------ */
+.npc-card {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  border: 2px solid var(--npc-zheshi);
+  border-radius: 8px;
+  background: linear-gradient(
+    145deg,
+    rgba(245, 236, 215, 0.9) 0%,
+    rgba(232, 220, 200, 0.85) 100%
+  );
+  cursor: pointer;
+  transition:
+    transform var(--npc-hover-duration) ease-out,
+    box-shadow var(--npc-hover-duration) ease-out,
+    border-color var(--npc-hover-duration) ease-out;
+  /* 初始状态：无阴影，安静如画卷静置 */
+  box-shadow: 0 2px 6px rgba(44, 44, 44, 0.12);
+  overflow: visible;
+  z-index: 1;
+}
+
+/* ------------------------------------------------------------
+   三、悬浮交互效果 —— 桌面端 hover + 移动端 active
+   放大卡片、添加赤金色光晕、边框加深
+   ------------------------------------------------------------ */
+.npc-card:hover,
+.npc-card:active,
+.npc-card:focus-visible {
+  transform: scale(var(--npc-hover-scale));
+  border-color: var(--npc-chijin);
+  /* 赤金光晕：如烛光映照古画 */
+  box-shadow:
+    0 0 var(--npc-glow-spread) rgba(196, 149, 90, 0.45),
+    0 0 calc(var(--npc-glow-spread) * 2) rgba(196, 149, 90, 0.2),
+    0 4px 16px rgba(44, 44, 44, 0.18);
+  z-index: 10;
+}
+
+/* 键盘焦点样式（无障碍） */
+.npc-card:focus-visible {
+  outline: 2px dashed var(--npc-dianqing);
+  outline-offset: 4px;
+}
+
+/* ------------------------------------------------------------
+   四、NPC 肖像图样式
+   圆形裁切，带古朴边框
+   ------------------------------------------------------------ */
+.npc-portrait {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--npc-zheshi);
+  /* 内阴影营造画卷质感 */
+  box-shadow: inset 0 0 8px rgba(156, 107, 60, 0.25);
+  transition:
+    border-color var(--npc-hover-duration) ease-out,
+    box-shadow var(--npc-hover-duration) ease-out;
+}
+
+/* 悬浮时肖像边框变为赤金色 */
+.npc-card:hover .npc-portrait,
+.npc-card:active .npc-portrait {
+  border-color: var(--npc-chijin);
+  box-shadow:
+    inset 0 0 8px rgba(156, 107, 60, 0.25),
+    0 0 8px rgba(196, 149, 90, 0.3);
+}
+
+/* ------------------------------------------------------------
+   五、NPC 姓名样式 —— 书法楷体
+   静置时沉稳，悬浮时微亮
+   ------------------------------------------------------------ */
+.npc-name {
+  margin-top: 8px;
+  font-family: var(--npc-font-calligraphy);
+  font-size: 1.1rem;
+  color: var(--npc-mose);
+  letter-spacing: 0.15em;
+  text-align: center;
+  transition: color var(--npc-hover-duration) ease-out;
+}
+
+.npc-card:hover .npc-name,
+.npc-card:active .npc-name {
+  color: var(--npc-zheshi);
+}
+
+/* ------------------------------------------------------------
+   六、角色信息浮层（Tooltip / Overlay）
+   悬浮时从卡片底部展开，展示角色名（书法体）与简介
+   半透明墨色背景 + 毛玻璃模糊
+   ------------------------------------------------------------ */
+.npc-info-overlay {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  width: max-content;
+  max-width: 240px;
+  padding: 16px 20px;
+  border-radius: 6px;
+  /* 墨色半透明 + 毛玻璃 */
+  background: rgba(44, 44, 44, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(196, 149, 90, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  /* 默认隐藏：不可见且不可交互 */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    opacity var(--npc-hover-duration) ease-out,
+    transform var(--npc-hover-duration) ease-out,
+    visibility var(--npc-hover-duration) ease-out;
+  transition-delay: var(--npc-tooltip-delay);
+
+  z-index: 100;
+}
+
+/* 浮层小三角（指向卡片） */
+.npc-info-overlay::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 8px solid transparent;
+  border-top-color: rgba(44, 44, 44, 0.82);
+}
+
+/* 悬浮时显示浮层 */
+.npc-card:hover .npc-info-overlay,
+.npc-card:active .npc-info-overlay,
+.npc-card:focus-visible .npc-info-overlay {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 浮层内角色名 —— 书法风格，赤金色 */
+.npc-info-overlay .npc-info-name {
+  font-family: var(--npc-font-calligraphy);
+  font-size: 1.25rem;
+  color: var(--npc-chijin);
+  letter-spacing: 0.2em;
+  margin-bottom: 8px;
+  text-align: center;
+  /* 文字微光效果 */
+  text-shadow: 0 0 6px rgba(196, 149, 90, 0.3);
+}
+
+/* 浮层内角色简介 */
+.npc-info-overlay .npc-info-desc {
+  font-family: var(--npc-font-body);
+  font-size: 0.85rem;
+  color: var(--npc-xuanzhi);
+  line-height: 1.6;
+  text-align: center;
+  margin: 0;
+  /* 限制两行，超出省略 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------
+   七、水墨晕染动画（Ink-Wash Animation）
+   悬浮时在卡片背景上模拟墨滴入水的扩散效果
+   使用伪元素 + radial-gradient + 动画
+   ------------------------------------------------------------ */
+.npc-card::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  /* 水墨渐变：中心浓，边缘淡 */
+  background: radial-gradient(
+    circle,
+    rgba(58, 107, 126, 0.15) 0%,
+    rgba(74, 66, 102, 0.08) 40%,
+    rgba(156, 107, 60, 0.04) 70%,
+    transparent 100%
+  );
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition:
+    width 0.6s ease-out,
+    height 0.6s ease-out,
+    opacity 0.4s ease-out;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.npc-card:hover::before,
+.npc-card:active::before {
+  width: 200%;
+  height: 200%;
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------
+   八、水墨扩散关键帧动画（可选增强）
+   若需更强烈的水墨效果，可为卡片添加 .npc-ink-enhanced 类
+   ------------------------------------------------------------ */
+.npc-card.npc-ink-enhanced::before {
+  animation: npc-ink-spread 0.8s ease-out forwards;
+}
+
+.npc-card.npc-ink-enhanced:not(:hover):not(:active)::before {
+  animation: npc-ink-retract 0.5s ease-in forwards;
+}
+
+@keyframes npc-ink-spread {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0;
+    border-radius: 50%;
+    /* 墨滴初始：不规则形状模拟 */
+    filter: blur(0px);
+  }
+  30% {
+    opacity: 0.8;
+    border-radius: 45% 55% 50% 50%;
+    filter: blur(2px);
+  }
+  60% {
+    border-radius: 48% 52% 46% 54%;
+    filter: blur(4px);
+  }
+  100% {
+    width: 220%;
+    height: 220%;
+    opacity: 1;
+    border-radius: 50%;
+    filter: blur(6px);
+  }
+}
+
+@keyframes npc-ink-retract {
+  0% {
+    width: 220%;
+    height: 220%;
+    opacity: 1;
+    filter: blur(6px);
+  }
+  100% {
+    width: 0;
+    height: 0;
+    opacity: 0;
+    filter: blur(0px);
+  }
+}
+
+/* ------------------------------------------------------------
+   九、移动端触控适配
+   移动端无 hover 状态，使用 :active 和 .npc-touched 类模拟
+   JavaScript 可添加 .npc-touched 实现点击保持效果
+   ------------------------------------------------------------ */
+@media (hover: none) and (pointer: coarse) {
+  /* 触控设备：取消 hover 效果，改用 active 状态 */
+  .npc-card:hover {
+    transform: none;
+    box-shadow: 0 2px 6px rgba(44, 44, 44, 0.12);
+    border-color: var(--npc-zheshi);
+  }
+
+  .npc-card:active,
+  .npc-card.npc-touched {
+    transform: scale(var(--npc-hover-scale));
+    border-color: var(--npc-chijin);
+    box-shadow:
+      0 0 var(--npc-glow-spread) rgba(196, 149, 90, 0.45),
+      0 0 calc(var(--npc-glow-spread) * 2) rgba(196, 149, 90, 0.2);
+    z-index: 10;
+  }
+
+  /* 触控设备浮层显示逻辑 */
+  .npc-card:hover .npc-info-overlay {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .npc-card:active .npc-info-overlay,
+  .npc-card.npc-touched .npc-info-overlay {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* 触控设备水墨动画 */
+  .npc-card:hover::before {
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+
+  .npc-card:active::before,
+  .npc-card.npc-touched::before {
+    width: 200%;
+    height: 200%;
+    opacity: 1;
+  }
+
+  /* 浮层改为卡片底部固定位置（避免被手指遮挡） */
+  .npc-info-overlay {
+    bottom: auto;
+    top: calc(100% + 12px);
+  }
+
+  .npc-info-overlay::after {
+    top: auto;
+    bottom: 100%;
+    border-top-color: transparent;
+    border-bottom-color: rgba(44, 44, 44, 0.82);
+  }
+}
+
+/* ------------------------------------------------------------
+   十、无障碍：尊重用户的动效偏好设置
+   prefers-reduced-motion: reduce 时禁用所有动画
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .npc-card,
+  .npc-card::before,
+  .npc-portrait,
+  .npc-name,
+  .npc-info-overlay {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+
+  /* 简化悬浮效果：仅改变边框色，不缩放 */
+  .npc-card:hover,
+  .npc-card:active {
+    transform: none;
+  }
+
+  /* 浮层立即显示，无位移 */
+  .npc-card:hover .npc-info-overlay,
+  .npc-card:active .npc-info-overlay {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ------------------------------------------------------------
+   十一、响应式适配
+   小屏幕下卡片和浮层尺寸调整
+   ------------------------------------------------------------ */
+@media (max-width: 480px) {
+  .npc-portrait {
+    width: 72px;
+    height: 72px;
+  }
+
+  .npc-name {
+    font-size: 0.95rem;
+  }
+
+  .npc-info-overlay {
+    max-width: 200px;
+    padding: 12px 16px;
+  }
+
+  .npc-info-overlay .npc-info-name {
+    font-size: 1.1rem;
+  }
+
+  .npc-info-overlay .npc-info-desc {
+    font-size: 0.8rem;
+  }
+}
+
+/* ------------------------------------------------------------
+   十二、装饰性元素 —— 卡片角落的印章点缀（可选）
+   添加 .npc-seal 类可在卡片右下角显示红色方印
+   ------------------------------------------------------------ */
+.npc-card .npc-seal {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #B84233;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--npc-font-calligraphy);
+  font-size: 0.65rem;
+  color: #B84233;
+  opacity: 0.6;
+  transform: rotate(-5deg);
+  transition: opacity var(--npc-hover-duration) ease-out;
+}
+
+.npc-card:hover .npc-seal,
+.npc-card:active .npc-seal {
+  opacity: 1;
+}

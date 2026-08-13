@@ -1,0 +1,805 @@
+/*
+ * ============================================================
+ *  治理仪表盘 - 印章风格样式表
+ *  领导力训练网页游戏 · 东方美学主题
+ * ============================================================
+ *  色彩体系:
+ *    朱砂红 #C84032  — 印章、重点标记
+ *    墨黑   #2C2C2C  — 正文、边框
+ *    宣纸白 #F5F0E8  — 背景底色
+ *    赭石   #9C6B3C  — 点缀、辅助线
+ * ============================================================
+ */
+
+/* ---------- 全局变量 ---------- */
+:root {
+  /* 朱砂红 —— 印章主色 */
+  --seal-red: #C84032;
+  --seal-red-light: rgba(200, 64, 50, 0.15);
+  --seal-red-hover: #A83028;
+
+  /* 墨黑 —— 文字与边框 */
+  --ink-black: #2C2C2C;
+  --ink-black-light: rgba(44, 44, 44, 0.6);
+
+  /* 宣纸白 —— 背景 */
+  --paper-white: #F5F0E8;
+  --paper-warm: #EDE6D6;
+
+  /* 赭石 —— 点缀色 */
+  --ochre: #9C6B3C;
+  --ochre-light: rgba(156, 107, 60, 0.2);
+
+  /* 印章尺寸 */
+  --seal-size-sm: 80px;
+  --seal-size-md: 120px;
+  --seal-size-lg: 180px;
+
+  /* 过渡动画 */
+  --transition-stamp: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ---------- 基础重置与背景 ---------- */
+.dash-container {
+  /* 宣纸纹理背景 */
+  background-color: var(--paper-white);
+  background-image:
+    /* 模拟宣纸纤维纹理 */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(156, 107, 60, 0.03) 2px,
+      rgba(156, 107, 60, 0.03) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 3px,
+      rgba(156, 107, 60, 0.02) 3px,
+      rgba(156, 107, 60, 0.02) 6px
+    );
+  min-height: 100vh;
+  padding: 2rem;
+  font-family: "Noto Serif SC", "Source Han Serif CN", "SimSun", serif;
+  color: var(--ink-black);
+}
+
+/* ---------- 响应式网格布局 ---------- */
+.dash-grid {
+  display: grid;
+  /* 自适应列数：最小 280px，自动填充 */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* 全宽行 —— 用于排名印章等突出展示 */
+.dash-grid .dash-full-width {
+  grid-column: 1 / -1;
+}
+
+/* ---------- 仪表盘卡片 · 官文风格 ---------- */
+/* .dash-card — 基础卡片容器，模拟官文/公文书页 */
+.dash-card {
+  background: var(--paper-white);
+  border: 2px solid var(--ink-black);
+  /* 双层边框模拟官文装帧 */
+  box-shadow:
+    inset 0 0 0 4px var(--paper-white),
+    inset 0 0 0 6px var(--ochre-light),
+    0 4px 16px rgba(44, 44, 44, 0.1);
+  padding: 1.5rem;
+  position: relative;
+  transition: var(--transition-stamp);
+}
+
+/* 卡片顶部装饰线 —— 模拟官文抬头 */
+.dash-card::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--ochre) 15%,
+    var(--ochre) 85%,
+    transparent 100%
+  );
+}
+
+/* 卡片底部角落装饰 */
+.dash-card::after {
+  content: "";
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--ochre-light) 20%,
+    var(--ochre-light) 80%,
+    transparent 100%
+  );
+}
+
+.dash-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 4px var(--paper-white),
+    inset 0 0 0 6px var(--ochre-light),
+    0 8px 24px rgba(44, 44, 44, 0.15);
+}
+
+/* 卡片标题 —— 竖排标题选项 */
+.dash-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink-black);
+  margin-bottom: 1rem;
+  letter-spacing: 0.15em;
+  /* 默认横排；添加 .vertical 类可切换竖排 */
+  writing-mode: horizontal-tb;
+}
+
+/* 竖排标题 —— 官文风格 */
+.dash-card-title.vertical {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  height: auto;
+  min-height: 120px;
+  margin-bottom: 0;
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+  letter-spacing: 0.3em;
+}
+
+/* ---------- 印章卡片 · .dash-seal ---------- */
+/* 圆形印章风格 —— 核心指标展示 */
+.dash-seal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+/* 印章圆形外框 */
+.dash-seal .seal-circle {
+  width: var(--seal-size-md);
+  height: var(--seal-size-md);
+  border-radius: 50%;
+  border: 4px solid var(--seal-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 1rem;
+  transition: var(--transition-stamp);
+  /* 印章质感：内阴影模拟印泥不均 */
+  box-shadow:
+    inset 0 0 12px var(--seal-red-light),
+    0 0 0 2px var(--paper-white),
+    0 0 0 4px var(--seal-red);
+}
+
+/* 八角印章 —— 变体 */
+.dash-seal.octagonal .seal-circle {
+  /* 使用 clip-path 裁剪为八角形 */
+  border-radius: 0;
+  clip-path: polygon(
+    30% 0%, 70% 0%,
+    100% 30%, 100% 70%,
+    70% 100%, 30% 100%,
+    0% 70%, 0% 30%
+  );
+  border: none;
+  background: var(--seal-red);
+  color: var(--paper-white);
+  width: var(--seal-size-md);
+  height: var(--seal-size-md);
+}
+
+.dash-seal.octagonal .seal-circle .seal-value {
+  color: var(--paper-white);
+}
+
+/* 印章内部数值 */
+.seal-value {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--seal-red);
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+/* 印章内标签 */
+.seal-label {
+  font-size: 0.85rem;
+  color: var(--ink-black-light);
+  letter-spacing: 0.2em;
+  margin-top: 0.25rem;
+}
+
+/* 印章 hover 效果 —— 盖章动画 */
+.dash-seal:hover .seal-circle {
+  transform: scale(0.92) rotate(-3deg);
+  box-shadow:
+    inset 0 0 20px rgba(200, 64, 50, 0.3),
+    0 0 0 2px var(--paper-white),
+    0 0 0 4px var(--seal-red-hover),
+    0 2px 8px rgba(200, 64, 50, 0.3);
+}
+
+/* ---------- 成就徽章 · .dash-badge ---------- */
+/* 成就徽章 —— 模拟篆刻印章效果 */
+.dash-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: default;
+}
+
+/* 徽章外框 —— 方形篆刻 */
+.dash-badge .badge-frame {
+  width: 64px;
+  height: 64px;
+  border: 3px solid var(--seal-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: var(--transition-stamp);
+  /* 篆刻质感 */
+  background:
+    radial-gradient(
+      ellipse at 30% 40%,
+      rgba(200, 64, 50, 0.08) 0%,
+      transparent 70%
+    );
+}
+
+/* 方形篆刻 —— 圆角变体 */
+.dash-badge.rounded .badge-frame {
+  border-radius: 8px;
+}
+
+/* 圆形篆刻变体 */
+.dash-badge.circular .badge-frame {
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+}
+
+/* 徽章内文字 —— 竖排篆刻 */
+.badge-text {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--seal-red);
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+}
+
+/* 徽章已激活状态 —— 印泥填实 */
+.dash-badge.active .badge-frame {
+  background: var(--seal-red);
+  box-shadow:
+    inset 0 0 8px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(200, 64, 50, 0.3);
+}
+
+.dash-badge.active .badge-text {
+  color: var(--paper-white);
+}
+
+/* 徽章未解锁 —— 淡色虚线框 */
+.dash-badge.locked .badge-frame {
+  border-color: var(--ink-black-light);
+  border-style: dashed;
+  opacity: 0.4;
+}
+
+.dash-badge.locked .badge-text {
+  color: var(--ink-black-light);
+}
+
+/* 徽章 hover —— 盖印效果 */
+.dash-badge:hover .badge-frame {
+  transform: scale(0.88) rotate(-5deg);
+  box-shadow:
+    inset 0 0 12px rgba(200, 64, 50, 0.2),
+    0 0 0 1px var(--seal-red),
+    0 4px 12px rgba(200, 64, 50, 0.25);
+}
+
+/* 徽章提示文字 */
+.badge-tooltip {
+  position: absolute;
+  bottom: -2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--ink-black-light);
+  white-space: nowrap;
+  letter-spacing: 0.1em;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.dash-badge:hover .badge-tooltip {
+  opacity: 1;
+}
+
+/* ---------- 排名印章 · .dash-rank ---------- */
+/* 大型排名展示 —— 当前品阶/段位 */
+.dash-rank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+}
+
+/* 排名大印章外框 */
+.dash-rank .rank-seal {
+  width: var(--seal-size-lg);
+  height: var(--seal-size-lg);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+/* 排名印章 —— 双层边框 */
+.rank-seal .rank-outer {
+  position: absolute;
+  inset: 0;
+  border: 5px solid var(--seal-red);
+  border-radius: 50%;
+  /* 旋转缓慢动画 —— 增加仪式感 */
+  animation: rank-rotate 60s linear infinite;
+}
+
+/* 外框装饰刻度 */
+.rank-seal .rank-outer::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 2px dashed var(--seal-red-light);
+  border-radius: 50%;
+}
+
+/* 排名内框 */
+.rank-seal .rank-inner {
+  width: 75%;
+  height: 75%;
+  border: 3px solid var(--seal-red);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(200, 64, 50, 0.05) 0%,
+      transparent 70%
+    );
+}
+
+/* 排名品阶文字 */
+.rank-title {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--seal-red);
+  letter-spacing: 0.2em;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  line-height: 1.3;
+}
+
+/* 排名等级数字 */
+.rank-level {
+  font-size: 0.9rem;
+  color: var(--ochre);
+  margin-top: 0.5rem;
+  letter-spacing: 0.15em;
+}
+
+/* 排名描述 */
+.rank-desc {
+  font-size: 0.85rem;
+  color: var(--ink-black-light);
+  text-align: center;
+  max-width: 200px;
+  line-height: 1.6;
+  letter-spacing: 0.1em;
+}
+
+@keyframes rank-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* 排名 hover —— 盖印下沉 */
+.dash-rank:hover .rank-seal {
+  transform: scale(0.95);
+  transition: var(--transition-stamp);
+}
+
+.dash-rank:hover .rank-outer {
+  animation-play-state: paused;
+}
+
+/* ---------- 进度指示器 · .dash-progress ---------- */
+/* 墨迹填充进度条 —— 模拟书法墨晕扩散效果 */
+.dash-progress {
+  width: 100%;
+  position: relative;
+}
+
+/* 进度条容器 */
+.progress-track {
+  width: 100%;
+  height: 24px;
+  background: var(--paper-warm);
+  border: 2px solid var(--ink-black);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 墨迹填充 —— 进度值 */
+.progress-fill {
+  height: 100%;
+  background: var(--ink-black);
+  /* 墨迹扩散效果：右边缘不规则 */
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 24'%3E%3Cpath d='M0,0 H85 Q90,4 88,8 Q92,12 87,16 Q90,20 85,24 H0 Z' fill='black'/%3E%3C/svg%3E");
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  position: relative;
+  transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 墨迹晕染效果 —— 填充区域右端 */
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  top: -2px;
+  bottom: -2px;
+  width: 12px;
+  background: radial-gradient(
+    ellipse at left center,
+    var(--ink-black) 0%,
+    rgba(44, 44, 44, 0.4) 40%,
+    transparent 100%
+  );
+  filter: blur(2px);
+}
+
+/* 朱砂色进度条变体 */
+.progress-fill.seal-red {
+  background: var(--seal-red);
+}
+
+/* 赭石色进度条变体 */
+.progress-fill.ochre {
+  background: var(--ochre);
+}
+
+/* 进度百分比文字 */
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--ink-black-light);
+  letter-spacing: 0.1em;
+}
+
+.progress-percent {
+  font-weight: 700;
+  color: var(--ink-black);
+  font-size: 0.9rem;
+}
+
+/* 圆形墨迹进度 —— 变体 */
+.dash-progress.circular {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.progress-ring {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+
+.progress-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+/* 圆形进度轨道 */
+.progress-ring .ring-track {
+  fill: none;
+  stroke: var(--paper-warm);
+  stroke-width: 6;
+}
+
+/* 圆形进度填充 —— 墨色 */
+.progress-ring .ring-fill {
+  fill: none;
+  stroke: var(--ink-black);
+  stroke-width: 6;
+  stroke-linecap: round;
+  /* 通过 stroke-dasharray / stroke-dashoffset 控制进度 */
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 圆形中心文字 */
+.progress-ring .ring-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--ink-black);
+}
+
+/* ---------- 官文面板 · 统计区域 ---------- */
+/* 官文风格统计面板 */
+.dash-official-panel {
+  background: var(--paper-white);
+  border: 2px solid var(--ink-black);
+  padding: 1.5rem 2rem;
+  position: relative;
+}
+
+/* 面板顶部 —— 官文标题栏 */
+.dash-official-panel .panel-header {
+  text-align: center;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--ochre-light);
+  position: relative;
+}
+
+.dash-official-panel .panel-header::after {
+  content: "◆";
+  position: absolute;
+  bottom: -0.5em;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--ochre);
+  font-size: 0.6rem;
+}
+
+.panel-title {
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: 0.3em;
+  color: var(--ink-black);
+}
+
+/* 竖排文字官文面板 */
+.dash-official-panel.vertical-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 2rem 1.5rem;
+  min-height: 300px;
+}
+
+.dash-official-panel.vertical-text .panel-header {
+  border-bottom: none;
+  border-right: 1px solid var(--ochre-light);
+  padding-bottom: 0;
+  padding-right: 1rem;
+  margin-bottom: 0;
+  margin-right: 1rem;
+}
+
+/* 统计数据行 */
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed var(--ochre-light);
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+}
+
+.stat-name {
+  font-size: 0.9rem;
+  color: var(--ink-black);
+  letter-spacing: 0.15em;
+}
+
+.stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--seal-red);
+}
+
+/* ---------- 印章装饰元素 ---------- */
+/* 角落印章装饰 */
+.corner-seal {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--seal-red);
+  opacity: 0.3;
+}
+
+.corner-seal.top-left {
+  top: 12px;
+  left: 12px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner-seal.top-right {
+  top: 12px;
+  right: 12px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner-seal.bottom-left {
+  bottom: 12px;
+  left: 12px;
+  border-right: none;
+  border-top: none;
+}
+
+.corner-seal.bottom-right {
+  bottom: 12px;
+  right: 12px;
+  border-left: none;
+  border-top: none;
+}
+
+/* ---------- 动画关键帧 ---------- */
+/* 盖印动画 —— 用于新成就解锁 */
+@keyframes stamp-down {
+  0% {
+    transform: scale(1.5) rotate(-10deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(0.9) rotate(2deg);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1.05) rotate(-1deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.dash-badge.newly-unlocked .badge-frame {
+  animation: stamp-down 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* 墨迹扩散入场动画 */
+@keyframes ink-spread {
+  0% {
+    clip-path: circle(0% at 50% 50%);
+    opacity: 0;
+  }
+  100% {
+    clip-path: circle(100% at 50% 50%);
+    opacity: 1;
+  }
+}
+
+.dash-card.ink-enter {
+  animation: ink-spread 0.8s ease-out forwards;
+}
+
+/* ---------- 响应式适配 ---------- */
+/* 平板端 */
+@media (max-width: 1024px) {
+  .dash-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .dash-rank .rank-seal {
+    width: 150px;
+    height: 150px;
+  }
+
+  .rank-title {
+    font-size: 1.6rem;
+  }
+}
+
+/* 手机端 */
+@media (max-width: 640px) {
+  .dash-container {
+    padding: 1rem;
+  }
+
+  .dash-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  /* 手机端印章缩小 */
+  .dash-seal .seal-circle {
+    width: var(--seal-size-sm);
+    height: var(--seal-size-sm);
+  }
+
+  .seal-value {
+    font-size: 1.4rem;
+  }
+
+  /* 排名印章居中缩小 */
+  .dash-rank .rank-seal {
+    width: 130px;
+    height: 130px;
+  }
+
+  .rank-title {
+    font-size: 1.3rem;
+  }
+
+  /* 徽章缩小 */
+  .dash-badge .badge-frame {
+    width: 52px;
+    height: 52px;
+  }
+
+  .badge-text {
+    font-size: 0.85rem;
+  }
+
+  /* 竖排标题在手机端保持横排 */
+  .dash-card-title.vertical {
+    writing-mode: horizontal-tb;
+    min-height: auto;
+  }
+}
+
+/* ---------- 打印样式 ---------- */
+@media print {
+  .dash-container {
+    background: white;
+  }
+
+  .dash-card,
+  .dash-seal,
+  .dash-badge,
+  .dash-rank {
+    break-inside: avoid;
+    box-shadow: none;
+    border-color: #333;
+  }
+
+  .rank-seal .rank-outer {
+    animation: none;
+  }
+}

@@ -1,0 +1,3212 @@
+/* =========================================================================
+   visual-upgrade-v2.css
+   领导力训练网页游戏 · 视觉增强层 (Visual Upgrade Layer v2)
+   -------------------------------------------------------------------------
+   作为现有 styles.css 之上的叠加增强层使用。
+   灵感来源：WebGAL 视觉小说引擎 / 原神 (Genshin Impact) 高级游戏 UI。
+   设计语言：深色基底 + 青绿/鎏金/珊瑚强调色，玻璃态、层叠渐变、柔和辉光。
+
+   用法：
+     1) 在 styles.css 之后引入本文件。
+     2) 所有自定义属性集中于 :root 的 --vu-* 命名空间，便于一键换肤。
+     3) 可通过为 <html> 添加 data-vu="off" 禁用增强层。
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   0. Web 字体引入（优雅显示字体 + 优化正文字体）
+   ------------------------------------------------------------------------- */
+/* =========================================================================
+   1. 增强色彩系统 · CSS 自定义属性
+   保留原有 dark teal/gold/coral 调性，补充中间色调、玻璃态与辉光变量。
+   ========================================================================= */
+:root {
+  /* —— 基底背景层（深色阶梯） —— */
+  --vu-bg: #0a1013;
+  --vu-bg-deep: #070b0e;
+  --vu-bg-soft: #0d161b;
+  --vu-bg-veil: rgba(10, 16, 19, 0.72);
+
+  /* —— 面板层（玻璃态阶梯） —— */
+  --vu-panel: #111d23;
+  --vu-panel-2: #17262e;
+  --vu-panel-3: #1d3039;
+  --vu-glass: rgba(23, 38, 46, 0.55);
+  --vu-glass-strong: rgba(17, 29, 35, 0.78);
+  --vu-glass-hi: rgba(159, 179, 200, 0.06);
+
+  /* —— 文本 —— */
+  --vu-ink: #e7eef2;
+  --vu-ink-soft: #c6d2dc;
+  --vu-muted: #b9cad8;
+  --vu-muted-soft: #9fb3c8;
+  --vu-faint: rgba(159, 179, 200, 0.5);
+
+  /* —— 青绿 teal 阶梯 —— */
+  --vu-teal: #4fd2cc;
+  --vu-teal-bright: #6ee7e1;
+  --vu-teal-soft: #7fe0db;
+  --vu-teal-deep: #2fa8a3;
+  --vu-teal-glow: rgba(79, 210, 204, 0.45);
+  --vu-teal-wash: rgba(79, 210, 204, 0.12);
+  --vu-teal-line: rgba(79, 210, 204, 0.38);
+
+  /* —— 鎏金 gold 阶梯 —— */
+  --vu-gold: #f2c14e;
+  --vu-gold-bright: #ffd877;
+  --vu-gold-soft: #f7d27a;
+  --vu-gold-deep: #c9982f;
+  --vu-gold-glow: rgba(242, 193, 78, 0.42);
+  --vu-gold-wash: rgba(242, 193, 78, 0.1);
+  --vu-gold-line: rgba(242, 193, 78, 0.4);
+
+  /* —— 珊瑚 coral 阶梯 —— */
+  --vu-coral: #e9826c;
+  --vu-coral-bright: #f4a18c;
+  --vu-coral-soft: #ee9c88;
+  --vu-coral-deep: #c25e48;
+  --vu-coral-glow: rgba(233, 130, 108, 0.4);
+  --vu-coral-wash: rgba(233, 130, 108, 0.1);
+  --vu-coral-line: rgba(233, 130, 108, 0.38);
+
+  /* —— 辅助色 —— */
+  --vu-blue: #4db7d6;
+  --vu-blue-glow: rgba(77, 183, 214, 0.4);
+  --vu-green: #57c7a3;
+  --vu-green-glow: rgba(87, 199, 163, 0.4);
+  --vu-purple: #b497f0;
+  --vu-purple-glow: rgba(154, 105, 232, 0.42);
+
+  /* —— 线条 —— */
+  --vu-line: rgba(159, 179, 200, 0.18);
+  --vu-line-soft: rgba(159, 179, 200, 0.1);
+  --vu-line-strong: rgba(159, 179, 200, 0.32);
+
+  /* —— 阴影体系 —— */
+  --vu-shadow: 0 18px 50px rgba(0, 0, 0, 0.42);
+  --vu-shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.34);
+  --vu-shadow-deep: 0 30px 80px rgba(0, 0, 0, 0.55);
+  --vu-shadow-lift: 0 22px 60px rgba(0, 0, 0, 0.5), 0 6px 18px rgba(0, 0, 0, 0.4);
+  --vu-glow-teal: 0 0 0 1px var(--vu-teal-line), 0 0 24px var(--vu-teal-glow);
+  --vu-glow-gold: 0 0 0 1px var(--vu-gold-line), 0 0 24px var(--vu-gold-glow);
+  --vu-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 0 24px rgba(79, 210, 204, 0.06);
+
+  /* —— 渐变 —— */
+  --vu-grad-teal: linear-gradient(135deg, var(--vu-teal), var(--vu-blue));
+  --vu-grad-gold: linear-gradient(135deg, var(--vu-gold-bright), var(--vu-gold-deep));
+  --vu-grad-coral: linear-gradient(135deg, var(--vu-coral), var(--vu-coral-deep));
+  --vu-grad-hero: linear-gradient(120deg, var(--vu-teal), var(--vu-gold) 55%, var(--vu-coral));
+  --vu-grad-border: linear-gradient(135deg, var(--vu-teal-line), transparent 40%, var(--vu-gold-line) 78%, transparent);
+  --vu-grad-glass: linear-gradient(150deg, var(--vu-glass-hi), transparent 45%);
+
+  /* —— 圆角 / 动效 —— */
+  --vu-radius: 8px;
+  --vu-radius-lg: 14px;
+  --vu-radius-pill: 999px;
+  --vu-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --vu-ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --vu-dur: 220ms;
+  --vu-dur-slow: 480ms;
+
+  /* —— 排版 —— */
+  --vu-font-body: "Inter", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --vu-font-display: "Noto Serif SC", "Songti SC", "Cinzel", Georgia, serif;
+  --vu-font-mono: "SF Mono", "JetBrains Mono", Consolas, monospace;
+}
+
+/* 关闭增强层：在 <html> 上设置 data-vu="off" 可整体禁用 */
+html[data-vu="off"] * {
+  animation: none !important;
+}
+
+/* =========================================================================
+   探秘 · 四大文明藏宝图
+   ========================================================================= */
+.expedition-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 22px 24px;
+  margin: 0 0 14px;
+  border: 1px solid color-mix(in srgb, var(--civ, var(--vu-gold)) 42%, transparent);
+  border-radius: var(--vu-radius);
+  background:
+    radial-gradient(circle at 12% 10%, color-mix(in srgb, var(--civ, var(--vu-gold)) 22%, transparent), transparent 46%),
+    linear-gradient(140deg, rgba(15, 24, 29, 0.92), rgba(8, 13, 17, 0.9));
+  box-shadow: var(--vu-shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+.expedition-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto -40px -70px auto;
+  width: 240px;
+  height: 150px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--civ, var(--vu-gold)) 34%, transparent), transparent 68%);
+  pointer-events: none;
+}
+.expedition-hero h1 {
+  margin: 4px 0 8px;
+  font-family: var(--vu-font-display);
+  font-size: clamp(24px, 3vw, 38px);
+  line-height: 1.15;
+  letter-spacing: 0;
+  color: var(--vu-ink);
+}
+.expedition-hero p {
+  max-width: 820px;
+  margin: 0;
+  color: var(--vu-muted);
+  line-height: 1.65;
+}
+.treasure-ring {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 118px;
+  height: 118px;
+  border-radius: 50%;
+  border: 1px dashed color-mix(in srgb, var(--civ, var(--vu-gold)) 55%, transparent);
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--civ, var(--vu-gold)) 14%, transparent), transparent 62%),
+    rgba(7, 12, 16, 0.72);
+  text-align: center;
+  flex: 0 0 auto;
+}
+.treasure-ring strong {
+  display: block;
+  font-family: var(--vu-font-display);
+  font-size: 26px;
+  color: var(--vu-gold-bright);
+}
+.treasure-ring span {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--vu-muted);
+}
+.expedition-chapter-card {
+  margin: 14px 0;
+  padding: 16px 18px;
+  border-left: 3px solid var(--civ, var(--vu-gold));
+  border-radius: var(--vu-radius);
+  background: color-mix(in srgb, var(--civ, var(--vu-gold)) 8%, var(--vu-panel));
+}
+.expedition-chapter-card span {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--vu-muted-soft);
+  text-transform: uppercase;
+}
+.expedition-chapter-card strong {
+  display: block;
+  margin: 4px 0 6px;
+  font-family: var(--vu-font-display);
+  font-size: 20px;
+  color: var(--vu-ink);
+}
+.expedition-chapter-card p {
+  margin: 0;
+  color: var(--vu-muted);
+  line-height: 1.6;
+}
+.expedition-scene {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  margin: 10px 0;
+  border: 1px solid color-mix(in srgb, var(--civ, var(--vu-gold)) 34%, transparent);
+  border-radius: var(--vu-radius);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--civ, var(--vu-gold)) 10%, transparent), transparent 70%);
+}
+.expedition-scene > div {
+  display: grid;
+  gap: 2px;
+  flex: 0 0 auto;
+  min-width: 150px;
+}
+.expedition-scene span {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--vu-gold);
+}
+.expedition-scene strong {
+  font-family: var(--vu-font-display);
+  color: var(--vu-ink);
+}
+.expedition-scene p {
+  margin: 0;
+  color: var(--vu-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.expedition-transition-line {
+  display: inline-block;
+  margin: 4px 0 10px;
+  padding: 4px 10px;
+  border: 1px solid color-mix(in srgb, var(--civ, var(--vu-gold)) 40%, transparent);
+  border-radius: var(--vu-radius-pill);
+  color: var(--vu-gold);
+  font-size: 13px;
+}
+.treasure-panel .treasure-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+.treasure-panel .treasure-track span {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--dot, var(--vu-gold)) 55%, transparent);
+  color: var(--vu-muted);
+  font-size: 13px;
+  background: rgba(7, 12, 16, 0.5);
+}
+.treasure-panel .treasure-track span.found {
+  color: #07100d;
+  background: var(--dot, var(--vu-gold));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--dot, var(--vu-gold)) 45%, transparent);
+}
+
+/* =========================================================================
+   探秘动作 · 修炼入口 · 守护者验证
+   ========================================================================= */
+.exploration-panel {
+  margin: 12px 0;
+  padding: 14px;
+  border: 1px solid var(--vu-line);
+  border-radius: var(--vu-radius);
+  background: var(--vu-glass);
+}
+.exploration-panel.complete {
+  border-color: color-mix(in srgb, var(--vu-teal) 45%, transparent);
+}
+.exploration-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.exploration-head span {
+  font-weight: 700;
+  color: var(--vu-ink);
+}
+.exploration-head strong {
+  color: var(--vu-gold);
+  font-family: var(--vu-font-mono);
+}
+.exploration-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.exploration-action {
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--vu-gold) 38%, transparent);
+  border-radius: var(--vu-radius);
+  background: color-mix(in srgb, var(--vu-gold) 9%, transparent);
+  color: var(--vu-gold-bright);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.exploration-action.done {
+  border-color: color-mix(in srgb, var(--vu-teal) 40%, transparent);
+  background: color-mix(in srgb, var(--vu-teal) 10%, transparent);
+  color: var(--vu-teal-bright);
+  cursor: default;
+}
+.exploration-findings {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.exploration-findings p {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 2px solid var(--vu-gold-line);
+  border-radius: 6px;
+  background: rgba(7, 12, 16, 0.42);
+  color: var(--vu-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.exploration-findings strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--vu-ink-soft);
+}
+.exploration-lock-note {
+  margin: 8px 0 10px;
+  padding: 10px 12px;
+  border-radius: var(--vu-radius);
+  background: color-mix(in srgb, var(--vu-coral) 12%, transparent);
+  color: var(--vu-coral-bright);
+  font-size: 13px;
+}
+.exploration-reward {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--vu-teal) 12%, transparent);
+  color: var(--vu-teal-bright);
+  font-size: 12px;
+}
+.story-lesson {
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--dot, var(--vu-teal)) 38%, transparent);
+  border-radius: var(--vu-radius);
+  background: color-mix(in srgb, var(--dot, var(--vu-teal)) 8%, var(--vu-panel));
+}
+.story-lesson span {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--vu-muted-soft);
+}
+.story-lesson code {
+  display: block;
+  margin: 6px 0 8px;
+  color: var(--vu-ink);
+  font-family: var(--vu-font-mono);
+  font-size: 14px;
+}
+.story-lesson p {
+  margin: 0 0 10px;
+  color: var(--vu-muted);
+  line-height: 1.6;
+}
+.story-lesson button {
+  border: 1px solid var(--vu-line-strong);
+  border-radius: var(--vu-radius);
+  padding: 7px 12px;
+  background: transparent;
+  color: var(--vu-ink-soft);
+  cursor: pointer;
+}
+.story-lesson button:hover {
+  color: var(--vu-gold-bright);
+  border-color: var(--vu-gold-line);
+}
+.integrity-gate {
+  margin: 10px 0;
+  padding: 18px;
+  border: 1px solid var(--vu-coral-line);
+  border-radius: var(--vu-radius);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(233, 130, 108, 0.14), transparent 42%),
+    var(--vu-glass-strong);
+}
+.integrity-gate-head span {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--vu-coral);
+  text-transform: uppercase;
+}
+.integrity-gate-head h3 {
+  margin: 6px 0 6px;
+  color: var(--vu-ink);
+}
+.integrity-gate-head p {
+  margin: 0;
+  color: var(--vu-muted);
+  line-height: 1.55;
+}
+.integrity-gate-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+.integrity-gate-options button {
+  display: grid;
+  gap: 4px;
+  min-height: 68px;
+  padding: 10px 12px;
+  border: 1px solid var(--vu-line);
+  border-radius: var(--vu-radius);
+  background: rgba(7, 12, 16, 0.5);
+  color: var(--vu-ink-soft);
+  text-align: left;
+  cursor: pointer;
+}
+.integrity-gate-options button:hover {
+  border-color: var(--vu-coral-line);
+  color: var(--vu-coral-bright);
+}
+.integrity-gate-options small {
+  color: var(--vu-muted-soft);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* =========================================================================
+   章节修炼与 NPC 故事
+   ========================================================================= */
+.chapter-training-card {
+  margin: 16px 0;
+  padding: 16px 18px;
+  border: 1px solid var(--vu-line);
+  border-radius: var(--vu-radius);
+  background: var(--vu-panel);
+}
+.chapter-training-card > h3 {
+  margin: 0 0 4px;
+  color: var(--vu-ink);
+}
+.chapter-training-card > p {
+  margin: 0 0 12px;
+  color: var(--vu-muted);
+  font-size: 13px;
+}
+.chapter-training-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.chapter-training-item {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--vu-line-soft);
+  border-radius: var(--vu-radius);
+  background: rgba(7, 12, 16, 0.36);
+}
+.chapter-training-item strong {
+  color: var(--vu-ink);
+}
+.chapter-training-item code {
+  color: var(--vu-gold-soft);
+  font-family: var(--vu-font-mono);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.chapter-training-item small {
+  color: var(--vu-muted-soft);
+  font-size: 12px;
+}
+.chapter-training-item button {
+  justify-self: start;
+  border: 1px solid var(--vu-gold-line);
+  border-radius: var(--vu-radius);
+  padding: 6px 10px;
+  background: transparent;
+  color: var(--vu-gold-bright);
+  cursor: pointer;
+  font-size: 13px;
+}
+.ability-practice-button {
+  width: 100%;
+  margin-top: 10px;
+  border: 1px solid var(--vu-gold-line);
+  border-radius: var(--vu-radius);
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--vu-gold-bright);
+  cursor: pointer;
+}
+.npc-cameo-panel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid var(--vu-line);
+  border-radius: var(--vu-radius);
+  background: var(--vu-glass);
+}
+.npc-cameo-dot {
+  width: 12px;
+  height: 12px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--dot, var(--vu-teal));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--dot, var(--vu-teal)) 55%, transparent);
+}
+.npc-cameo-panel strong {
+  display: block;
+  color: var(--vu-ink);
+}
+.npc-cameo-panel small {
+  display: block;
+  color: var(--vu-muted-soft);
+  font-size: 12px;
+}
+.npc-cameo-panel p {
+  margin: 6px 0 0;
+  color: var(--vu-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.npc-scene-quote {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-left: 3px solid var(--dot, var(--vu-teal));
+  border-radius: var(--vu-radius);
+  background: rgba(7, 12, 16, 0.42);
+}
+.npc-scene-quote span {
+  color: var(--vu-gold);
+  font-weight: 700;
+}
+.npc-scene-quote p {
+  margin: 5px 0 0;
+  color: var(--vu-muted);
+  line-height: 1.55;
+  font-size: 13px;
+}
+.npc-story {
+  margin-top: 12px;
+  border-top: 1px solid var(--vu-line-soft);
+  padding-top: 10px;
+}
+.npc-story summary {
+  color: var(--vu-gold);
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+}
+.npc-story summary::before {
+  content: "▸ ";
+}
+.npc-story[open] summary::before {
+  content: "▾ ";
+}
+.npc-story-copy {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.npc-story-copy p {
+  margin: 0;
+  color: var(--vu-muted);
+  line-height: 1.6;
+}
+.npc-dialogue {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.npc-dialogue-line {
+  padding: 10px 12px;
+  border-radius: var(--vu-radius);
+  background: rgba(7, 12, 16, 0.42);
+}
+.npc-dialogue-line strong {
+  display: block;
+  color: var(--vu-ink-soft);
+  font-size: 13px;
+}
+.npc-dialogue-line p {
+  margin: 4px 0 0;
+  color: var(--vu-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.npc-relic-note {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--vu-teal) 10%, transparent);
+  color: var(--vu-teal-bright);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* =========================================================================
+   领导力游戏中心 · 地图入口卡片
+   ========================================================================= */
+.lg-quest-panel {
+  margin: 12px 0;
+  padding: 14px;
+  border: 1px solid var(--vu-line);
+  border-radius: var(--vu-radius);
+  background:
+    radial-gradient(circle at 90% 10%, rgba(180, 151, 240, 0.14), transparent 46%),
+    var(--vu-panel);
+}
+.lg-quest-panel h3 {
+  margin: 0 0 6px;
+  color: var(--vu-ink);
+}
+.lg-quest-panel p {
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+.lg-quest-panel button {
+  width: 100%;
+  border: 1px solid var(--vu-purple-line, rgba(180, 151, 240, 0.45));
+  border-radius: var(--vu-radius);
+  padding: 9px 12px;
+  background: transparent;
+  color: #d8c9ff;
+  cursor: pointer;
+}
+.lg-quest-panel button:hover {
+  background: color-mix(in srgb, #b497f0 12%, transparent);
+}
+/* =========================================================================
+   章节剧情影像与领导力游戏中心入口
+   ========================================================================= */
+.chapter-narrative {
+  display: grid;
+  grid-template-columns: minmax(180px, 320px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  margin: 12px 0;
+  border: 1px solid color-mix(in srgb, var(--civ, var(--vu-gold)) 40%, transparent);
+  border-radius: var(--vu-radius);
+  overflow: hidden;
+  background: var(--vu-panel);
+  box-shadow: var(--vu-shadow-soft);
+}
+.chapter-narrative-art {
+  min-height: 180px;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(0.9) brightness(0.92);
+}
+.chapter-narrative-copy {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  padding: 16px 18px;
+}
+.chapter-narrative-copy > span {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--vu-gold);
+  text-transform: uppercase;
+}
+.chapter-narrative-copy h2 {
+  margin: 0;
+  color: var(--vu-ink);
+  font-family: var(--vu-font-display);
+  font-size: 22px;
+}
+.chapter-narrative-copy p {
+  margin: 0;
+  color: var(--vu-muted);
+  line-height: 1.65;
+}
+.chapter-narrative-copy details {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--vu-line-soft);
+}
+.chapter-narrative-copy summary {
+  color: var(--vu-teal-bright);
+  cursor: pointer;
+  font-weight: 600;
+}
+.chapter-narrative-copy details p {
+  margin-top: 8px;
+}
+.lg-quest-banner {
+  display: grid;
+  grid-template-columns: minmax(160px, 300px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  margin: 0 0 14px;
+  padding: 10px;
+  border: 1px solid rgba(180, 151, 240, 0.5);
+  border-radius: var(--vu-radius);
+  background:
+    radial-gradient(circle at 90% 20%, rgba(180, 151, 240, 0.16), transparent 48%),
+    var(--vu-panel);
+  box-shadow: var(--vu-shadow-soft);
+}
+.lg-quest-banner img {
+  width: 100%;
+  height: 128px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+.lg-quest-banner h2 {
+  margin: 2px 0 6px;
+  color: var(--vu-ink);
+  font-family: var(--vu-font-display);
+  font-size: 22px;
+}
+.lg-quest-banner p {
+  margin: 0 0 10px;
+  color: var(--vu-muted);
+  line-height: 1.55;
+}
+.lg-quest-banner button {
+  border: 1px solid var(--vu-purple-line, rgba(180, 151, 240, 0.5));
+  border-radius: var(--vu-radius);
+  padding: 9px 14px;
+  background: transparent;
+  color: #d8c9ff;
+  cursor: pointer;
+}
+.lg-quest-banner button:hover {
+  background: color-mix(in srgb, #b497f0 14%, transparent);
+}
+
+@media (max-width: 900px) {
+  .chapter-narrative,
+  .lg-quest-banner {
+    grid-template-columns: 1fr;
+  }
+  .chapter-narrative-art {
+    min-height: 130px;
+  }
+  .lg-quest-banner img {
+    height: 110px;
+  }
+}
+
+/* =========================================================================
+   教练工作坊 · 个人教练卡
+   ========================================================================= */
+.coach-personal-panel {
+  margin: 16px 0;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--vu-teal) 42%, transparent);
+  border-radius: var(--vu-radius);
+  background:
+    radial-gradient(circle at 92% 8%, rgba(79, 210, 204, 0.14), transparent 42%),
+    var(--vu-panel);
+}
+.coach-personal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.coach-personal-head h2 {
+  margin: 4px 0 6px;
+  color: var(--vu-ink);
+}
+.coach-personal-head p {
+  margin: 0;
+}
+.coach-personal-name {
+  display: grid;
+  gap: 2px;
+  padding: 8px 12px;
+  border: 1px solid var(--vu-teal-line);
+  border-radius: var(--vu-radius);
+  background: rgba(7, 12, 16, 0.4);
+}
+.coach-personal-name strong {
+  color: var(--vu-ink);
+}
+.coach-personal-name span {
+  color: var(--vu-muted-soft);
+  font-size: 12px;
+}
+.coach-personal-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.coach-card {
+  padding: 12px;
+  border: 1px solid var(--vu-line-soft);
+  border-radius: var(--vu-radius);
+  background: rgba(7, 12, 16, 0.36);
+}
+.coach-card h3 {
+  margin: 0 0 8px;
+  color: var(--vu-ink);
+  font-size: 14px;
+}
+.coach-card p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+  color: var(--vu-muted);
+  font-size: 13px;
+}
+.coach-card p span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot, var(--vu-teal));
+}
+.coach-card button {
+  display: block;
+  width: 100%;
+  margin: 4px 0;
+  padding: 7px 9px;
+  border: 1px solid var(--vu-teal-line);
+  border-radius: var(--vu-radius);
+  background: transparent;
+  color: var(--vu-teal-bright);
+  text-align: left;
+  cursor: pointer;
+  font-size: 13px;
+}
+.coach-action-plan {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--vu-gold-line);
+  border-radius: var(--vu-radius);
+  background: color-mix(in srgb, var(--vu-gold) 7%, transparent);
+}
+.coach-action-plan h3 {
+  margin: 0 0 8px;
+  color: var(--vu-gold-bright);
+}
+.coach-action-plan ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.coach-action-plan li button {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--vu-gold-line);
+  border-radius: var(--vu-radius);
+  background: transparent;
+  color: var(--vu-ink-soft);
+  cursor: pointer;
+  text-align: left;
+}
+.coach-action-plan li button:hover {
+  color: var(--vu-gold-bright);
+  border-color: var(--vu-gold);
+}
+
+@media (max-width: 900px) {
+  .coach-personal-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .coach-action-plan ol {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .coach-personal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.story-advancement {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--vu-muted-soft);
+  border-radius: 6px;
+  background: rgba(7, 12, 16, 0.4);
+  color: var(--vu-ink-soft);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.story-advancement.expert {
+  border-left-color: var(--vu-teal);
+  background: color-mix(in srgb, var(--vu-teal) 10%, transparent);
+  color: var(--vu-teal-bright);
+}
+.story-advancement.partial {
+  border-left-color: var(--vu-gold);
+  background: color-mix(in srgb, var(--vu-gold) 9%, transparent);
+  color: var(--vu-gold-bright);
+}
+.story-advancement.risk {
+  border-left-color: var(--vu-coral);
+  background: color-mix(in srgb, var(--vu-coral) 10%, transparent);
+  color: var(--vu-coral-bright);
+}
+
+.trust-crisis-banner {
+  margin: 10px 0;
+  padding: 12px 14px;
+  border: 1px solid var(--vu-coral-line, rgba(233, 130, 108, 0.5));
+  border-radius: var(--vu-radius);
+  background: color-mix(in srgb, var(--vu-coral) 12%, transparent);
+  color: var(--vu-coral-bright);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.investment-panel button {
+  width: 100%;
+  margin-top: 6px;
+  border: 1px solid var(--vu-teal-line);
+  border-radius: var(--vu-radius);
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--vu-teal-bright);
+  cursor: pointer;
+}
+.production-panel button {
+  width: 100%;
+  margin-top: 6px;
+  border: 1px solid var(--vu-gold-line);
+  border-radius: var(--vu-radius);
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--vu-gold-bright);
+  cursor: pointer;
+}
+.production-panel button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.production-progress {
+  height: 8px;
+  margin: 8px 0 4px;
+  border-radius: 999px;
+  background: rgba(7, 12, 16, 0.5);
+  overflow: hidden;
+}
+.production-progress span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--vu-teal), var(--vu-gold));
+}
+.duel-bonus-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 14px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--vu-gold-line);
+  border-radius: var(--vu-radius);
+  background: color-mix(in srgb, var(--vu-gold) 8%, var(--vu-panel));
+  flex-wrap: wrap;
+}
+.duel-bonus-panel h2 {
+  margin: 2px 0 4px;
+  color: var(--vu-ink);
+  font-size: 20px;
+}
+.duel-bonus-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.duel-bonus-status strong {
+  color: var(--vu-gold-bright);
+  font-size: 24px;
+}
+.duel-bonus-status button {
+  border: 1px solid var(--vu-gold-line);
+  border-radius: var(--vu-radius);
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--vu-gold-bright);
+  cursor: pointer;
+}
+.duel-bonus-status button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.map-guide-overlay {
+  position: relative;
+  z-index: 5;
+  margin: 12px 0;
+  padding: 18px;
+  border: 1px solid var(--vu-gold-line);
+  border-radius: var(--vu-radius);
+  background:
+    radial-gradient(circle at 90% 10%, rgba(242, 193, 78, 0.14), transparent 45%),
+    var(--vu-glass-strong);
+  box-shadow: var(--vu-shadow);
+}
+.map-guide-overlay ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+.map-guide-overlay li {
+  padding: 12px;
+  border: 1px solid var(--vu-line);
+  border-radius: var(--vu-radius);
+  background: rgba(7, 12, 16, 0.4);
+  color: var(--vu-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.map-guide-overlay li strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--vu-gold-bright);
+}
+.ending-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+.ending-summary > div {
+  padding: 12px;
+  border: 1px solid var(--vu-line);
+  border-radius: var(--vu-radius);
+  background: rgba(7, 12, 16, 0.42);
+}
+.ending-summary span {
+  display: block;
+  color: var(--vu-muted-soft);
+  font-size: 12px;
+}
+.ending-summary strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--vu-ink);
+  font-size: 18px;
+}
+.ending-summary .ending-route-summary {
+  grid-column: span 2;
+}
+.ending-summary .ending-route-summary strong {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+
+@media (max-width: 900px) {
+  .map-guide-overlay ol,
+  .ending-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ending-summary .ending-route-summary {
+    grid-column: span 2;
+  }
+}
+@media (max-width: 560px) {
+  .map-guide-overlay ol,
+  .ending-summary {
+    grid-template-columns: 1fr;
+  }
+  .ending-summary .ending-route-summary {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 900px) {
+  .expedition-hero {
+    grid-template-columns: 1fr;
+  }
+  .treasure-ring {
+    width: 92px;
+    height: 92px;
+  }
+  .exploration-actions,
+  .integrity-gate-options {
+    grid-template-columns: 1fr;
+  }
+  .chapter-training-grid {
+    grid-template-columns: 1fr;
+  }
+  .expedition-scene {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .expedition-scene > div {
+    min-width: 0;
+  }
+}
+
+/* =========================================================================
+   2. 增强排版系统
+   ========================================================================= */
+body {
+  font-family: var(--vu-font-body);
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 标题：衬线显示字体 + 文字渐变 */
+h1,
+h2,
+.brand,
+.rank-name,
+.eyebrow {
+  font-family: var(--vu-font-display);
+  letter-spacing: 0.02em;
+}
+
+h1 {
+  background: linear-gradient(120deg, #ffffff 0%, var(--vu-teal-soft) 38%, var(--vu-gold-soft) 78%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  /* 渐变文字仍保留可访问的视觉权重 */
+  filter: drop-shadow(0 2px 18px rgba(79, 210, 204, 0.18));
+}
+
+/* 鎏金标题渐变（用于结果/成就标题） */
+.achievement-hero h1,
+.assessment-result-hero h1,
+.ending-choice-result,
+.role-start-panel strong {
+  background: linear-gradient(120deg, var(--vu-gold-bright), var(--vu-gold-soft) 50%, var(--vu-coral-soft));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+}
+
+/* 品牌字微辉光 */
+.brand {
+  text-shadow: 0 0 24px var(--vu-teal-glow);
+}
+
+/* 正文阅读优化：更舒展的行高与字距 */
+.scenario-context,
+.hero-copy p:not(.eyebrow),
+.transition-summary,
+.achievement-card p,
+.npc-card p {
+  line-height: 1.85;
+  letter-spacing: 0.015em;
+}
+
+/* 段落首行微缩进感的呼吸间距 */
+.scenario-context {
+  font-size: 17px;
+  line-height: 1.95;
+  letter-spacing: 0.02em;
+}
+
+/* 代码/标签等宽 */
+code,
+.achievement-category code,
+.hidden-branch-grid code {
+  font-family: var(--vu-font-mono);
+}
+
+/* =========================================================================
+   3. 背景特效 · 动态渐变网格 / 浮动粒子 / 暗角 / 噪点
+   通过固定定位的伪元素与独立图层叠加，不影响内容交互。
+   ========================================================================= */
+
+/* 3.1 动态渐变网格光晕：缓慢漂移的彩色光斑 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -3;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 12%, var(--vu-teal-wash), transparent 32%),
+    radial-gradient(circle at 82% 16%, var(--vu-gold-wash), transparent 30%),
+    radial-gradient(circle at 70% 88%, var(--vu-coral-wash), transparent 34%),
+    radial-gradient(circle at 24% 80%, rgba(77, 183, 214, 0.1), transparent 30%);
+  background-size: 200% 200%;
+  animation: vu-mesh-drift 26s var(--vu-ease-soft) infinite alternate;
+  filter: blur(8px);
+}
+
+@keyframes vu-mesh-drift {
+  0% {
+    background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%;
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 30% 20%, 70% 30%, 60% 70%, 20% 60%;
+    opacity: 0.9;
+  }
+}
+
+/* 3.2 浮动光球/粒子层：多颗柔光球缓慢漂浮 */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, rgba(79, 210, 204, 0.55) 0%, transparent 70%),
+    radial-gradient(circle, rgba(242, 193, 78, 0.45) 0%, transparent 70%),
+    radial-gradient(circle, rgba(233, 130, 108, 0.4) 0%, transparent 70%),
+    radial-gradient(circle, rgba(77, 183, 214, 0.4) 0%, transparent 70%),
+    radial-gradient(circle, rgba(180, 151, 240, 0.35) 0%, transparent 70%);
+  background-repeat: no-repeat;
+  background-size:
+    260px 260px,
+    200px 200px,
+    180px 180px,
+    220px 220px,
+    160px 160px;
+  background-position:
+    8% 18%,
+    88% 24%,
+    72% 82%,
+    16% 76%,
+    50% 48%;
+  opacity: 0.5;
+  animation: vu-orbs-float 32s var(--vu-ease-soft) infinite alternate;
+  filter: blur(40px);
+}
+
+@keyframes vu-orbs-float {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(-20px, -28px, 0) scale(1.08);
+  }
+}
+
+/* 3.3 暗角晕影 (Vignette) + 3.4 噪点纹理：独立固定图层 */
+.vu-bg-vignette,
+.vu-bg-noise {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* 暗角：四角加深，聚焦中心 */
+.vu-bg-vignette {
+  background: radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, 0.55) 130%);
+}
+
+/* 噪点：内联 SVG 湍流纹理，极低透明度，模拟胶片质感 */
+.vu-bg-noise {
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* 当未注入专用节点时，用 #app 的伪元素兜底生成暗角与噪点 */
+#app {
+  position: relative;
+}
+#app::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.45) 125%);
+}
+
+/* 3.5 顶部光带：顶栏下方的青绿渐隐光 */
+.topbar {
+  background: rgba(10, 16, 19, 0.82);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: 0 1px 0 var(--vu-line) inset, 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+.topbar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--vu-teal-line), var(--vu-gold-line), transparent);
+  opacity: 0.7;
+}
+
+/* =========================================================================
+   4. 玻璃态卡片 / 面板设计
+   统一为面板类组件注入玻璃态、渐变边框、悬浮抬升与聚焦内辉光。
+   ========================================================================= */
+
+/* 4.1 玻璃态基础 mixin（以面板类为目标） */
+.panel,
+.assessment-panel,
+.scenario-panel,
+.transition-panel,
+.rank-panel,
+.decision-panel,
+.intel-panel,
+.baseline-detail,
+.role-start-panel {
+  position: relative;
+  border: 1px solid var(--vu-line);
+  border-radius: var(--vu-radius-lg);
+  background:
+    var(--vu-grad-glass),
+    linear-gradient(155deg, var(--vu-glass-strong), var(--vu-glass) 70%);
+  backdrop-filter: blur(14px) saturate(135%);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  box-shadow: var(--vu-shadow), var(--vu-inner-glow);
+  transition:
+    transform var(--vu-dur) var(--vu-ease),
+    box-shadow var(--vu-dur) var(--vu-ease),
+    border-color var(--vu-dur) var(--vu-ease);
+}
+
+/* 4.2 渐变描边：用 mask 让伪元素仅在边框处可见 */
+.panel::before,
+.assessment-panel::before,
+.scenario-panel::before,
+.transition-panel::before,
+.rank-panel::before,
+.decision-panel::before,
+.intel-panel::before,
+.baseline-detail::before,
+.role-start-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--vu-grad-border);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.55;
+  transition: opacity var(--vu-dur) var(--vu-ease);
+  pointer-events: none;
+}
+
+/* 4.3 悬浮抬升：交互式卡片 hover 时上浮 + 加深阴影 + 描边点亮 */
+.menu-card,
+.achievement-card,
+.npc-card,
+.ability-card,
+.role-card,
+.role-slot-card,
+.option-card,
+.assessment-option,
+.baseline-row,
+.achievement-category-stat,
+.role-stage,
+.role-application-grid > div {
+  position: relative;
+  border: 1px solid var(--vu-line);
+  border-radius: var(--vu-radius);
+  background:
+    var(--vu-grad-glass),
+    var(--vu-panel);
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  box-shadow: var(--vu-shadow-soft);
+  transition:
+    transform var(--vu-dur) var(--vu-ease),
+    box-shadow var(--vu-dur) var(--vu-ease),
+    border-color var(--vu-dur) var(--vu-ease);
+}
+
+.menu-card:hover,
+.achievement-card:not(.locked):hover,
+.npc-card:not(.hidden):hover,
+.ability-card:hover,
+.role-card:hover,
+.role-slot-card:not(.empty):hover,
+.option-card:hover,
+.assessment-option:hover,
+.baseline-row:hover,
+.achievement-category-stat:hover,
+.role-stage:hover,
+.role-application-grid > div:hover {
+  transform: translateY(-4px);
+  border-color: var(--vu-teal-line);
+  box-shadow: var(--vu-shadow-lift), 0 0 28px var(--vu-teal-glow);
+}
+
+/* hover 时点亮渐变描边 */
+.menu-card:hover::before,
+.achievement-card:not(.locked):hover::before,
+.npc-card:not(.hidden):hover::before,
+.ability-card:hover::before,
+.option-card:hover::before,
+.assessment-option:hover::before {
+  opacity: 1;
+}
+
+/* 渐变描边伪元素（与面板一致的 mask 技法） */
+.menu-card::before,
+.achievement-card::before,
+.npc-card::before,
+.ability-card::before,
+.option-card::before,
+.assessment-option::before,
+.role-card::before,
+.role-slot-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--vu-grad-border);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.4;
+  transition: opacity var(--vu-dur) var(--vu-ease);
+  pointer-events: none;
+}
+
+/* 4.4 聚焦内辉光：可交互元素 focus-visible 时内部泛起青绿光 */
+.menu-card:focus-visible,
+.achievement-card:focus-visible,
+.npc-card:focus-visible,
+.ability-card:focus-visible,
+.option-card:focus-visible,
+.assessment-option:focus-visible,
+.role-card:focus-visible,
+.role-slot-card:focus-visible,
+.panel:focus-within,
+.scenario-panel:focus-within,
+.decision-panel:focus-within,
+.assessment-panel:focus-within {
+  box-shadow: var(--vu-shadow-lift), inset 0 0 0 1px var(--vu-teal-line), inset 0 0 32px var(--vu-teal-glow);
+}
+
+/* 4.5 玻璃态滚动条美化 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--vu-teal-line) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--vu-teal-deep), var(--vu-panel-3));
+  border-radius: var(--vu-radius-pill);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(var(--vu-teal), var(--vu-teal-deep));
+  background-clip: padding-box;
+}
+
+/* =========================================================================
+   5. 精致动画
+   页面过渡、错落入场、呼吸脉动、微光加载、浮动粒子。
+   ========================================================================= */
+
+/* 5.1 页面过渡：淡入 + 轻微上滑（作用于各场景壳） */
+.menu-shell,
+.map-shell,
+.story-shell,
+.ability-shell,
+.report-shell,
+.assessment-shell,
+.assessment-result-shell,
+.achievement-shell,
+.relation-shell,
+.narrow-shell,
+.transition-shell,
+.hidden-branch-shell,
+.duel-lobby {
+  animation: vu-page-enter var(--vu-dur-slow) var(--vu-ease) both;
+}
+
+@keyframes vu-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* 5.2 卡片错落入场：网格内子项依次浮现 */
+.menu-grid .menu-card,
+.achievement-grid .achievement-card,
+.relation-grid .npc-card,
+.ability-grid .ability-card,
+.role-grid .role-card,
+.baseline-list .baseline-row,
+.achievement-category-stats .achievement-category-stat,
+.hidden-branch-grid > div,
+.event-book-list span {
+  animation: vu-card-stagger 520ms var(--vu-ease) both;
+}
+
+@keyframes vu-card-stagger {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 错落延迟：每项递增 60ms，最多 8 档 */
+.menu-grid .menu-card:nth-child(1),
+.achievement-grid .achievement-card:nth-child(1),
+.relation-grid .npc-card:nth-child(1),
+.ability-grid .ability-card:nth-child(1),
+.role-grid .role-card:nth-child(1),
+.baseline-list .baseline-row:nth-child(1),
+.hidden-branch-grid > div:nth-child(1) {
+  animation-delay: 40ms;
+}
+.menu-grid .menu-card:nth-child(2),
+.achievement-grid .achievement-card:nth-child(2),
+.relation-grid .npc-card:nth-child(2),
+.ability-grid .ability-card:nth-child(2),
+.role-grid .role-card:nth-child(2),
+.baseline-list .baseline-row:nth-child(2),
+.hidden-branch-grid > div:nth-child(2) {
+  animation-delay: 100ms;
+}
+.menu-grid .menu-card:nth-child(3),
+.achievement-grid .achievement-card:nth-child(3),
+.relation-grid .npc-card:nth-child(3),
+.ability-grid .ability-card:nth-child(3),
+.role-grid .role-card:nth-child(3),
+.baseline-list .baseline-row:nth-child(3),
+.hidden-branch-grid > div:nth-child(3) {
+  animation-delay: 160ms;
+}
+.menu-grid .menu-card:nth-child(4),
+.achievement-grid .achievement-card:nth-child(4),
+.relation-grid .npc-card:nth-child(4),
+.ability-grid .ability-card:nth-child(4),
+.role-grid .role-card:nth-child(4),
+.hidden-branch-grid > div:nth-child(4) {
+  animation-delay: 220ms;
+}
+.menu-grid .menu-card:nth-child(5),
+.achievement-grid .achievement-card:nth-child(5),
+.hidden-branch-grid > div:nth-child(5) {
+  animation-delay: 280ms;
+}
+.menu-grid .menu-card:nth-child(6),
+.achievement-grid .achievement-card:nth-child(6) {
+  animation-delay: 340ms;
+}
+.menu-grid .menu-card:nth-child(7) {
+  animation-delay: 400ms;
+}
+.menu-grid .menu-card:nth-child(8) {
+  animation-delay: 460ms;
+}
+
+/* 5.3 呼吸脉动：强化交互元素的呼吸感 */
+.rank-panel,
+.power-board,
+.story-art canvas,
+.relation-graph {
+  animation: vu-breathe 5s var(--vu-ease-soft) infinite;
+}
+
+@keyframes vu-breathe {
+  0%,
+  100% {
+    filter: brightness(1);
+    box-shadow: var(--vu-shadow);
+  }
+  50% {
+    filter: brightness(1.07);
+    box-shadow: var(--vu-shadow), 0 0 36px var(--vu-teal-glow);
+  }
+}
+
+/* 5.4 微光加载 (Shimmer)：用于加载/占位状态 */
+.vu-shimmer,
+.assessment-bar i,
+.rank-meter i,
+.achievement-progress i,
+.achievement-card-progress i {
+  position: relative;
+  overflow: hidden;
+}
+.vu-shimmer::after,
+.assessment-bar i::after,
+.rank-meter i::after,
+.achievement-progress i::after,
+.achievement-card-progress i::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: translateX(-100%);
+  animation: vu-shimmer 1.8s var(--vu-ease-soft) infinite;
+}
+
+@keyframes vu-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* 5.5 浮动粒子（独立装饰节点 .vu-particles） */
+.vu-particles {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.vu-particles span {
+  position: absolute;
+  bottom: -12px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--vu-teal);
+  box-shadow: 0 0 12px var(--vu-teal-glow);
+  opacity: 0;
+  animation: vu-particle-rise linear infinite;
+}
+.vu-particles span:nth-child(odd) {
+  background: var(--vu-gold);
+  box-shadow: 0 0 12px var(--vu-gold-glow);
+}
+.vu-particles span:nth-child(3n) {
+  background: var(--vu-coral);
+  box-shadow: 0 0 12px var(--vu-coral-glow);
+  width: 4px;
+  height: 4px;
+}
+
+@keyframes vu-particle-rise {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.6);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-104vh) translateX(24px) scale(1);
+    opacity: 0;
+  }
+}
+
+/* 5.6 成就/解锁高光闪烁 */
+.achievement-unlock,
+.ability-unlock-banner {
+  animation: vu-unlock-pop 600ms var(--vu-ease) both, vu-breathe 4s 0.6s var(--vu-ease-soft) infinite;
+}
+
+@keyframes vu-unlock-pop {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 5.7 选项选中：柔和外扩脉动 */
+.assessment-option.selected,
+.route-choice-actions button.selected,
+.diff-btn.active {
+  animation: vu-select-pulse 2.4s var(--vu-ease-soft) infinite;
+}
+
+@keyframes vu-select-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--vu-teal-wash);
+  }
+  50% {
+    box-shadow: 0 0 0 6px transparent, 0 0 20px var(--vu-teal-glow);
+  }
+}
+
+/* 5.8 reduced-motion：尊重无障碍偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  body::before,
+  body::after {
+    animation: none !important;
+  }
+}
+
+/* =========================================================================
+   6. 按钮 / 交互升级
+   涟漪反馈、渐变边框、图标间距、禁用态、按压反馈。
+   ========================================================================= */
+
+/* 6.1 按钮基础增强：渐变背景 + 内高光 + 圆角放大 */
+button,
+.file-button,
+.route-choice-actions button,
+.guide-tasks button,
+.hint-controls button {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--vu-radius);
+  border: 1px solid var(--vu-line);
+  background:
+    var(--vu-grad-glass),
+    var(--vu-panel-2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  letter-spacing: 0.02em;
+  transition:
+    transform var(--vu-dur) var(--vu-ease),
+    border-color var(--vu-dur) var(--vu-ease),
+    background var(--vu-dur) var(--vu-ease),
+    box-shadow var(--vu-dur) var(--vu-ease),
+    filter var(--vu-dur) var(--vu-ease);
+}
+
+/* 6.2 悬浮：上浮 + 青绿描边 + 微辉光 */
+button:hover:not(:disabled),
+.file-button:hover,
+.route-choice-actions button:hover,
+.guide-tasks button:hover {
+  transform: translateY(-2px);
+  border-color: var(--vu-teal-line);
+  background: var(--vu-panel-3);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.36), 0 0 18px var(--vu-teal-glow);
+}
+
+/* 6.3 按压反馈：按下时回缩 + 收紧阴影 */
+button:active:not(:disabled),
+.file-button:active,
+.route-choice-actions button:active,
+.guide-tasks button:active {
+  transform: translateY(1px) scale(0.985);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 2px 8px rgba(0, 0, 0, 0.35);
+  filter: brightness(0.96);
+}
+
+/* 6.4 涟漪效果：按压时由中心扩散的圆形涟漪（纯 CSS，:active 触发） */
+button::after,
+.file-button::after,
+.route-choice-actions button::after,
+.guide-tasks button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.55), transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 520ms var(--vu-ease-soft),
+    opacity 520ms var(--vu-ease-soft);
+}
+button:active:not(:disabled)::after,
+.file-button:active::after,
+.route-choice-actions button:active::after,
+.guide-tasks button:active::after {
+  transform: translate(-50%, -50%) scale(40);
+  opacity: 0.5;
+  transition: opacity 520ms var(--vu-ease-soft);
+}
+
+/* 6.5 主按钮：渐变填充 + 渐变描边 + 顶部高光 */
+button.primary {
+  border: 0;
+  background: var(--vu-grad-teal);
+  color: #04343a;
+  font-weight: 800;
+  box-shadow: 0 8px 22px rgba(79, 210, 204, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+button.primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--vu-teal-bright), var(--vu-teal-deep));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+button.primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow: 0 12px 30px rgba(79, 210, 204, 0.45), 0 0 26px var(--vu-teal-glow), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+/* 6.6 鎏金试验按钮：渐变金边 + 暖辉光 */
+button.trial-now {
+  border: 1px solid var(--vu-gold-line);
+  background:
+    linear-gradient(160deg, var(--vu-gold-wash), transparent 60%),
+    rgba(10, 16, 19, 0.7);
+  color: var(--vu-gold-bright);
+  text-shadow: 0 0 14px var(--vu-gold-glow);
+}
+button.trial-now:hover {
+  border-color: var(--vu-gold);
+  box-shadow: 0 8px 24px rgba(242, 193, 78, 0.28), 0 0 22px var(--vu-gold-glow);
+}
+
+/* 6.7 图标间距：内含 svg/img/icon 的按钮统一留白 */
+button:has(svg),
+button:has(img),
+.file-button:has(svg),
+.guide-tasks button:has(svg) {
+  gap: 8px;
+}
+button svg,
+button img {
+  flex: 0 0 auto;
+}
+
+/* 6.8 禁用态：降饱和 + 静态 + 禁止光标 */
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: saturate(0.4) brightness(0.85);
+  box-shadow: none;
+  transform: none;
+}
+button:disabled::after {
+  display: none;
+}
+
+/* 6.9 链接按钮：去除玻璃态，保留下划线动效 */
+button.link {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 0;
+}
+button.link:hover {
+  transform: none;
+  box-shadow: none;
+  color: var(--vu-teal);
+  text-shadow: 0 0 12px var(--vu-teal-glow);
+}
+
+/* 6.10 输入控件：聚焦内辉光 + 渐变描边 */
+input,
+select,
+textarea {
+  border-radius: var(--vu-radius);
+  background: rgba(7, 11, 14, 0.6);
+  transition: border-color var(--vu-dur) var(--vu-ease), box-shadow var(--vu-dur) var(--vu-ease), background var(--vu-dur) var(--vu-ease);
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--vu-teal);
+  background: rgba(7, 11, 14, 0.85);
+  box-shadow: 0 0 0 3px var(--vu-teal-wash), inset 0 0 18px var(--vu-teal-wash);
+}
+
+/* 6.11 全局聚焦描边增强 */
+button:focus-visible,
+[data-action]:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 2px var(--vu-bg-deep), 0 0 0 4px var(--vu-teal), 0 0 20px var(--vu-teal-glow);
+}
+
+/* =========================================================================
+   7. 组件级增强
+   面向具体组件的玻璃态、辉光、徽章、进度条、品质标签等细节打磨。
+   ========================================================================= */
+
+/* 7.1 排名面板：鎏金顶光带 + 数字辉光 */
+.rank-panel {
+  border-top: 2px solid var(--vu-gold-line);
+  background:
+    linear-gradient(160deg, var(--vu-teal-wash), transparent 55%),
+    var(--vu-glass-strong);
+}
+.rank-panel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--vu-gold), transparent);
+  filter: blur(1px);
+  opacity: 0.8;
+}
+.rank-panel strong {
+  text-shadow: 0 0 28px var(--vu-gold-glow), 0 4px 18px rgba(0, 0, 0, 0.5);
+}
+.rank-meter i,
+.assessment-bar i,
+.achievement-progress i,
+.achievement-card-progress i {
+  background: linear-gradient(90deg, var(--vu-teal), var(--vu-gold));
+  box-shadow: 0 0 12px var(--vu-teal-glow);
+}
+
+/* 7.2 选项字母圆角徽章 */
+.option-letter,
+.achievement-icon {
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.28), transparent 50%),
+    var(--vu-panel-3);
+  box-shadow: inset 0 0 0 1px var(--vu-line), 0 0 14px var(--vu-teal-wash);
+}
+.achievement-icon {
+  color: var(--vu-gold-bright);
+  box-shadow: inset 0 0 0 1px var(--vu-gold-line), 0 0 14px var(--vu-gold-glow);
+}
+
+/* 7.3 品质标签：玻璃态胶囊 + 辉光 */
+.quality,
+.ach-rarity,
+.ach-category,
+.npc-status,
+.role-move,
+.role-focus span {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.quality.expert {
+  box-shadow: 0 0 14px var(--vu-teal-glow);
+}
+.quality.partial {
+  box-shadow: 0 0 14px var(--vu-gold-glow);
+}
+.quality.risk {
+  box-shadow: 0 0 14px var(--vu-coral-glow);
+}
+
+/* 7.4 稀有度边框辉光（史诗/传说） */
+.ach-rarity.rarity-epic {
+  box-shadow: 0 0 14px var(--vu-purple-glow);
+}
+.ach-rarity.rarity-legendary {
+  box-shadow: 0 0 16px var(--vu-gold-glow);
+}
+
+/* 7.5 NPC 头像：玻璃球高光 */
+.npc-avatar,
+.role-stage > span {
+  box-shadow:
+    inset 0 2px 6px rgba(255, 255, 255, 0.35),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.45),
+    0 0 14px var(--vu-teal-wash);
+}
+
+/* 7.6 引用/教练提示：左侧渐变光带 + 玻璃态 */
+.coach-hint,
+.assessment-intro,
+.cert-note,
+.stake,
+.hidden-branch-grid code {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background:
+    linear-gradient(90deg, var(--vu-gold-wash), transparent 80%),
+    var(--vu-glass);
+  box-shadow: inset 3px 0 0 var(--vu-gold), var(--vu-shadow-soft);
+}
+
+/* 7.7 场景/剧情画布容器：玻璃态框 + 内嵌暗角 */
+.scene-art,
+.story-art,
+.assessment-art,
+.relation-graph {
+  background:
+    var(--vu-grad-glass),
+    var(--vu-panel);
+  box-shadow: var(--vu-shadow), inset 0 0 60px rgba(0, 0, 0, 0.45);
+}
+
+/* 7.8 结果效果芯片：玻璃态 */
+.outcome-effects span {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background:
+    var(--vu-grad-glass),
+    var(--vu-panel);
+}
+.outcome-effects b {
+  text-shadow: 0 0 10px var(--vu-teal-glow);
+}
+.outcome-effects .negative b {
+  text-shadow: 0 0 10px var(--vu-coral-glow);
+}
+
+/* 7.9 引导任务按钮：青绿玻璃胶囊 */
+.guide-tasks button {
+  background:
+    linear-gradient(150deg, var(--vu-teal-wash), transparent 70%),
+    var(--vu-glass);
+  border-color: var(--vu-teal-line);
+  color: var(--vu-teal-bright);
+}
+
+/* 7.10 全局徽章：鎏金边辉光 */
+.role-global-badge {
+  box-shadow: 0 0 16px var(--vu-gold-glow), inset 0 0 0 1px var(--vu-gold-line);
+}
+
+/* =========================================================================
+   8. 工具类 / 辅助层
+   可直接在 HTML 中使用，便于快速应用增强效果。
+   ========================================================================= */
+
+/* 8.1 文字渐变工具 */
+.vu-text-teal {
+  background: var(--vu-grad-teal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.vu-text-gold {
+  background: var(--vu-grad-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.vu-text-hero {
+  background: var(--vu-grad-hero);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* 8.2 玻璃态工具 */
+.vu-glass {
+  background: var(--vu-glass);
+  backdrop-filter: blur(14px) saturate(135%);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  border: 1px solid var(--vu-line);
+  border-radius: var(--vu-radius-lg);
+  box-shadow: var(--vu-shadow), var(--vu-inner-glow);
+}
+
+/* 8.3 辉光工具 */
+.vu-glow-teal {
+  box-shadow: var(--vu-glow-teal);
+}
+.vu-glow-gold {
+  box-shadow: var(--vu-glow-gold);
+}
+.vu-glow-coral {
+  box-shadow: 0 0 0 1px var(--vu-coral-line), 0 0 24px var(--vu-coral-glow);
+}
+
+/* 8.4 渐变描边工具（mask 技法） */
+.vu-border-gradient {
+  position: relative;
+  border: 0;
+}
+.vu-border-gradient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--vu-grad-border);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* 8.5 入场动画工具 */
+.vu-fade-up {
+  animation: vu-card-stagger 520ms var(--vu-ease) both;
+}
+.vu-fade-in {
+  animation: vu-page-enter var(--vu-dur-slow) var(--vu-ease) both;
+}
+.vu-pop {
+  animation: vu-unlock-pop 600ms var(--vu-ease) both;
+}
+
+/* 8.6 加载骨架 */
+.vu-skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--vu-radius);
+  background: var(--vu-panel-2);
+}
+.vu-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(159, 179, 200, 0.18), transparent);
+  transform: translateX(-100%);
+  animation: vu-shimmer 1.6s var(--vu-ease-soft) infinite;
+}
+
+/* 8.7 隐藏滚动条但保留滚动 */
+.vu-no-scrollbar {
+  scrollbar-width: none;
+}
+.vu-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* =========================================================================
+   9. 响应式改进（移动端）
+   在小屏下减弱重型特效以保性能，并优化触控与排版。
+   ========================================================================= */
+
+/* 平板及以下：减弱背景模糊强度 */
+@media (max-width: 1000px) {
+  body::before {
+    filter: blur(6px);
+    animation-duration: 32s;
+  }
+  body::after {
+    filter: blur(28px);
+    opacity: 0.4;
+  }
+}
+
+/* 手机：关闭高耗能特效，放大触控目标，收紧间距 */
+@media (max-width: 720px) {
+  /* 关闭浮动光球与渐变网格漂移动画，改为静态以省电 */
+  body::before,
+  body::after {
+    animation: none;
+    filter: none;
+  }
+  body::after {
+    opacity: 0.25;
+  }
+
+  /* 关闭所有玻璃态模糊（移动端 backdrop-filter 性能开销大） */
+  .panel,
+  .assessment-panel,
+  .scenario-panel,
+  .transition-panel,
+  .rank-panel,
+  .decision-panel,
+  .intel-panel,
+  .baseline-detail,
+  .role-start-panel,
+  .menu-card,
+  .achievement-card,
+  .npc-card,
+  .ability-card,
+  .option-card,
+  .assessment-option,
+  .topbar,
+  button,
+  .file-button {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--vu-panel);
+  }
+  .topbar {
+    background: rgba(10, 16, 19, 0.96);
+  }
+
+  /* 关闭卡片错落入场的 blur，避免移动端卡顿 */
+  @keyframes vu-page-enter {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 触控目标放大到 48px，间距更舒展 */
+  button,
+  .file-button,
+  input,
+  select,
+  textarea {
+    min-height: 48px;
+  }
+  .menu-card {
+    min-height: 180px;
+  }
+
+  /* hover 抬升在触屏上无意义，改为静态 */
+  .menu-card:hover,
+  .achievement-card:not(.locked):hover,
+  .npc-card:not(.hidden):hover,
+  .ability-card:hover,
+  .option-card:hover,
+  .assessment-option:hover {
+    transform: none;
+  }
+
+  /* 标题字号收敛，避免溢出 */
+  h1 {
+    font-size: clamp(26px, 8vw, 38px);
+    line-height: 1.2;
+  }
+
+  /* 浮动粒子降为静态少量，减少重绘 */
+  .vu-particles span:nth-child(n + 9) {
+    display: none;
+  }
+}
+
+/* 超窄屏：进一步收紧 */
+@media (max-width: 380px) {
+  .menu-shell,
+  .map-shell,
+  .story-shell,
+  .ability-shell,
+  .report-shell,
+  .assessment-shell,
+  .narrow-shell {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .rank-panel strong {
+    font-size: 56px;
+  }
+}
+
+/* =========================================================================
+   10. 人物关系页清晰度修复（画布+卡片字号/对比度强化）
+   ========================================================================= */
+
+/* 10.1 关系网络图 canvas：强制足够高度 + 圆角 + 间距 */
+.relation-graph {
+  width: 100% !important;
+  display: block !important;
+  min-height: 440px !important;
+  height: auto !important;
+  border-radius: 20px !important;
+  margin: 20px 0 28px !important;
+  /* 背景暗底：即使 canvas 还没画也能看清后续渲染结果 */
+  background:
+    linear-gradient(135deg, rgba(13, 22, 27, 0.96), rgba(17, 29, 35, 0.96)) !important;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.55),
+    inset 0 0 70px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* 10.2 关系卡片网格：更宽的列 + 更大间距 */
+.relation-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+  gap: 18px !important;
+  margin: 12px 0 40px !important;
+}
+
+@media (max-width: 720px) {
+  .relation-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+}
+
+/* 10.3 所有 NPC 卡片：统一深色背景 + 高对比文字 + 更大内边距 */
+.npc-card,
+.npc-card.hidden,
+.npc-card.known,
+.npc-card.trusted {
+  position: relative;
+  padding: 18px 18px 20px !important;
+  border-radius: 18px !important;
+  /* 深色玻璃态背景：保证浅白文字绝对清晰可读 */
+  background:
+    linear-gradient(150deg, rgba(17, 29, 40, 0.94), rgba(13, 22, 27, 0.94)) !important;
+  border: 1px solid rgba(65, 199, 192, 0.18) !important;
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  color: #e7eef2 !important;
+  isolation: isolate;
+}
+
+/* hidden 状态卡片：加一点灰度但仍保证深色背景 */
+.npc-card.hidden {
+  background:
+    linear-gradient(150deg, rgba(20, 28, 34, 0.94), rgba(16, 22, 27, 0.94)) !important;
+  border-color: rgba(159, 179, 200, 0.12) !important;
+  opacity: 1 !important;
+}
+
+.npc-card.known {
+  border-color: rgba(65, 199, 192, 0.32) !important;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(65, 199, 192, 0.12) !important;
+}
+
+.npc-card.trusted {
+  border-color: rgba(242, 193, 78, 0.4) !important;
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.6),
+    0 0 24px rgba(242, 193, 78, 0.12),
+    inset 0 1px 0 rgba(242, 193, 78, 0.16) !important;
+}
+
+/* 10.4 卡片内头像尺寸放大 */
+.npc-avatar-wrap {
+  margin-right: 14px !important;
+  flex-shrink: 0 !important;
+}
+.npc-avatar {
+  width: 56px !important;
+  height: 56px !important;
+  font-size: 22px !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* 10.5 卡片文字：放大字号 + 强对比度颜色（强制覆盖 .muted / small 等灰字） */
+.npc-card h2 {
+  font-size: 20px !important;
+  line-height: 1.3 !important;
+  font-weight: 700 !important;
+  margin: 0 0 4px !important;
+  letter-spacing: 0.01em !important;
+  color: #f2f7fb !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55) !important;
+}
+
+.npc-card small {
+  display: block !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  margin: 0 0 8px !important;
+  color: #a9bcd0 !important; /* 高对比的蓝灰 */
+  font-weight: 500 !important;
+}
+
+.npc-card p {
+  font-size: 15px !important;
+  line-height: 1.8 !important;
+  margin: 0 0 10px !important;
+  color: #dde7ef !important;
+  letter-spacing: 0.01em !important;
+}
+
+.npc-card em {
+  display: block !important;
+  font-style: normal !important;
+  font-size: 14px !important;
+  line-height: 1.7 !important;
+  margin: 8px 0 0 !important;
+  padding: 10px 12px !important;
+  border-radius: 10px !important;
+  color: #c2d2de !important;
+  background: rgba(65, 199, 192, 0.08) !important;
+  border-left: 3px solid rgba(65, 199, 192, 0.45) !important;
+}
+
+.npc-status {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  padding: 5px 12px !important;
+  border-radius: 999px !important;
+  letter-spacing: 0.03em !important;
+  margin: 0 0 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+.npc-card.trusted .npc-status {
+  background: rgba(242, 193, 78, 0.16) !important;
+  color: #f2c14e !important;
+  border: 1px solid rgba(242, 193, 78, 0.35) !important;
+  text-shadow: 0 0 8px rgba(242, 193, 78, 0.3) !important;
+}
+.npc-card.known .npc-status {
+  background: rgba(65, 199, 192, 0.14) !important;
+  color: #79e3dd !important;
+  border: 1px solid rgba(65, 199, 192, 0.32) !important;
+}
+.npc-card.hidden .npc-status {
+  background: rgba(159, 179, 200, 0.1) !important;
+  color: #9fb3c8 !important;
+  border: 1px solid rgba(159, 179, 200, 0.18) !important;
+}
+
+
+/* 横屏移动：顶栏压缩 */
+@media (max-width: 900px) and (orientation: landscape) {
+  .topbar {
+    min-height: 52px;
+  }
+  .story-narrative .scenario-panel {
+    position: static;
+  }
+}
+
+/* 大屏：放宽最大宽度并启用更丰富的辉光 */
+@media (min-width: 1400px) {
+  .menu-shell,
+  .story-shell,
+  .ability-shell,
+  .report-shell {
+    width: min(1280px, 100%);
+  }
+  body::after {
+    opacity: 0.6;
+  }
+}
+
+/* =========================================================================
+   11. 真实美术资源接入样式 (Real Art Assets Integration)
+   -------------------------------------------------------------------------
+   为首页卡片封面、藏宝图残片、角色立绘、成就徽章、能力插画、
+   1v1 背景等真实图片提供定位 / 尺寸 / 渐变蒙层等基础视觉样式。
+   资源路径：public/art/*.jpg 与 public/bg/*.jpg
+   生成脚本：npm run generate:real-art
+   ========================================================================= */
+
+/* --- 11.1 首页 10 大模块卡片（菜单封面 + 渐变蒙层） --- */
+.menu-card.has-art {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.menu-card-cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  z-index: 0;
+  opacity: 0.55;
+  mix-blend-mode: luminosity;
+  filter: saturate(0.85) contrast(1.05);
+  transition: transform 0.5s ease, opacity 0.3s ease, filter 0.3s ease;
+  pointer-events: none;
+}
+.menu-card:hover .menu-card-cover,
+.menu-card:focus-visible .menu-card-cover {
+  opacity: 0.82;
+  transform: scale(1.04);
+  mix-blend-mode: normal;
+  filter: saturate(1.05) contrast(1.1);
+}
+.menu-card-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(10,16,19,0.15) 0%, rgba(10,16,19,0.55) 45%, rgba(10,16,19,0.92) 100%),
+    linear-gradient(90deg, rgba(10,16,19,0.35) 0%, rgba(10,16,19,0.05) 50%, rgba(10,16,19,0.35) 100%);
+}
+.menu-card.resume-card.has-art .menu-card-mask {
+  background:
+    linear-gradient(180deg, rgba(26, 18, 5, 0.25) 0%, rgba(26, 18, 5, 0.6) 55%, rgba(26, 18, 5, 0.94) 100%),
+    linear-gradient(90deg, rgba(26, 18, 5, 0.45) 0%, rgba(26, 18, 5, 0.1) 40%, rgba(26, 18, 5, 0.5) 100%);
+}
+/* 让文字浮在图片上层 */
+.menu-card.has-art > .card-index,
+.menu-card.has-art > h2,
+.menu-card.has-art > h3,
+.menu-card.has-art > p,
+.menu-card.has-art > span:not(.menu-card-mask):not(.menu-card-cover) {
+  position: relative;
+  z-index: 2;
+}
+
+/* --- 11.2 角色档案槽 + 立绘 --- */
+.role-slot-card.has-slot-art {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+}
+.role-slot-avatar {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(var(--vu-gold-rgb, 212, 175, 55), 0.55);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  background: var(--vu-panel-2);
+}
+.role-slot-card.empty .role-slot-avatar {
+  opacity: 0.25;
+  filter: grayscale(1);
+}
+.role-slot-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+/* 主卡片立绘：替换原 SVG 的尺寸 */
+.role-grid .role-portrait {
+  width: 120px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(var(--vu-gold-rgb, 212, 175, 55), 0.4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  background: var(--vu-panel-2);
+}
+
+/* --- 11.3 藏宝图残片（替换原圆圈字符） --- */
+.treasure-track {
+  gap: 10px;
+}
+.treasure-frag-wrap {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at center, rgba(var(--dot-rgb, 86, 211, 168), 0.08), transparent 70%),
+    var(--vu-panel-2);
+  border: 1px solid rgba(var(--dot-rgb, 86, 211, 168), 0.25);
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+.treasure-frag-wrap.missing {
+  filter: grayscale(0.8);
+  opacity: 0.55;
+}
+.treasure-frag-wrap.found {
+  border-color: rgba(var(--dot-rgb, 86, 211, 168), 0.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 1px rgba(var(--dot-rgb, 86, 211, 168), 0.2),
+    0 0 18px rgba(var(--dot-rgb, 86, 211, 168), 0.35),
+    0 2px 10px rgba(0, 0, 0, 0.4);
+}
+.treasure-frag {
+  position: absolute;
+  inset: 4px;
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
+  object-fit: cover;
+  border-radius: 7px;
+  z-index: 0;
+}
+.treasure-frag-text {
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  color: var(--vu-ink);
+  font-size: 20px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+}
+.treasure-frag-wrap:not(.found) .treasure-frag-text {
+  opacity: 0.9;
+}
+
+/* --- 11.4 成就大类封面 + 卡片徽章底版 --- */
+.achievement-category-stat.has-cat-art {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.ach-cat-cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.22;
+  mix-blend-mode: soft-light;
+  z-index: 0;
+  filter: saturate(0.8);
+  pointer-events: none;
+}
+.ach-cat-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(17,29,35,0.35) 0%, rgba(17,29,35,0.85) 100%);
+  pointer-events: none;
+}
+.achievement-category-stat.has-cat-art > strong,
+.achievement-category-stat.has-cat-art > span {
+  position: relative;
+  z-index: 2;
+}
+/* 成就卡片徽章 */
+.achievement-icon-wrap {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  flex: 0 0 60px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.achievement-badge {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.92;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+}
+.achievement-icon {
+  position: relative;
+  z-index: 1;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--vu-bg-deep);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+.achievement-card.locked .achievement-badge {
+  opacity: 0.35;
+  filter: grayscale(1) brightness(0.6) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+.achievement-card.locked .achievement-icon {
+  color: var(--vu-muted);
+  text-shadow: none;
+  opacity: 0.75;
+}
+
+/* --- 11.5 能力图谱卡片插画 --- */
+.ability-card.has-ability-art {
+  padding-top: 64px;
+  position: relative;
+  overflow: hidden;
+}
+.ability-illust {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 110px;
+  width: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  z-index: 0;
+  opacity: 0.55;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 45%, rgba(0,0,0,0) 100%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 45%, rgba(0,0,0,0) 100%);
+  filter: saturate(0.9) contrast(1.08);
+  pointer-events: none;
+}
+.ability-card.has-ability-art:hover .ability-illust {
+  opacity: 0.78;
+  filter: saturate(1.05);
+}
+.ability-card.has-ability-art > .ability-head,
+.ability-card.has-ability-art > p,
+.ability-card.has-ability-art > .ability-bar,
+.ability-card.has-ability-art > .subskill-list,
+.ability-card.has-ability-art > .training-path,
+.ability-card.has-ability-art > .ability-formula,
+.ability-card.has-ability-art > .ability-example,
+.ability-card.has-ability-art > .ability-next-gate,
+.ability-card.has-ability-art > .ability-sources,
+.ability-card.has-ability-art > .ability-practice-button {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- 11.6 1v1 大厅 / 对战 / 揭晓场景背景 --- */
+.duel-lobby.has-lobby-art {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(1100px 520px at 72% 8%, rgba(65, 199, 192, 0.34), transparent 62%),
+    radial-gradient(900px 460px at 12% 88%, rgba(242, 193, 78, 0.28), transparent 58%),
+    linear-gradient(180deg, #243640 0%, #172229 58%, #10181e 100%);
+}
+.duel-lobby-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.88;
+  mix-blend-mode: screen;
+  filter: saturate(1.15) blur(0.5px) contrast(1.05) brightness(1.02);
+  pointer-events: none;
+}
+.duel-lobby.has-lobby-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(7,11,14,0.06) 0%, rgba(7,11,14,0.24) 58%, rgba(7,11,14,0.36) 100%);
+}
+.duel-hero.has-hero-art {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(200px, 0.85fr);
+  gap: 28px;
+  align-items: center;
+}
+.duel-hero-art {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(var(--vu-gold-rgb, 212, 175, 55), 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  z-index: 2;
+  background: var(--vu-panel-2);
+  filter: brightness(1.08) saturate(1.06);
+}
+.duel-hero.has-hero-art > p.eyebrow,
+.duel-hero.has-hero-art > h1,
+.duel-hero.has-hero-art > p.muted,
+.duel-hero.has-hero-art > .mode-switch,
+.duel-hero.has-hero-art > .resume-duel-button {
+  grid-column: 1;
+  z-index: 2;
+}
+.duel-hero h1,
+.duel-hero p,
+.duel-hero .mode-switch button {
+  text-shadow: 0 2px 14px rgba(7, 11, 14, 0.92);
+}
+@media (max-width: 900px) {
+  .duel-hero.has-hero-art {
+    grid-template-columns: 1fr;
+  }
+  .duel-hero-art {
+    grid-column: 1;
+    grid-row: auto;
+    height: 180px;
+  }
+}
+/* 对战中场景 */
+.duel-shell.has-duel-art,
+.duel-predict.has-predict-art,
+.duel-reveal.has-reveal-art {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(1000px 480px at 50% 0%, rgba(65, 199, 192, 0.28), transparent 60%),
+    radial-gradient(760px 420px at 90% 90%, rgba(242, 193, 78, 0.22), transparent 55%),
+    linear-gradient(180deg, #22323c 0%, #152027 55%, #0f181e 100%);
+}
+.duel-stage-bg,
+.duel-predict-bg,
+.duel-reveal-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.75;
+  mix-blend-mode: screen;
+  filter: saturate(1.12) blur(0.8px) contrast(1.04) brightness(1.02);
+  pointer-events: none;
+}
+.duel-shell.has-duel-art::after,
+.duel-predict.has-predict-art::after,
+.duel-reveal.has-reveal-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(7,11,14,0.06) 0%, rgba(7,11,14,0.26) 55%, rgba(7,11,14,0.4) 100%);
+}
+.duel-shell.has-duel-art > *,
+.duel-predict.has-predict-art > *,
+.duel-reveal.has-reveal-art > *:not(.duel-reveal-bg) {
+  position: relative;
+  z-index: 2;
+}
+
+/* =========================================================================
+   12. 使用说明
+   -------------------------------------------------------------------------
+   • 引入顺序：<link rel="stylesheet" href="styles.css">
+                <link rel="stylesheet" href="visual-upgrade-v2.css">
+   • 换肤：覆盖 :root 中的 --vu-* 变量即可整体改色。
+   • 关闭：在 <html> 上加 data-vu="off" 可禁用全部动画。
+   • 真实美术：
+       1) 运行 `npm run generate:real-art` 自动拉取 44+ 张真实 AI 美术图
+          放入 public/art 与 public/bg 目录
+       2) src/ui/App.ts 中 artAsset() 注册表已自动按命名约定解析路径
+       3) 若图片缺失会走 onerror fallback（隐藏 img，显示纯色块 + 原图标）
+   • 装饰节点（可选）：
+       <div class="vu-bg-vignette"></div>
+       <div class="vu-bg-noise"></div>
+       <div class="vu-particles">
+         <span style="left:10%;animation-duration:14s;animation-delay:0s"></span>
+         <span style="left:25%;animation-duration:18s;animation-delay:2s"></span>
+         <span style="left:40%;animation-duration:16s;animation-delay:4s"></span>
+         <span style="left:55%;animation-duration:20s;animation-delay:1s"></span>
+         <span style="left:70%;animation-duration:15s;animation-delay:3s"></span>
+         <span style="left:85%;animation-duration:17s;animation-delay:5s"></span>
+       </div>
+     未注入这些节点时，body / #app 的伪元素会兜底提供暗角与噪点。
+   • 加载占位：为元素添加 .vu-shimmer 或 .vu-skeleton 即可获得微光效果。
+   ========================================================================= */
+
+
+/* =========================================================================
+   领导力五维模型 · 士气
+   ========================================================================= */
+.dimension-panel {
+  margin: 18px 0;
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--vu-radius, 8px);
+  background: rgba(12, 22, 28, 0.72);
+}
+.dimension-panel h2 {
+  margin: 0 0 12px;
+}
+.dimension-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.dimension-row {
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--dim, #41c7c0) 38%, transparent);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.dimension-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dimension-head strong {
+  color: var(--dim, #41c7c0);
+}
+.dimension-head span {
+  color: var(--vu-muted, #9fb3c8);
+  font-size: 12px;
+}
+.dimension-head em {
+  margin-left: auto;
+  color: #f2c14e;
+  font-style: normal;
+  font-weight: 800;
+}
+.dimension-bar {
+  height: 8px;
+  margin: 8px 0 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.dimension-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--dim, #41c7c0);
+}
+.dimension-row small {
+  color: var(--vu-muted, #9fb3c8);
+  line-height: 1.5;
+}
+.trial-morale-panel {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(87, 199, 163, 0.4);
+  border-radius: 8px;
+  background: rgba(87, 199, 163, 0.1);
+}
+.trial-morale-panel strong {
+  color: #aef1ec;
+}
+.trial-morale-panel .trial-energy-bar {
+  margin: 6px 0;
+}
+.trial-morale-panel small {
+  color: #bdece8;
+}
+
+/* =========================================================================
+   主页模块四组分类：个人训练 / 团体训练 / 培训师模块 / 系统设置
+   ========================================================================= */
+.menu-groups {
+  display: grid;
+  gap: 26px;
+  margin-top: 30px;
+}
+.menu-group {
+  padding: 18px;
+  border: 1px solid var(--vu-line);
+  border-radius: var(--vu-radius);
+  background:
+    linear-gradient(180deg, rgba(24, 36, 44, 0.55) 0%, rgba(12, 19, 24, 0.72) 100%),
+    var(--vu-panel);
+  box-shadow: var(--vu-shadow-soft);
+}
+.menu-group-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.menu-group-index {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(242, 193, 78, 0.45);
+  border-radius: 10px;
+  background: rgba(242, 193, 78, 0.12);
+  color: var(--vu-gold-bright, #f8e2ae);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+.menu-group-head h2 {
+  margin: 0;
+  color: #eef4f7;
+  font-size: 19px;
+}
+.menu-group-head p {
+  margin: 3px 0 0;
+  color: #9fb3c8;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.menu-group-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.menu-group-grid .menu-card {
+  order: unset;
+}
+.menu-group-grid .menu-card-cover {
+  opacity: 0.68;
+  mix-blend-mode: normal;
+  filter: saturate(1) contrast(1.08) brightness(1.08);
+}
+.menu-group-grid .menu-card:hover .menu-card-cover,
+.menu-group-grid .menu-card:focus-visible .menu-card-cover {
+  opacity: 0.9;
+}
+.menu-group-grid .menu-card-mask {
+  background:
+    linear-gradient(180deg, rgba(10, 16, 19, 0.1) 0%, rgba(10, 16, 19, 0.35) 45%, rgba(10, 16, 19, 0.72) 100%),
+    linear-gradient(90deg, rgba(10, 16, 19, 0.18) 0%, rgba(10, 16, 19, 0.02) 50%, rgba(10, 16, 19, 0.18) 100%);
+}
+.menu-group-grid .menu-card h2,
+.menu-group-grid .menu-card p {
+  text-shadow: 0 1px 10px rgba(7, 11, 14, 0.9);
+}
+.menu-group-grid .menu-card {
+  animation: vu-card-stagger 520ms var(--vu-ease) both;
+}
+.menu-group-grid .menu-card:nth-child(1) { animation-delay: 40ms; }
+.menu-group-grid .menu-card:nth-child(2) { animation-delay: 100ms; }
+.menu-group-grid .menu-card:nth-child(3) { animation-delay: 160ms; }
+.menu-group-grid .menu-card:nth-child(4) { animation-delay: 220ms; }
+.menu-group-grid .menu-card:nth-child(5) { animation-delay: 280ms; }
+.menu-group-grid .menu-card:nth-child(6) { animation-delay: 340ms; }
+.menu-group-grid .menu-card:nth-child(7) { animation-delay: 400ms; }
+.menu-group-grid .menu-card:nth-child(8) { animation-delay: 460ms; }
+@media (max-width: 980px) {
+  .menu-group-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .menu-group-grid {
+    grid-template-columns: 1fr;
+  }
+  .menu-group {
+    padding: 14px;
+  }
+}
+
+/* =========================================================================
+   单人 90 天行动计划
+   ========================================================================= */
+.coach-plan-panel {
+  margin: 16px 0;
+  padding: 18px;
+  border: 1px solid rgba(65, 199, 192, 0.35);
+  border-radius: var(--vu-radius, 8px);
+  background: rgba(12, 22, 28, 0.76);
+}
+.coach-plan-panel > h2 {
+  margin: 0 0 6px;
+}
+.coach-plan-wizard h3 {
+  margin: 14px 0 10px;
+}
+.coach-plan-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.coach-plan-options button {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(65, 199, 192, 0.4);
+  border-radius: 8px;
+  background: rgba(65, 199, 192, 0.08);
+  color: #e5f6f5;
+  text-align: left;
+  cursor: pointer;
+}
+.coach-plan-options button:hover {
+  border-color: #41c7c0;
+  background: rgba(65, 199, 192, 0.18);
+}
+.coach-plan-options button span {
+  color: var(--vu-muted, #9fb3c8);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.coach-plan-result {
+  margin-top: 14px;
+}
+.coach-plan-phases {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+.coach-plan-phase {
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+.coach-plan-phase h3 {
+  margin: 4px 0 8px;
+}
+.coach-plan-phase ol {
+  margin: 10px 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+.coach-plan-phase ol button {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: transparent;
+  color: #d8e4ec;
+  text-align: left;
+  cursor: pointer;
+}
+.coach-plan-phase ol button.done {
+  border-color: rgba(87, 199, 163, 0.6);
+  background: rgba(87, 199, 163, 0.14);
+  color: #aef1ec;
+}
+.coach-plan-weekly,
+.coach-plan-checkpoint,
+.coach-plan-question {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  line-height: 1.55;
+}
+.coach-plan-question {
+  border-left: 3px solid #f2c14e;
+  color: #f8e2ae;
+}
+.coach-plan-metrics {
+  margin: 14px 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(242, 193, 78, 0.4);
+  border-radius: 8px;
+  background: rgba(242, 193, 78, 0.1);
+  color: #f8e2ae;
+  line-height: 1.6;
+}
+.coach-plan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.coach-plan-actions button {
+  padding: 9px 14px;
+  border: 1px solid rgba(65, 199, 192, 0.45);
+  border-radius: 8px;
+  background: rgba(65, 199, 192, 0.1);
+  color: #e5f6f5;
+  cursor: pointer;
+}
+.coach-plan-actions button:hover {
+  background: rgba(65, 199, 192, 0.2);
+}
+
+/* =========================================================================
+   NPC 关系深化剧情
+   ========================================================================= */
+.npc-arc {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(65, 199, 192, 0.35);
+  border-radius: 8px;
+  background: rgba(65, 199, 192, 0.08);
+}
+.npc-arc h4 {
+  margin: 0 0 8px;
+  color: #aef1ec;
+}
+.npc-arc p {
+  margin: 6px 0;
+  line-height: 1.6;
+}
+.npc-quest {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-left: 3px solid #f2c14e;
+  background: rgba(242, 193, 78, 0.1);
+  color: #f8e2ae;
+}

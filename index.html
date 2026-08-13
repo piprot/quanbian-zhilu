@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>升维 · 自适应领导力情境游戏</title>
+    <meta
+      name="description"
+      content="升维是一款基于权经九章架构、情境高尔夫方法与 Juricore 学院风视觉的在线领导力情境游戏，训练识人、用人、驭人、谋权、掌权、固权与自我进化能力。"
+    />
+    <meta name="theme-color" content="#0a1013" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <style>
+      #app-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-content: center;
+        gap: 14px;
+        justify-items: center;
+        background: #0a1013;
+        color: #e7eef2;
+        font-family: system-ui, sans-serif;
+        font-size: 15px;
+        letter-spacing: 0;
+      }
+      #app-loading::after {
+        content: "";
+        width: 28px;
+        height: 28px;
+        border: 3px solid rgba(242, 193, 78, 0.25);
+        border-top-color: #f2c14e;
+        border-radius: 50%;
+        animation: app-load-spin 0.9s linear infinite;
+      }
+      @keyframes app-load-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #app-static {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+        color: #e7eef2;
+        font-family: system-ui, "Microsoft YaHei", sans-serif;
+        letter-spacing: 0;
+      }
+      #app-static header,
+      #app-static footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      #app-static .static-brand {
+        color: #41c7c0;
+        font-weight: 900;
+        font-size: 20px;
+      }
+      #app-static .static-tag {
+        color: #f2c14e;
+        font-size: 13px;
+      }
+      #app-static h1 {
+        margin: 28px 0 10px;
+        font-size: clamp(28px, 5vw, 46px);
+        line-height: 1.2;
+        color: #f5f8fa;
+      }
+      #app-static .static-lead {
+        max-width: 760px;
+        margin: 0 0 24px;
+        color: #9fb3c8;
+        line-height: 1.8;
+      }
+      #app-static .static-ctas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 0 0 24px;
+      }
+      #app-static .static-cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 9px 18px;
+        border: 1px solid rgba(242, 193, 78, 0.5);
+        border-radius: 8px;
+        background: rgba(242, 193, 78, 0.1);
+        color: #ffd877;
+        font-weight: 800;
+        text-decoration: none;
+        transition: background 0.2s ease, color 0.2s ease;
+      }
+      #app-static .static-cta.primary {
+        background: #f2c14e;
+        border-color: #f2c14e;
+        color: #12181b;
+      }
+      #app-static .static-cta:hover {
+        background: rgba(242, 193, 78, 0.22);
+      }
+      #app-static .static-cta.primary:hover {
+        background: #ffd877;
+      }
+      #app-static .static-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+      }
+      #app-static .static-card {
+        border: 1px solid rgba(159, 179, 200, 0.22);
+        border-radius: 8px;
+        padding: 14px 16px;
+        background: rgba(17, 26, 42, 0.72);
+      }
+      #app-static .static-card strong {
+        display: block;
+        margin-bottom: 6px;
+        color: #f2c14e;
+      }
+      #app-static .static-card p {
+        margin: 0;
+        color: #c6d3de;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+      #app-static .static-steps {
+        margin: 24px 0 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: static-step;
+      }
+      #app-static .static-steps li {
+        counter-increment: static-step;
+        margin: 8px 0;
+        color: #c6d3de;
+        line-height: 1.7;
+      }
+      #app-static .static-steps li::before {
+        content: counter(static-step);
+        display: inline-grid;
+        place-items: center;
+        width: 22px;
+        height: 22px;
+        margin-right: 10px;
+        border-radius: 50%;
+        background: rgba(65, 199, 192, 0.18);
+        color: #41c7c0;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      #app-static footer {
+        margin-top: 28px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(159, 179, 200, 0.2);
+        color: #8fa3b8;
+        font-size: 13px;
+      }
+      @media (max-width: 600px) {
+        #app-static {
+          padding: 20px 14px 36px;
+        }
+      }
+    </style>
+    <script>
+      window.setTimeout(function () {
+        var loading = document.getElementById("app-loading");
+        if (loading && !document.body.hasAttribute("data-app-ready")) {
+          loading.style.display = "none";
+        }
+      }, 5000);
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <style>#app-loading { display: none; }</style>
+    </noscript>
+    <div id="app-loading" role="status" aria-live="polite">
+      <span>升维 · 正在加载</span>
+    </div>
+    <div id="app">
+      <div id="app-static">
+        <header>
+          <span class="static-brand">升维</span>
+          <span class="static-tag">可玩版本 v1.7.34 · 浏览器加载后自动进入完整菜单</span>
+        </header>
+        <h1>在真实职场情境中升维领导力</h1>
+        <p class="static-lead">
+          基于《权经》九章架构、Heifetz 自适应领导力与情境高尔夫方法，通过主线剧情、支线任务和 1v1
+          对决，训练识人、用人、驭人、谋权、掌权、固权与自我进化能力。启用 JavaScript 后点击「立即试玩第一章」可直接进入首章，或创建档案开始完整流程。
+        </p>
+        <div class="static-ctas">
+          <a class="static-cta primary" data-action="start-trial-chapter" href="#play">立即试玩第一章</a>
+          <a class="static-cta" data-action="open-profile" href="#profile">创建档案开始完整流程</a>
+        </div>
+        <div class="static-grid">
+          <div class="static-card">
+            <strong>01 主线征途</strong>
+            <p>九章权力架构，18 个真实职场情境；角色与难度变体、随机事件、多结局与章节复盘。</p>
+          </div>
+          <div class="static-card">
+            <strong>02 1v1 对决</strong>
+            <p>AI 陪练、本地双人、远程对战三种模式，按情境高尔夫基准评分，含预判加成与复盘讨论。</p>
+          </div>
+          <div class="static-card">
+            <strong>03 能力图谱与复盘</strong>
+            <p>十项能力、五级段位、能力雷达与决策回放；每章输出得分、能力变化、关键决策回顾与教练追问。</p>
+          </div>
+          <div class="static-card">
+            <strong>04 成长系统</strong>
+            <p>成就图鉴、人物关系图、成长试炼、三角色独立存档、自动保存、导出与备份恢复。</p>
+          </div>
+          <div class="static-card">
+            <strong>05 完整设置</strong>
+            <p>中英双语、声音/音乐音量、难度档位、字体大小、存档数据管理与键盘快捷键。</p>
+          </div>
+          <div class="static-card">
+            <strong>06 内容规模</strong>
+            <p>9 章 × 81 主线情境（18 核心 + 63 扩展）、36 随机事件、33 分支节点、30 测评题、30 训练题与 24 个试炼阶段。</p>
+          </div>
+        </div>
+        <ol class="static-steps">
+          <li>点击「创建档案」，选择空降、创业或高潜身份，命名你的角色。</li>
+          <li>跳过或完成 30 题能力基线测评，然后进入主线地图。</li>
+          <li>在每个职场情境中做出选择，立即看到专家/部分/风险评分、资源变化与能力成长。</li>
+          <li>完成章节后查看复盘报告，可随时回到地图继续下一章或挑战 1v1。</li>
+        </ol>
+        <footer>
+          <span>目标用户：中层管理者、高潜人才与创业者 · 单章约 15-25 分钟 · 支持桌面与手机</span>
+          <span>若长时间停留在本页，说明脚本未执行，请刷新或使用现代浏览器。</span>
+        </footer>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

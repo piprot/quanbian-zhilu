@@ -1,0 +1,268 @@
+.ta-shell {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 26px 20px 56px;
+}
+
+.ta-hero,
+.ta-play-hero {
+  margin-bottom: 20px;
+}
+
+.ta-hero h1,
+.ta-play-hero h1,
+.ta-lesson-hero h1 {
+  margin: 6px 0 8px;
+  font-size: 28px;
+  line-height: 1.25;
+}
+
+.ta-hero p,
+.ta-play-hero p,
+.ta-lesson-hero p {
+  margin: 0 0 8px;
+  color: #c6d2dc;
+  line-height: 1.7;
+}
+
+.ta-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.ta-roles button {
+  border: 1px solid rgba(65, 199, 192, 0.45);
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: rgba(65, 199, 192, 0.08);
+  color: #aef1ec;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ta-roles button.active {
+  border-color: #41c7c0;
+  background: rgba(65, 199, 192, 0.22);
+}
+
+.ta-panel {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.ta-panel h2 {
+  margin: 0 0 10px;
+  font-size: 17px;
+}
+
+.ta-panel ol,
+.ta-panel ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #c6d2dc;
+  line-height: 1.7;
+}
+
+.ta-dimensions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.ta-dim {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.ta-dim span {
+  color: #9fb3c8;
+  font-size: 12px;
+}
+
+.ta-dim b {
+  color: #f2c14e;
+  font-size: 18px;
+}
+
+.ta-dim i {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ta-dim i em {
+  display: block;
+  height: 100%;
+  background: #41c7c0;
+}
+
+.ta-mentors,
+.ta-lessons,
+.ta-scenarios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.ta-mentor,
+.ta-lesson-card,
+.ta-scenario-card {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  text-align: left;
+  color: #e7eef2;
+  cursor: pointer;
+}
+
+.ta-mentor.active,
+.ta-lesson-card.done,
+.ta-scenario-card.done {
+  border-color: rgba(87, 199, 163, 0.6);
+  background: rgba(87, 199, 163, 0.08);
+}
+
+.ta-mentor span,
+.ta-lesson-card span,
+.ta-scenario-card span {
+  color: #9fb3c8;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ta-formula {
+  padding: 12px 14px;
+  border-left: 3px solid #f2c14e;
+  background: rgba(242, 193, 78, 0.08);
+  color: #f8e2ae;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.ta-practice,
+.ta-homework,
+.ta-scenario-play {
+  margin-top: 8px;
+}
+
+.ta-options,
+.ta-play-options {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.ta-options button,
+.ta-play-option {
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #d8e4ec;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ta-feedback {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(242, 193, 78, 0.4);
+  border-radius: 8px;
+  background: rgba(242, 193, 78, 0.08);
+}
+
+.ta-feedback.correct {
+  border-color: rgba(87, 199, 163, 0.6);
+  background: rgba(87, 199, 163, 0.1);
+}
+
+.ta-feedback.wrong {
+  border-color: rgba(233, 130, 108, 0.6);
+  background: rgba(233, 130, 108, 0.1);
+}
+
+.ta-feedback p {
+  margin: 6px 0;
+  color: #c6d2dc;
+  line-height: 1.6;
+}
+
+.ta-path-review p,
+.ta-best-path p {
+  margin: 6px 0;
+  color: #c6d2dc;
+  line-height: 1.65;
+}
+
+.ta-path-choice {
+  margin-top: 0;
+}
+
+.ta-path-choice b,
+.ta-path-review b,
+.ta-best-path b {
+  color: #f2c14e;
+}
+
+.ta-knowledge {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.ta-homework textarea {
+  width: 100%;
+  min-height: 96px;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(8, 16, 21, 0.9);
+  color: #e7eef2;
+}
+
+.ta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.ta-panel button,
+.ta-actions button {
+  border: 1px solid rgba(65, 199, 192, 0.45);
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: rgba(65, 199, 192, 0.08);
+  color: #aef1ec;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ta-panel .primary,
+.ta-actions .primary {
+  background: #41c7c0;
+  color: #071215;
+}
+
+@media (max-width: 720px) {
+  .ta-dimensions,
+  .ta-mentors,
+  .ta-lessons,
+  .ta-scenarios {
+    grid-template-columns: 1fr;
+  }
+}

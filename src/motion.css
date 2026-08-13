@@ -1,0 +1,186 @@
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes outcome-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  70% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes reveal-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes progress-grow {
+  from {
+    width: 0;
+  }
+}
+
+@keyframes shake-hit {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes badge-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) rotate(-4deg);
+  }
+  70% {
+    transform: scale(1.08) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(20deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.6) rotate(45deg);
+  }
+}
+
+.menu-card,
+.ability-card,
+.achievement-card,
+.npc-card,
+.trial-stage-card,
+.practice-card,
+.duel-analysis-card,
+.training-panel,
+.report-panel {
+  animation: card-enter 320ms ease both;
+}
+
+.menu-card:nth-child(2),
+.ability-card:nth-child(2),
+.trial-stage-card:nth-child(2) {
+  animation-delay: 40ms;
+}
+
+.menu-card:nth-child(3),
+.ability-card:nth-child(3),
+.trial-stage-card:nth-child(3) {
+  animation-delay: 80ms;
+}
+
+.menu-card:nth-child(4),
+.ability-card:nth-child(4),
+.trial-stage-card:nth-child(4) {
+  animation-delay: 120ms;
+}
+
+.outcome-panel,
+.training-result-hero,
+.trial-battle-result {
+  animation: outcome-pop 420ms ease both;
+}
+
+.duel-reveal {
+  animation: reveal-pulse 900ms ease-in-out infinite;
+}
+
+.trial-battle-result.win,
+.duel-result h1,
+.achievement-unlock,
+.training-mastery-badge {
+  animation: badge-pop 480ms ease both;
+}
+
+.trial-battle-result.lose {
+  animation: shake-hit 420ms ease both;
+}
+
+.trial-battle-result.win,
+.achievement-unlock {
+  position: relative;
+}
+
+.trial-battle-result.win::after,
+.achievement-unlock::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  width: 18px;
+  height: 18px;
+  background:
+    radial-gradient(circle at 30% 30%, #fff 0 12%, transparent 40%),
+    conic-gradient(from 30deg, #f2c14e, #fff, #41c7c0, #f2c14e);
+  border-radius: 50%;
+  filter: drop-shadow(0 0 8px rgba(242, 193, 78, 0.8));
+  animation: sparkle 900ms ease-out infinite;
+}
+
+.ability-bar i,
+.trial-energy-bar i,
+.assessment-bar i,
+.rank-meter i,
+.achievement-progress i {
+  animation: progress-grow 500ms ease both;
+}
+
+button {
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

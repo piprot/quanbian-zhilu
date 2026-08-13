@@ -1,0 +1,60 @@
+﻿services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-adaptive_ascent}
+      POSTGRES_USER: ${POSTGRES_USER:-adaptive}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-adaptive} -d ${POSTGRES_DB:-adaptive_ascent}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  server:
+    build: .
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      DATABASE_URL: postgres://${POSTGRES_USER:-adaptive}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-adaptive_ascent}
+      DATABASE_SSL: "false"
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      TOKEN_MAX_AGE_MS: ${TOKEN_MAX_AGE_MS:-604800000}
+      MAX_MESSAGE_BYTES: ${MAX_MESSAGE_BYTES:-65536}
+      MAX_SAVE_BYTES: ${MAX_SAVE_BYTES:-262144}
+      ROOM_TTL_MS: ${ROOM_TTL_MS:-600000}
+      DATA_DIR: /app/server/data
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:8080/').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - server
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

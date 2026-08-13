@@ -1,0 +1,600 @@
+/* ============================================================
+   页面过渡动画集 —— 东方美学风格
+   适用于：领导力培训网页游戏「圣维之道」
+   设计语言：卷轴展开、墨滴晕染、笔锋横扫、翻页、印章
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   一、CSS 自定义属性（全局动画参数调节）
+   所有时长、缓动、颜色均可通过覆盖变量调整
+   ------------------------------------------------------------ */
+:root {
+  /* 过渡时长 */
+  --tr-scroll-duration: 0.8s;     /* 卷轴展开：较慢，营造展开感 */
+  --tr-ink-duration: 0.6s;        /* 墨滴扩散：中等速度 */
+  --tr-brush-duration: 0.5s;      /* 笔锋横扫：干脆利落 */
+  --tr-page-duration: 0.7s;       /* 翻页效果：适中，兼顾3D感 */
+  --tr-stamp-duration: 0.4s;      /* 印章压印：快速有力 */
+
+  /* 缓动函数 */
+  --tr-scroll-easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);  /* 舒缓展开 */
+  --tr-ink-easing: cubic-bezier(0.22, 0.61, 0.36, 1);         /* 墨滴自然扩散 */
+  --tr-brush-easing: cubic-bezier(0.4, 0, 0.2, 1);            /* 笔锋流畅 */
+  --tr-page-easing: cubic-bezier(0.645, 0.045, 0.355, 1);     /* 翻页惯性 */
+  --tr-stamp-easing: cubic-bezier(0.34, 1.56, 0.64, 1);       /* 弹性落印 */
+
+  /* 东方传统色 */
+  --tr-mose: #2C2C2C;             /* 墨色 */
+  --tr-zheshi: #9C6B3C;           /* 赭石 */
+  --tr-chijin: #C4955A;           /* 赤金 */
+  --tr-dianqing: #3A6B7E;         /* 靛青 */
+  --tr-yinzhu: #B84233;           /* 印朱：印章红 */
+  --tr-xuanzhi: #F5ECD7;          /* 宣纸 */
+}
+
+/* ============================================================
+   二、卷轴展开过渡（Scroll Unfurl）
+   模拟古画轴从上向下缓缓展开的效果
+   内容区域由高度0逐渐展开至完整高度，配合卷曲阴影
+   ============================================================ */
+.transition-scroll {
+  --tr-duration: var(--tr-scroll-duration);
+  --tr-easing: var(--tr-scroll-easing);
+
+  animation: scroll-unfurl var(--tr-duration) var(--tr-easing) both;
+  /* 初始状态：从顶部开始展开 */
+  transform-origin: top center;
+}
+
+@keyframes scroll-unfurl {
+  0% {
+    /* 卷轴完全收起：压扁在顶部 */
+    max-height: 0;
+    opacity: 0;
+    transform: perspective(800px) rotateX(-15deg) scaleY(0.01);
+    /* 卷曲处阴影 */
+    filter: drop-shadow(0 4px 8px rgba(44, 44, 44, 0.3));
+  }
+  20% {
+    opacity: 0.6;
+    max-height: 20%;
+    transform: perspective(800px) rotateX(-8deg) scaleY(0.2);
+    filter: drop-shadow(0 8px 16px rgba(44, 44, 44, 0.25));
+  }
+  60% {
+    opacity: 0.9;
+    max-height: 70%;
+    transform: perspective(800px) rotateX(-2deg) scaleY(0.75);
+    filter: drop-shadow(0 4px 12px rgba(44, 44, 44, 0.15));
+  }
+  100% {
+    max-height: 100%;
+    opacity: 1;
+    transform: perspective(800px) rotateX(0deg) scaleY(1);
+    /* 展开完成后阴影消散 */
+    filter: drop-shadow(0 0 0 transparent);
+  }
+}
+
+/* 卷轴底部装饰线（模拟卷轴木轴） */
+.transition-scroll::after {
+  content: "";
+  display: block;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--tr-zheshi) 15%,
+    var(--tr-chijin) 50%,
+    var(--tr-zheshi) 85%,
+    transparent 100%
+  );
+  border-radius: 2px;
+  margin-top: 12px;
+  animation: scroll-rod-appear 0.3s ease-out var(--tr-scroll-duration) both;
+}
+
+@keyframes scroll-rod-appear {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   三、墨滴扩散过渡（Ink Drop）
+   新内容如墨滴落入宣纸，从中心向四周晕染展开
+   使用 radial-gradient 遮罩实现圆形扩展
+   ============================================================ */
+.transition-ink {
+  --tr-duration: var(--tr-ink-duration);
+  --tr-easing: var(--tr-ink-easing);
+
+  animation: ink-drop-fade var(--tr-duration) var(--tr-easing) both;
+}
+
+@keyframes ink-drop-fade {
+  0% {
+    opacity: 0;
+    /* 遮罩从中心极小圆开始 */
+    -webkit-mask-image: radial-gradient(
+      circle at center,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 0%,
+      transparent 0%,
+      transparent 100%
+    );
+    mask-image: radial-gradient(
+      circle at center,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 0%,
+      transparent 0%,
+      transparent 100%
+    );
+    transform: scale(0.96);
+    filter: blur(4px);
+  }
+  25% {
+    opacity: 0.5;
+    -webkit-mask-image: radial-gradient(
+      circle at center,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 20%,
+      transparent 35%,
+      transparent 100%
+    );
+    mask-image: radial-gradient(
+      circle at center,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 20%,
+      transparent 35%,
+      transparent 100%
+    );
+    transform: scale(0.98);
+    filter: blur(2px);
+  }
+  60% {
+    opacity: 0.85;
+    -webkit-mask-image: radial-gradient(
+      circle at center,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 55%,
+      rgba(0, 0, 0, 0.6) 70%,
+      transparent 85%,
+      transparent 100%
+    );
+    mask-image: radial-gradient(
+      circle at center,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 55%,
+      rgba(0, 0, 0, 0.6) 70%,
+      transparent 85%,
+      transparent 100%
+    );
+    transform: scale(0.99);
+    filter: blur(1px);
+  }
+  100% {
+    opacity: 1;
+    -webkit-mask-image: none;
+    mask-image: none;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+/* 墨滴扩散的边缘装饰（可选：添加墨点飞溅效果） */
+.transition-ink::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tr-mose);
+  transform: translate(-50%, -50%);
+  animation: ink-splatter var(--tr-ink-duration) var(--tr-easing) both;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes ink-splatter {
+  0% {
+    width: 4px;
+    height: 4px;
+    opacity: 0.8;
+    box-shadow:
+      12px -8px 0 1px rgba(44, 44, 44, 0.4),
+      -10px 6px 0 0.5px rgba(44, 44, 44, 0.3),
+      8px 14px 0 0.8px rgba(44, 44, 44, 0.35);
+  }
+  50% {
+    width: 3px;
+    height: 3px;
+    opacity: 0.4;
+    box-shadow:
+      20px -16px 0 0.5px rgba(44, 44, 44, 0.2),
+      -18px 12px 0 0.3px rgba(44, 44, 44, 0.15),
+      14px 22px 0 0.4px rgba(44, 44, 44, 0.18);
+  }
+  100% {
+    width: 0;
+    height: 0;
+    opacity: 0;
+    box-shadow:
+      24px -20px 0 0px transparent,
+      -22px 16px 0 0px transparent,
+      18px 28px 0 0px transparent;
+  }
+}
+
+/* ============================================================
+   四、笔锋横扫过渡（Brush Stroke）
+   水平擦除式切换，边缘模拟毛笔笔触的有机不规则感
+   使用多层 clip-path 或 mask 实现毛边效果
+   ============================================================ */
+.transition-brush {
+  --tr-duration: var(--tr-brush-duration);
+  --tr-easing: var(--tr-brush-easing);
+
+  animation: brush-wipe var(--tr-duration) var(--tr-easing) both;
+  overflow: hidden;
+}
+
+@keyframes brush-wipe {
+  0% {
+    opacity: 0;
+    /* 使用多边形 clip-path 模拟笔触的不规则左边缘 */
+    clip-path: polygon(
+      0% 0%, 0% 0%,
+      0% 100%, 0% 100%
+    );
+  }
+  15% {
+    opacity: 1;
+    clip-path: polygon(
+      0% 0%, 8% 0%,
+      6% 15%, 9% 30%,
+      5% 45%, 8% 60%,
+      7% 75%, 10% 90%,
+      6% 100%, 0% 100%
+    );
+  }
+  40% {
+    clip-path: polygon(
+      0% 0%, 35% 0%,
+      33% 12%, 37% 28%,
+      32% 45%, 36% 62%,
+      34% 78%, 38% 92%,
+      33% 100%, 0% 100%
+    );
+  }
+  70% {
+    clip-path: polygon(
+      0% 0%, 72% 0%,
+      70% 10%, 74% 25%,
+      69% 42%, 73% 58%,
+      71% 75%, 75% 90%,
+      70% 100%, 0% 100%
+    );
+  }
+  100% {
+    opacity: 1;
+    clip-path: polygon(
+      0% 0%, 100% 0%,
+      100% 100%, 0% 100%
+    );
+  }
+}
+
+/* 笔锋横扫的墨迹残留装饰 */
+.transition-brush::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 100%;
+  background: linear-gradient(
+    to left,
+    transparent 0%,
+    rgba(156, 107, 60, 0.06) 40%,
+    rgba(156, 107, 60, 0.12) 100%
+  );
+  animation: brush-trail var(--tr-brush-duration) var(--tr-easing) both;
+  pointer-events: none;
+}
+
+@keyframes brush-trail {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(200%);
+  }
+}
+
+/* ============================================================
+   五、翻页过渡（Page Turn）
+   模拟古籍翻页的3D透视旋转效果
+   使用 perspective + rotateY 实现纸张翻转感
+   ============================================================ */
+.transition-page {
+  --tr-duration: var(--tr-page-duration);
+  --tr-easing: var(--tr-page-easing);
+
+  animation: page-turn var(--tr-duration) var(--tr-easing) both;
+  transform-origin: left center;
+  /* 3D 透视容器 */
+  perspective: 1200px;
+}
+
+@keyframes page-turn {
+  0% {
+    opacity: 0;
+    transform: perspective(1200px) rotateY(-90deg) translateZ(20px);
+    /* 翻页时的纸张阴影 */
+    filter: drop-shadow(-8px 0 16px rgba(44, 44, 44, 0.3))
+            brightness(0.7);
+  }
+  25% {
+    opacity: 0.6;
+    transform: perspective(1200px) rotateY(-60deg) translateZ(15px);
+    filter: drop-shadow(-6px 0 12px rgba(44, 44, 44, 0.25))
+            brightness(0.8);
+  }
+  50% {
+    opacity: 0.85;
+    transform: perspective(1200px) rotateY(-30deg) translateZ(8px);
+    filter: drop-shadow(-3px 0 8px rgba(44, 44, 44, 0.15))
+            brightness(0.9);
+  }
+  75% {
+    transform: perspective(1200px) rotateY(-8deg) translateZ(2px);
+    filter: drop-shadow(-1px 0 4px rgba(44, 44, 44, 0.08))
+            brightness(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1200px) rotateY(0deg) translateZ(0);
+    filter: drop-shadow(0 0 0 transparent)
+            brightness(1);
+  }
+}
+
+/* 翻页效果的中缝装饰线（模拟书脊） */
+.transition-page::before {
+  content: "";
+  position: absolute;
+  top: 5%;
+  left: 0;
+  width: 2px;
+  height: 90%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--tr-zheshi) 20%,
+    var(--tr-chijin) 50%,
+    var(--tr-zheshi) 80%,
+    transparent 100%
+  );
+  opacity: 0;
+  animation: page-spine 0.3s ease-out calc(var(--tr-page-duration) * 0.6) both;
+}
+
+@keyframes page-spine {
+  from {
+    opacity: 0;
+    height: 0;
+  }
+  to {
+    opacity: 0.5;
+    height: 90%;
+  }
+}
+
+/* ============================================================
+   六、印章压印过渡（Stamp Press）
+   内容如印章般"盖"入画面，带轻微弹跳和红色印泥渐显
+   适用于重要提示、章节标题等强调性内容
+   ============================================================ */
+.transition-stamp {
+  --tr-duration: var(--tr-stamp-duration);
+  --tr-easing: var(--tr-stamp-easing);
+
+  animation: stamp-press var(--tr-duration) var(--tr-easing) both;
+}
+
+@keyframes stamp-press {
+  0% {
+    opacity: 0;
+    /* 从上方落下，略大于最终尺寸 */
+    transform: scale(1.3) translateY(-20px);
+    filter: blur(2px);
+  }
+  40% {
+    opacity: 0.8;
+    /* 接触纸面：略小于最终尺寸（压入感） */
+    transform: scale(0.95) translateY(2px);
+    filter: blur(0);
+  }
+  65% {
+    /* 轻微反弹 */
+    transform: scale(1.03) translateY(-1px);
+  }
+  85% {
+    /* 二次微调 */
+    transform: scale(0.99) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* 印章压印的红色印泥光晕 */
+.transition-stamp::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80%;
+  height: 80%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  /* 印朱色光晕 */
+  background: radial-gradient(
+    ellipse at center,
+    rgba(184, 66, 51, 0.15) 0%,
+    rgba(184, 66, 51, 0.06) 40%,
+    transparent 70%
+  );
+  animation: stamp-ink-glow var(--tr-stamp-duration) ease-out both;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes stamp-ink-glow {
+  0% {
+    opacity: 0;
+    width: 20%;
+    height: 20%;
+  }
+  30% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    width: 120%;
+    height: 120%;
+  }
+}
+
+/* ============================================================
+   七、过渡状态辅助类
+   用于 JavaScript 控制过渡的进入/离开状态
+   ============================================================ */
+
+/* 进入前的准备状态（元素已插入但尚未动画） */
+.transition-enter {
+  opacity: 0;
+}
+
+/* 进入完成状态 */
+.transition-enter-active {
+  opacity: 1;
+}
+
+/* 离开前状态 */
+.transition-exit {
+  opacity: 1;
+}
+
+/* 离开动画中 */
+.transition-exit-active {
+  opacity: 0;
+  transition: opacity 0.3s ease-in;
+}
+
+/* ============================================================
+   八、组合使用示例类
+   可将多种过渡组合使用，如"卷轴+墨滴"
+   ============================================================ */
+.transition-scroll-ink {
+  animation:
+    scroll-unfurl var(--tr-scroll-duration) var(--tr-scroll-easing) both,
+    ink-drop-fade var(--tr-ink-duration) var(--tr-ink-easing) calc(var(--tr-scroll-duration) * 0.4) both;
+}
+
+/* ============================================================
+   九、无障碍：尊重用户的减少动效偏好
+   prefers-reduced-motion: reduce 时，所有过渡简化为淡入淡出
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .transition-scroll,
+  .transition-ink,
+  .transition-brush,
+  .transition-page,
+  .transition-stamp,
+  .transition-scroll-ink {
+    animation: simple-fade 0.3s ease both !important;
+  }
+
+  /* 禁用所有装饰性伪元素动画 */
+  .transition-scroll::before,
+  .transition-scroll::after,
+  .transition-ink::before,
+  .transition-brush::after,
+  .transition-page::before,
+  .transition-stamp::after {
+    animation: none !important;
+    display: none !important;
+  }
+}
+
+@keyframes simple-fade {
+  from {
+    opacity: 0;
+    transform: none;
+    filter: none;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* ============================================================
+   十、性能优化
+   为动画元素添加 GPU 加速提示
+   ============================================================ */
+.transition-scroll,
+.transition-ink,
+.transition-brush,
+.transition-page,
+.transition-stamp {
+  will-change: transform, opacity;
+  /* 动画结束后释放 GPU 资源 */
+  animation-fill-mode: both;
+}
+
+/* 动画完成后移除 will-change（通过 JS 添加此类） */
+.transition-settled {
+  will-change: auto;
+}
+
+/* ============================================================
+   十一、响应式适配
+   小屏幕下适当缩短动画时长，提升流畅感
+   ============================================================ */
+@media (max-width: 768px) {
+  :root {
+    --tr-scroll-duration: 0.6s;
+    --tr-ink-duration: 0.45s;
+    --tr-brush-duration: 0.4s;
+    --tr-page-duration: 0.5s;
+    --tr-stamp-duration: 0.35s;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --tr-scroll-duration: 0.5s;
+    --tr-ink-duration: 0.35s;
+    --tr-brush-duration: 0.3s;
+    --tr-page-duration: 0.4s;
+    --tr-stamp-duration: 0.3s;
+  }
+}
