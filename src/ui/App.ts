@@ -5418,6 +5418,7 @@ export class AdaptiveGameApp {
     if (this.handleExportClick(action, actionTarget)) return;
     if (this.handleLiveClick(action, actionTarget)) return;
     if (this.handleCustomScenarioClick(action, actionTarget)) return;
+    if (this.handleCoachClick(action, actionTarget)) return;
 
     switch (action) {
       case "open-node": {
@@ -5970,69 +5971,6 @@ export class AdaptiveGameApp {
         } else {
           this.show("map");
         }
-        break;
-      case "open-achievements":
-        this.audio.ui();
-        this.show("achievements");
-        break;
-      case "open-relations":
-        this.audio.ui();
-        this.show("relations");
-        break;
-      case "open-settings":
-        this.audio.ui();
-        this.show("settings");
-        break;
-      case "open-assessment":
-        this.pendingProfile = structuredClone(this.save.profile);
-        this.assessmentAnswers = [];
-        this.assessmentStep = 0;
-        this.audio.ui();
-        this.show("assessment");
-        break;
-      case "open-coach":
-        this.audio.ui();
-        this.show("coach");
-        break;
-      case "coach-plan-goal":
-        this.coachGoal = actionTarget.dataset.goal as CoachGoal;
-        this.coachPlanStep = "challenge";
-        this.renderCoach();
-        break;
-      case "coach-plan-challenge":
-        this.coachChallenge =
-          actionTarget.dataset.challenge as CoachChallenge;
-        this.coachPlanStep = "plan";
-        this.coachPlan =
-          this.coachGoal && this.coachChallenge
-            ? generateCoachPlan(
-                this.save,
-                this.coachGoal,
-                this.coachChallenge
-              )
-            : undefined;
-        this.coachPlanChecks = {};
-        this.renderCoach();
-        break;
-      case "coach-plan-check": {
-        const key = actionTarget.dataset.key ?? "";
-        this.coachPlanChecks[key] = !this.coachPlanChecks[key];
-        this.renderCoach();
-        break;
-      }
-      case "coach-plan-restart":
-        this.coachPlan = undefined;
-        this.coachGoal = undefined;
-        this.coachChallenge = undefined;
-        this.coachPlanStep = "goal";
-        this.coachPlanChecks = {};
-        this.renderCoach();
-        break;
-      case "coach-load-demo":
-        this.loadCoachDemo();
-        break;
-      case "coach-import":
-        this.importCoachParticipants();
         break;
       case "claim-challenge": {
         const challengeId = actionTarget.dataset.challenge ?? "";
@@ -7573,6 +7511,79 @@ export class AdaptiveGameApp {
         this.customPlayResult = undefined;
         this.audio.ui();
         this.show("customScenarios");
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private handleCoachClick(
+    action: string,
+    actionTarget: HTMLElement
+  ): boolean {
+    switch (action) {
+      case "open-achievements":
+        this.audio.ui();
+        this.show("achievements");
+        return true;
+      case "open-relations":
+        this.audio.ui();
+        this.show("relations");
+        return true;
+      case "open-settings":
+        this.audio.ui();
+        this.show("settings");
+        return true;
+      case "open-assessment":
+        this.pendingProfile = structuredClone(this.save.profile);
+        this.assessmentAnswers = [];
+        this.assessmentStep = 0;
+        this.audio.ui();
+        this.show("assessment");
+        return true;
+      case "open-coach":
+        this.audio.ui();
+        this.show("coach");
+        return true;
+      case "coach-plan-goal":
+        this.coachGoal = actionTarget.dataset.goal as CoachGoal;
+        this.coachPlanStep = "challenge";
+        this.renderCoach();
+        return true;
+      case "coach-plan-challenge":
+        this.coachChallenge =
+          actionTarget.dataset.challenge as CoachChallenge;
+        this.coachPlanStep = "plan";
+        this.coachPlan =
+          this.coachGoal && this.coachChallenge
+            ? generateCoachPlan(
+                this.save,
+                this.coachGoal,
+                this.coachChallenge
+              )
+            : undefined;
+        this.coachPlanChecks = {};
+        this.renderCoach();
+        return true;
+      case "coach-plan-check": {
+        const key = actionTarget.dataset.key ?? "";
+        this.coachPlanChecks[key] = !this.coachPlanChecks[key];
+        this.renderCoach();
+        return true;
+      }
+      case "coach-plan-restart":
+        this.coachPlan = undefined;
+        this.coachGoal = undefined;
+        this.coachChallenge = undefined;
+        this.coachPlanStep = "goal";
+        this.coachPlanChecks = {};
+        this.renderCoach();
+        return true;
+      case "coach-load-demo":
+        this.loadCoachDemo();
+        return true;
+      case "coach-import":
+        this.importCoachParticipants();
         return true;
       default:
         return false;
