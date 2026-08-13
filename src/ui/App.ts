@@ -5410,6 +5410,8 @@ export class AdaptiveGameApp {
     }
 
     if (this.handleTrainingClick(action, actionTarget)) return;
+    if (this.handleAssessmentClick(action, actionTarget)) return;
+    if (this.handleDuelClick(action, actionTarget)) return;
 
     switch (action) {
       case "open-node": {
@@ -6960,53 +6962,6 @@ export class AdaptiveGameApp {
           this.renderTrial();
         }
         break;
-      case "open-duel":
-        this.audio.ui();
-        this.show("duelLobby");
-        break;
-      case "open-duel-lobby":
-        this.audio.ui();
-        this.cleanupRemote();
-        this.show("duelLobby");
-        break;
-      case "create-profile":
-        this.createProfileFromForm();
-        break;
-      case "start-without-assessment":
-        this.startWithoutAssessment();
-        break;
-      case "assessment-option":
-        this.assessmentAnswers[this.assessmentStep] = Number(
-          actionTarget.dataset.option
-        );
-        this.audio.ui();
-        this.renderAssessment();
-        break;
-      case "assessment-next":
-        this.assessmentAnswers[this.assessmentStep] ??= 0;
-        this.assessmentStep = Math.min(
-          ASSESSMENT_QUESTIONS.length - 1,
-          this.assessmentStep + 1
-        );
-        this.audio.ui();
-        this.renderAssessment();
-        break;
-      case "assessment-prev":
-        this.assessmentStep = Math.max(0, this.assessmentStep - 1);
-        this.audio.ui();
-        this.renderAssessment();
-        break;
-      case "assessment-submit":
-        this.assessmentAnswers[this.assessmentStep] ??= 0;
-        this.finishProfile(true);
-        break;
-      case "assessment-skip":
-        this.finishProfile(false);
-        break;
-      case "start-campaign":
-        this.audio.ui();
-        this.show("map");
-        break;
       case "claim-challenge": {
         const challengeId = actionTarget.dataset.challenge ?? "";
         const today = todayKey();
@@ -7271,99 +7226,6 @@ export class AdaptiveGameApp {
         }
         break;
       }
-      case "set-duel-mode":
-        this.duelMode = (actionTarget.dataset.mode as DuelMode) ?? "ai";
-        this.renderDuelLobby();
-        break;
-      case "start-ai-duel":
-        this.startAiDuel();
-        break;
-      case "start-challenge-duel":
-        this.startChallengeDuel();
-        break;
-      case "start-endless-duel":
-        this.startEndlessDuel();
-        break;
-      case "resume-duel":
-        this.resumeDuel();
-        break;
-      case "start-local-duel":
-        this.startLocalDuel();
-        break;
-      case "duel-rematch":
-        if (this.duelRematchAction === "ai") {
-          this.startAiDuel();
-        } else if (this.duelRematchAction === "local") {
-          this.startLocalDuel();
-        }
-        break;
-      case "create-remote":
-        void this.createRemote();
-        break;
-      case "join-remote":
-        void this.joinRemote();
-        break;
-      case "finish-remote":
-        void this.finishRemote();
-        break;
-      case "copy-invite":
-        this.copyText(actionTarget, "copy-target");
-        break;
-      case "copy-answer":
-        this.copyText(actionTarget, "copy-target");
-        break;
-      case "duel-pick":
-        this.duelPick(actionTarget);
-        break;
-      case "duel-predict": {
-        const prediction = actionTarget.dataset.quality as
-          | DuelQuality
-          | undefined;
-        if (!prediction) {
-          break;
-        }
-        const engine = this.duelEngine;
-        if (
-          engine?.currentRound === 0 &&
-          engine?.roundResults.length === 0
-        ) {
-          this.duelPredictionHistory = [];
-        }
-        this.duelPrediction = prediction;
-        this.duelPredictionPhase = false;
-        if (this.duelMode === "remote") {
-          this.duelPredictionCorrect = undefined;
-          this.duelPredictionHistory.push(false);
-          const ownOption = this.remoteOwnOption ?? 0;
-          if (this.usingCloudMatch && this.roomClient) {
-            this.roomClient.reveal(ownOption);
-          } else if (this.remotePeer) {
-            this.remotePeer.send({
-              kind: "reveal",
-              optionIndex: ownOption
-            });
-          }
-          this.audio.duelPick();
-          this.renderDuel();
-          return;
-        }
-        const predictingIndex =
-          this.duelMode === "local" ? (this.hotSeatTurn as 0 | 1) : 0;
-        const bonus = engine
-          ? engine.predictOpponentStyle(predictingIndex, prediction)
-          : 0;
-        this.duelPredictionCorrect = bonus > 0;
-        this.duelPredictionHistory.push(bonus > 0);
-        this.duelPredictionBonusTotal += bonus;
-        this.audio.duelPick();
-        this.maybeRevealDuelRound();
-        break;
-      }
-      case "pass-local":
-        this.localPassed = true;
-        this.hotSeatTurn = 1;
-        this.renderDuel();
-        break;
       case "reset-profile":
         if (
           window.confirm(
@@ -7486,6 +7348,165 @@ export class AdaptiveGameApp {
         this.trainingResult = undefined;
         this.audio.ui();
         this.renderTraining();
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /** 建档/测评视图点击：从 handleClick 拆出的测评域动作，返回 true 表示已处理。 */
+  private handleAssessmentClick(
+    action: string,
+    actionTarget: HTMLElement
+  ): boolean {
+    switch (action) {
+      case "create-profile":
+        this.createProfileFromForm();
+        return true;
+      case "start-without-assessment":
+        this.startWithoutAssessment();
+        return true;
+      case "assessment-option":
+        this.assessmentAnswers[this.assessmentStep] = Number(
+          actionTarget.dataset.option
+        );
+        this.audio.ui();
+        this.renderAssessment();
+        return true;
+      case "assessment-next":
+        this.assessmentAnswers[this.assessmentStep] ??= 0;
+        this.assessmentStep = Math.min(
+          ASSESSMENT_QUESTIONS.length - 1,
+          this.assessmentStep + 1
+        );
+        this.audio.ui();
+        this.renderAssessment();
+        return true;
+      case "assessment-prev":
+        this.assessmentStep = Math.max(0, this.assessmentStep - 1);
+        this.audio.ui();
+        this.renderAssessment();
+        return true;
+      case "assessment-submit":
+        this.assessmentAnswers[this.assessmentStep] ??= 0;
+        this.finishProfile(true);
+        return true;
+      case "assessment-skip":
+        this.finishProfile(false);
+        return true;
+      case "start-campaign":
+        this.audio.ui();
+        this.show("map");
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  /** 1v1 对局视图点击：从 handleClick 拆出的对决域动作，返回 true 表示已处理。 */
+  private handleDuelClick(action: string, actionTarget: HTMLElement): boolean {
+    switch (action) {
+      case "open-duel":
+        this.audio.ui();
+        this.show("duelLobby");
+        return true;
+      case "open-duel-lobby":
+        this.audio.ui();
+        this.cleanupRemote();
+        this.show("duelLobby");
+        return true;
+      case "set-duel-mode":
+        this.duelMode = (actionTarget.dataset.mode as DuelMode) ?? "ai";
+        this.renderDuelLobby();
+        return true;
+      case "start-ai-duel":
+        this.startAiDuel();
+        return true;
+      case "start-challenge-duel":
+        this.startChallengeDuel();
+        return true;
+      case "start-endless-duel":
+        this.startEndlessDuel();
+        return true;
+      case "resume-duel":
+        this.resumeDuel();
+        return true;
+      case "start-local-duel":
+        this.startLocalDuel();
+        return true;
+      case "duel-rematch":
+        if (this.duelRematchAction === "ai") {
+          this.startAiDuel();
+        } else if (this.duelRematchAction === "local") {
+          this.startLocalDuel();
+        }
+        return true;
+      case "create-remote":
+        void this.createRemote();
+        return true;
+      case "join-remote":
+        void this.joinRemote();
+        return true;
+      case "finish-remote":
+        void this.finishRemote();
+        return true;
+      case "copy-invite":
+        this.copyText(actionTarget, "copy-target");
+        return true;
+      case "copy-answer":
+        this.copyText(actionTarget, "copy-target");
+        return true;
+      case "duel-pick":
+        this.duelPick(actionTarget);
+        return true;
+      case "duel-predict": {
+        const prediction = actionTarget.dataset.quality as
+          | DuelQuality
+          | undefined;
+        if (!prediction) {
+          return true;
+        }
+        const engine = this.duelEngine;
+        if (
+          engine?.currentRound === 0 &&
+          engine?.roundResults.length === 0
+        ) {
+          this.duelPredictionHistory = [];
+        }
+        this.duelPrediction = prediction;
+        this.duelPredictionPhase = false;
+        if (this.duelMode === "remote") {
+          this.duelPredictionCorrect = undefined;
+          this.duelPredictionHistory.push(false);
+          const ownOption = this.remoteOwnOption ?? 0;
+          if (this.usingCloudMatch && this.roomClient) {
+            this.roomClient.reveal(ownOption);
+          } else if (this.remotePeer) {
+            this.remotePeer.send({
+              kind: "reveal",
+              optionIndex: ownOption
+            });
+          }
+          this.audio.duelPick();
+          this.renderDuel();
+          return true;
+        }
+        const predictingIndex =
+          this.duelMode === "local" ? (this.hotSeatTurn as 0 | 1) : 0;
+        const bonus = engine
+          ? engine.predictOpponentStyle(predictingIndex, prediction)
+          : 0;
+        this.duelPredictionCorrect = bonus > 0;
+        this.duelPredictionHistory.push(bonus > 0);
+        this.duelPredictionBonusTotal += bonus;
+        this.audio.duelPick();
+        this.maybeRevealDuelRound();
+        return true;
+      }
+      case "pass-local":
+        this.localPassed = true;
+        this.hotSeatTurn = 1;
+        this.renderDuel();
         return true;
       default:
         return false;
