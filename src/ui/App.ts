@@ -5423,260 +5423,7 @@ export class AdaptiveGameApp {
     if (this.handleReviewClick(action, actionTarget)) return;
     if (this.handleMapClick(action, actionTarget)) return;
     if (this.handleStoryTransitionClick(action, actionTarget)) return;
-
-    switch (action) {
-      case "open-node": {
-        const nodeId = actionTarget.dataset.node;
-        if (nodeId) {
-          // 已完成节点只用于展示，不可再次结算；重打请走 replay-chapter。
-          if (isNodeComplete(this.save, nodeId)) {
-            this.audio.ui();
-            return;
-          }
-          this.audio.ui();
-          this.replayMode = false;
-          this.storyNodeId = nodeId;
-          this.storyHintRevealed = false;
-          this.pendingBranchNodeId = undefined;
-          this.pendingChapterTransition = undefined;
-          this.lastUnlockedAchievement = undefined;
-          this.lastOutcome = undefined;
-          this.lastOutcomeNodeId = undefined;
-          // D3：派发随机事件时展示"突发干扰"横幅；普通节点清空。
-          try {
-            const opened = getNode(nodeId);
-            this.interferenceText =
-              opened.kind === "random"
-                ? this.t("interferenceNote")
-                : opened.kind === "main" && this.recentExpertRate() < 0.35
-                  ? this.adaptiveInterferenceText()
-                  : undefined;
-          } catch {
-            this.interferenceText = undefined;
-          }
-          this.show("story");
-          // D2：每个决策回合开始时启动时限计时器（标准档不计时）。
-          this.startRoundTimer();
-        }
-        break;
-      }
-      case "resume-last-node": {
-        const nodeId = this.save.lastStoryNodeId;
-        if (!nodeId) break;
-        try {
-          const node = getNode(nodeId);
-          if (isNodeComplete(this.save, node.id)) {
-            this.save.lastStoryNodeId = undefined;
-            this.persistSave();
-            break;
-          }
-          this.audio.ui();
-          this.replayMode = false;
-          this.storyNodeId = node.id;
-          this.storyHintRevealed = false;
-          this.pendingBranchNodeId = undefined;
-          this.pendingChapterTransition = undefined;
-          this.lastUnlockedAchievement = undefined;
-          this.lastOutcome = undefined;
-          this.lastOutcomeNodeId = undefined;
-          this.interferenceText =
-            node.kind === "random"
-              ? this.t("interferenceNote")
-              : node.kind === "main" && this.recentExpertRate() < 0.35
-                ? this.adaptiveInterferenceText()
-                : undefined;
-          this.show("story");
-          this.startRoundTimer();
-        } catch {
-          this.save.lastStoryNodeId = undefined;
-          this.persistSave();
-        }
-        break;
-      }
-      case "select-chapter": {
-        const chapterId = Number(actionTarget.dataset.chapter);
-        if (this.save.unlockedChapters.includes(chapterId)) {
-          this.audio.ui();
-          this.selectedChapter = chapterId;
-          this.renderMap();
-        }
-        break;
-      }
-      case "select-role":
-        this.audio.ui();
-        this.pendingRole = (actionTarget.dataset.role as RoleId) ?? "highPotential";
-        this.renderProfile();
-        break;
-      case "switch-role": {
-        const role = actionTarget.dataset.role as RoleId;
-        if (!role || !ROLES[role]) break;
-        this.save = loadSave(role);
-        this.pendingRole = role;
-        this.pendingProfile = undefined;
-        this.audio.ui();
-        if (this.save.profileCreated) {
-          this.show("menu");
-        } else {
-          this.show("profile");
-        }
-        break;
-      }
-      case "new-role": {
-        const role = actionTarget.dataset.role as RoleId;
-        if (!role || !ROLES[role]) break;
-        const existing = roleSlotSummaries().find(
-          (slot) => slot.role === role && slot.exists
-        );
-        if (
-          existing &&
-          !window.confirm(
-            this.language === "en"
-              ? `A ${roleDisplay(this.language, role).name} save already exists. Create a new one and overwrite it?`
-              : `已存在「${roleDisplay(this.language, role).name}」档案，新建会覆盖它，确定吗？`
-          )
-        ) {
-          break;
-        }
-        if (existing) {
-          deleteRoleSlot(role);
-        }
-        this.save = loadSave(role);
-        this.pendingRole = role;
-        this.pendingProfile = undefined;
-        this.audio.ui();
-        this.show("profile");
-        break;
-      }
-      case "open-menu":
-        this.audio.ui();
-        this.show("menu");
-        break;
-      case "open-profile":
-        this.audio.ui();
-        this.show("profile");
-        break;
-      case "start-trial-chapter":
-        this.pendingRole = "parachute";
-        this.startWithoutAssessment();
-        this.showToast(
-          this.language === "en"
-            ? "Chapter 1 trial started as Parachute Manager."
-            : "已以空降管理者身份进入首章试玩。"
-        );
-        break;
-      case "open-map":
-        this.audio.ui();
-        if (this.save.profileCreated && this.save.playCount === 0) {
-          this.markGuideStep("map");
-        }
-        this.interferenceText = undefined;
-        this.replayMode = false;
-        this.selectedChapter =
-          this.save.unlockedChapters[this.save.unlockedChapters.length - 1] ?? 1;
-        this.show("map");
-        break;
-      case "replay-chapter": {
-        const chapterId = Number(actionTarget.dataset.chapter);
-        const chapter = CHAPTERS.find((item) => item.id === chapterId);
-        if (chapter && isChapterComplete(this.save, chapter.id)) {
-          this.audio.ui();
-          this.replayMode = true;
-          this.storyNodeId = chapter.nodeIds[0];
-          this.storyHintRevealed = false;
-          this.pendingBranchNodeId = undefined;
-          this.pendingChapterTransition = undefined;
-          this.lastUnlockedAchievement = undefined;
-          this.lastOutcome = undefined;
-          this.lastOutcomeNodeId = undefined;
-          this.interferenceText = undefined;
-          this.show("story");
-        }
-        break;
-      }
-      case "retry-chapter": {
-        const chapterId = Number(actionTarget.dataset.chapter);
-        const chapter = CHAPTERS.find((item) => item.id === chapterId);
-        if (chapter && isChapterComplete(this.save, chapter.id)) {
-          retryChapter(this.save, chapter.id);
-          trackEvent("chapter_retry", { chapterId });
-          this.audio.ui();
-          this.replayMode = false;
-          this.storyNodeId = chapter.nodeIds[0];
-          this.storyHintRevealed = false;
-          this.pendingBranchNodeId = undefined;
-          this.pendingChapterTransition = undefined;
-          this.lastUnlockedAchievement = undefined;
-          this.lastOutcome = undefined;
-          this.lastOutcomeNodeId = undefined;
-          this.interferenceText = undefined;
-          this.show("story");
-        }
-        break;
-      }
-      case "guide-ability":
-        if (this.save.profileCreated && this.save.playCount === 0) {
-          this.markGuideStep("ability");
-        }
-        this.audio.ui();
-        this.show("ability");
-        break;
-      case "open-ability":
-        this.audio.ui();
-        if (this.save.profileCreated && this.save.playCount === 0) {
-          this.markGuideStep("ability");
-        }
-        this.show("ability");
-        break;
-      case "open-report":
-        this.audio.ui();
-        if (this.save.profileCreated && this.save.playCount === 0) {
-          this.markGuideStep("report");
-        }
-        this.show("report");
-        break;
-      case "apply-certification": {
-        const cert = certificationLevel(this.save);
-        if (cert.passed) {
-          this.showToast(
-            this.language === "en"
-              ? `Certification approved · ${cert.level}`
-              : `认证通过 · ${cert.level}`
-          );
-          this.audio.expert();
-        } else {
-          this.showToast(
-            this.language === "en"
-              ? `Not certified yet · ${cert.next}`
-              : `暂未达标 · ${cert.next}`
-          );
-          this.audio.partial();
-        }
-        break;
-      }
-      case "certification-help":
-        this.showToast(
-          this.language === "en"
-            ? "Certification = assessment score + role focus ability levels. Finish the 30-question assessment and train focus abilities to grow."
-            : "认证点 = 测评总分 + 角色重点能力等级合计；完成 30 题测评提升总分，训练角色重点能力提升等级。"
-        );
-        this.audio.ui();
-        break;
-      case "reset-profile":
-        if (
-          window.confirm(
-            this.language === "en"
-              ? "Clear the current profile and all progress?"
-              : "确定要清空当前档案和所有进度吗？"
-          )
-        ) {
-          deleteRoleSlot(this.save.profile.role);
-          this.save = resetSave(this.save.profile.role);
-          trackEvent("profile_reset");
-          this.pendingRole = this.save.profile.role;
-          this.show("profile");
-        }
-        break;
-    }
+    if (this.handleNavClick(action, actionTarget)) return;
   }
 
   /** 训练视图点击：从 handleClick 拆出的训练域动作，返回 true 表示已处理。 */
@@ -7626,6 +7373,249 @@ export class AdaptiveGameApp {
         }
         return true;
       }
+      default:
+        return false;
+    }
+  }
+
+  private handleNavClick(action: string, actionTarget: HTMLElement): boolean {
+    switch (action) {
+      case "open-node": {
+        const nodeId = actionTarget.dataset.node;
+        if (nodeId) {
+          // 已完成节点只用于展示，不可再次结算；重打请走 replay-chapter。
+          if (isNodeComplete(this.save, nodeId)) {
+            this.audio.ui();
+            return true;
+          }
+          this.audio.ui();
+          this.replayMode = false;
+          this.storyNodeId = nodeId;
+          this.storyHintRevealed = false;
+          this.pendingBranchNodeId = undefined;
+          this.pendingChapterTransition = undefined;
+          this.lastUnlockedAchievement = undefined;
+          this.lastOutcome = undefined;
+          this.lastOutcomeNodeId = undefined;
+          // D3：派发随机事件时展示"突发干扰"横幅；普通节点清空。
+          try {
+            const opened = getNode(nodeId);
+            this.interferenceText =
+              opened.kind === "random"
+                ? this.t("interferenceNote")
+                : opened.kind === "main" && this.recentExpertRate() < 0.35
+                  ? this.adaptiveInterferenceText()
+                  : undefined;
+          } catch {
+            this.interferenceText = undefined;
+          }
+          this.show("story");
+          // D2：每个决策回合开始时启动时限计时器（标准档不计时）。
+          this.startRoundTimer();
+        }
+        return true;
+      }
+      case "resume-last-node": {
+        const nodeId = this.save.lastStoryNodeId;
+        if (!nodeId) return true;
+        try {
+          const node = getNode(nodeId);
+          if (isNodeComplete(this.save, node.id)) {
+            this.save.lastStoryNodeId = undefined;
+            this.persistSave();
+            return true;
+          }
+          this.audio.ui();
+          this.replayMode = false;
+          this.storyNodeId = node.id;
+          this.storyHintRevealed = false;
+          this.pendingBranchNodeId = undefined;
+          this.pendingChapterTransition = undefined;
+          this.lastUnlockedAchievement = undefined;
+          this.lastOutcome = undefined;
+          this.lastOutcomeNodeId = undefined;
+          this.interferenceText =
+            node.kind === "random"
+              ? this.t("interferenceNote")
+              : node.kind === "main" && this.recentExpertRate() < 0.35
+                ? this.adaptiveInterferenceText()
+                : undefined;
+          this.show("story");
+          this.startRoundTimer();
+        } catch {
+          this.save.lastStoryNodeId = undefined;
+          this.persistSave();
+        }
+        return true;
+      }
+      case "select-chapter": {
+        const chapterId = Number(actionTarget.dataset.chapter);
+        if (this.save.unlockedChapters.includes(chapterId)) {
+          this.audio.ui();
+          this.selectedChapter = chapterId;
+          this.renderMap();
+        }
+        return true;
+      }
+      case "select-role":
+        this.audio.ui();
+        this.pendingRole = (actionTarget.dataset.role as RoleId) ?? "highPotential";
+        this.renderProfile();
+        return true;
+      case "switch-role": {
+        const role = actionTarget.dataset.role as RoleId;
+        if (!role || !ROLES[role]) return true;
+        this.save = loadSave(role);
+        this.pendingRole = role;
+        this.pendingProfile = undefined;
+        this.audio.ui();
+        if (this.save.profileCreated) {
+          this.show("menu");
+        } else {
+          this.show("profile");
+        }
+        return true;
+      }
+      case "new-role": {
+        const role = actionTarget.dataset.role as RoleId;
+        if (!role || !ROLES[role]) return true;
+        const existing = roleSlotSummaries().find(
+          (slot) => slot.role === role && slot.exists
+        );
+        if (
+          existing &&
+          !window.confirm(
+            this.language === "en"
+              ? `A ${roleDisplay(this.language, role).name} save already exists. Create a new one and overwrite it?`
+              : `已存在「${roleDisplay(this.language, role).name}」档案，新建会覆盖它，确定吗？`
+          )
+        ) {
+          return true;
+        }
+        if (existing) {
+          deleteRoleSlot(role);
+        }
+        this.save = loadSave(role);
+        this.pendingRole = role;
+        this.pendingProfile = undefined;
+        this.audio.ui();
+        this.show("profile");
+        return true;
+      }
+      case "open-menu":
+        this.audio.ui();
+        this.show("menu");
+        return true;
+      case "open-profile":
+        this.audio.ui();
+        this.show("profile");
+        return true;
+      case "start-trial-chapter":
+        this.pendingRole = "parachute";
+        this.startWithoutAssessment();
+        this.showToast(
+          this.language === "en"
+            ? "Chapter 1 trial started as Parachute Manager."
+            : "已以空降管理者身份进入首章试玩。"
+        );
+        return true;
+      case "open-map":
+        this.audio.ui();
+        if (this.save.profileCreated && this.save.playCount === 0) {
+          this.markGuideStep("map");
+        }
+        this.interferenceText = undefined;
+        this.replayMode = false;
+        this.selectedChapter =
+          this.save.unlockedChapters[this.save.unlockedChapters.length - 1] ?? 1;
+        this.show("map");
+        return true;
+      case "replay-chapter": {
+        const chapterId = Number(actionTarget.dataset.chapter);
+        const chapter = CHAPTERS.find((item) => item.id === chapterId);
+        if (chapter && isChapterComplete(this.save, chapter.id)) {
+          this.audio.ui();
+          this.replayMode = true;
+          this.storyNodeId = chapter.nodeIds[0];
+          this.storyHintRevealed = false;
+          this.pendingBranchNodeId = undefined;
+          this.pendingChapterTransition = undefined;
+          this.lastUnlockedAchievement = undefined;
+          this.lastOutcome = undefined;
+          this.lastOutcomeNodeId = undefined;
+          this.interferenceText = undefined;
+          this.show("story");
+        }
+        return true;
+      }
+      case "retry-chapter": {
+        const chapterId = Number(actionTarget.dataset.chapter);
+        const chapter = CHAPTERS.find((item) => item.id === chapterId);
+        if (chapter && isChapterComplete(this.save, chapter.id)) {
+          retryChapter(this.save, chapter.id);
+          trackEvent("chapter_retry", { chapterId });
+          this.audio.ui();
+          this.replayMode = false;
+          this.storyNodeId = chapter.nodeIds[0];
+          this.storyHintRevealed = false;
+          this.pendingBranchNodeId = undefined;
+          this.pendingChapterTransition = undefined;
+          this.lastUnlockedAchievement = undefined;
+          this.lastOutcome = undefined;
+          this.lastOutcomeNodeId = undefined;
+          this.interferenceText = undefined;
+          this.show("story");
+        }
+        return true;
+      }
+      case "guide-ability":
+        if (this.save.profileCreated && this.save.playCount === 0) {
+          this.markGuideStep("ability");
+        }
+        this.audio.ui();
+        this.show("ability");
+        return true;
+      case "open-ability":
+        this.audio.ui();
+        if (this.save.profileCreated && this.save.playCount === 0) {
+          this.markGuideStep("ability");
+        }
+        this.show("ability");
+        return true;
+      case "open-report":
+        this.audio.ui();
+        if (this.save.profileCreated && this.save.playCount === 0) {
+          this.markGuideStep("report");
+        }
+        this.show("report");
+        return true;
+      case "apply-certification": {
+        const cert = certificationLevel(this.save);
+        if (cert.passed) {
+          this.showToast(
+            this.language === "en"
+              ? `Certification approved · ${cert.level}`
+              : `认证通过 · ${cert.level}`
+          );
+          this.audio.expert();
+        } else {
+          this.showToast(
+            this.language === "en"
+              ? `Not certified yet · ${cert.next}`
+              : `暂未达标 · ${cert.next}`
+          );
+          this.audio.partial();
+        }
+        return true;
+      }
+      case "certification-help":
+        this.showToast(
+          this.language === "en"
+            ? "Certification = assessment score + role focus ability levels. Finish the 30-question assessment and train focus abilities to grow."
+            : "认证点 = 测评总分 + 角色重点能力等级合计；完成 30 题测评提升总分，训练角色重点能力提升等级。"
+        );
+        this.audio.ui();
+        return true;
       default:
         return false;
     }
