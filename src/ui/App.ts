@@ -159,6 +159,7 @@ import { difficultySelector, settingsView } from "./settingsView";
 import { achievementsView } from "./achievementsView";
 import { profileView } from "./profileView";
 import { relationsView } from "./relationsView";
+import { trainingView } from "./trainingView";
 import {
   chapterTrainingMarkup,
   expeditionHeroMarkup,
@@ -2543,240 +2544,18 @@ export class AdaptiveGameApp {
     return this.language === "en" ? EXPANDED_TRAINING_EN[path.abilityId] : path;
   }
 
-  private trainingMasteryLabel(correct: number, total: number): string {
-    if (correct === total) return this.t("trainingMastered");
-    if (correct >= Math.ceil(total / 2)) return this.t("trainingBasic");
-    return this.t("trainingReviewNeeded");
-  }
-
   private renderTraining(): void {
-    const path = EXPANDED_TRAINING[this.trainingAbilityId];
-    const view = this.trainingDisplay(path);
-    const en = this.language === "en";
-    const ability = abilityDisplay(this.language, this.trainingAbilityId);
-    const exp = this.save.profile.abilities[this.trainingAbilityId];
-    const done = this.save.completedTraining.includes(this.trainingAbilityId);
-    const best = this.save.trainingScores[this.trainingAbilityId] ?? 0;
-    const role = this.save.profile.role;
-
-    if (this.trainingStage === "quiz") {
-      const question = view.questions[this.trainingStep];
-      const selected = this.trainingAnswers[this.trainingStep];
-      const last = this.trainingStep === view.questions.length - 1;
-      this.root.innerHTML = `
-        <header class="topbar">
-          <div class="brand">${this.t("brand")}</div>
-          <button class="link" data-action="training-back">${en ? "Back" : "返回"}</button>
-        </header>
-        <main class="training-shell training-quiz-shell" aria-label="${this.t("trainingQuiz")}">
-          <section class="training-quiz-head">
-            <div>
-              <p class="eyebrow">${this.t("trainingQuiz")}</p>
-              <h1>${ability.name} · ${escapeHtml(view.routeTitle)}</h1>
-            </div>
-            <strong>${this.trainingStep + 1} / ${view.questions.length}</strong>
-          </section>
-          <div class="assessment-bar"><i style="width:${((this.trainingStep + 1) / view.questions.length) * 100}%"></i></div>
-          <section class="training-question">
-            <h2>${escapeHtml(question.prompt)}</h2>
-            <div class="training-options">
-              ${question.options
-                .map(
-                  (option, index) => `
-                    <button class="training-option ${selected === index ? "selected" : ""}" data-action="training-option" data-option="${index}">
-                      ${escapeHtml(option.label)}
-                    </button>
-                  `
-                )
-                .join("")}
-            </div>
-            <div class="training-actions">
-              <button data-action="training-prev" ${this.trainingStep === 0 ? "disabled" : ""}>${this.t("trainingPrev")}</button>
-              ${
-                last
-                  ? `<button class="primary" data-action="training-submit">${this.t("trainingSubmit")}</button>`
-                  : `<button class="primary" data-action="training-next">${this.t("trainingNext")}</button>`
-              }
-            </div>
-          </section>
-        </main>
-      `;
-      return;
-    }
-
-    if (this.trainingStage === "result" && this.trainingResult) {
-      const result = this.trainingResult;
-      const masteryLabel = this.trainingMasteryLabel(result.correct, result.total);
-      this.root.innerHTML = `
-        <header class="topbar">
-          <div class="brand">${this.t("brand")}</div>
-          <button class="link" data-action="training-back">${en ? "Back" : "返回"}</button>
-        </header>
-        <main class="training-result-shell" aria-label="${this.t("trainingResult")}">
-          <section class="training-result-hero">
-            <p class="eyebrow">${this.t("trainingResult")}</p>
-            <h1>${result.correct} / ${result.total}</h1>
-            <div class="training-mastery-badge">${this.t("trainingMastery")} · ${masteryLabel}</div>
-            <p class="muted">${this.t("trainingCorrect")} ${ability.name}</p>
-            <div class="training-reward">
-              <span>${this.t("trainingReward")}</span>
-              <strong>+${result.gainedExp} ${ability.name}</strong>
-              <small>${result.firstComplete ? (en ? "First completion reward" : "首次完成奖励") : (en ? "Review only; reward already claimed" : "复训仅复盘，奖励已领取")}</small>
-            </div>
-          </section>
-          <section class="training-review">
-            <h2>${this.t("trainingReview")}</h2>
-            ${view.questions
-              .map(
-                (question, index) => `
-                  <div class="training-review-card ${result.answered[index] ? "correct" : "wrong"}">
-                    <span>${result.answered[index] ? "✓" : "×"}</span>
-                    <div>
-                      <h3>${escapeHtml(question.prompt)}</h3>
-                      <p><strong>${en ? "Your answer: " : "你的选择："}</strong>${escapeHtml(question.options[this.trainingAnswers[index]].label)}</p>
-                      <p><strong>${en ? "Correct: " : "正确做法："}</strong>${escapeHtml(question.options[question.answer].label)}</p>
-                      <div class="training-solution">
-                        <strong>${this.t("trainingSolved")}</strong>
-                        <ol>
-                          ${question.solutionSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}
-                        </ol>
-                      </div>
-                      <p class="reference-answer"><strong>${this.t("trainingReference")}</strong>${escapeHtml(question.referenceAnswer)}</p>
-                      <em>${escapeHtml(question.options[question.answer].feedback)}</em>
-                    </div>
-                  </div>
-                `
-              )
-              .join("")}
-          </section>
-          <div class="training-result-actions">
-            <button data-action="training-restart">${en ? "Review the Lesson" : "重新学习"}</button>
-            <button class="primary" data-action="open-ability">${en ? "Ability Map" : "能力图谱"}</button>
-          </div>
-        </main>
-      `;
-      return;
-    }
-
-    this.root.innerHTML = `
-      <header class="topbar">
-        <div class="brand">${this.t("brand")}</div>
-        <button class="link" data-action="training-back">${en ? "Back" : "返回"}</button>
-        <button class="link" data-action="open-ability">${en ? "Ability Map" : "能力图谱"}</button>
-      </header>
-      <main class="training-shell" aria-label="${this.t("trainingTitle")}">
-        <section class="training-hero">
-          <div>
-            <p class="eyebrow">${this.t("trainingTitle")}</p>
-            <h1>${escapeHtml(view.routeTitle)}</h1>
-            <p class="muted">${escapeHtml(view.routeSummary)}</p>
-            <div class="training-ability-tag" style="--dot:${ABILITIES[this.trainingAbilityId].color}">
-              <strong>${ability.name} · Lv.${abilityLevel(exp)}</strong>
-              <span>${done ? this.t("trainingCompleted") : `${this.t("trainingBest")} ${best} / ${view.questions.length}`}</span>
-            </div>
-          </div>
-          <canvas class="training-board" id="training-board"></canvas>
-        </section>
-        <section class="training-flow">
-          <div class="training-panel">
-            <h2>${this.t("trainingProblem")}</h2>
-            <p>${escapeHtml(view.problemPrompt)}</p>
-          </div>
-          <div class="training-panel">
-            <h2>${this.t("trainingAnalogy")}</h2>
-            <p>${escapeHtml(view.analogy)}</p>
-          </div>
-        </section>
-        <section class="training-columns">
-          <div class="training-panel training-route-panel">
-            <h2>${this.t("trainingBreakdown")}</h2>
-            <ol class="training-route">
-              ${view.route.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}
-            </ol>
-          </div>
-          <div class="training-panel">
-            <h2>${this.t("trainingApplication")}</h2>
-            <ul class="training-points">
-              ${view.applicationPoints.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
-            </ul>
-          </div>
-          <div class="training-panel training-formula-panel">
-            <h2>${this.t("trainingFormula")}</h2>
-            <h3>${escapeHtml(view.formula.name)}</h3>
-            <code>${escapeHtml(view.formula.expression)}</code>
-            <p>${escapeHtml(view.formula.explanation)}</p>
-          </div>
-        </section>
-        <section class="training-panel role-application-panel">
-          <h2>${this.t("trainingRoleApply")} · ${roleDisplay(this.language, role).name}</h2>
-          <div class="role-apply-grid role-single">
-            <div class="role-apply-card active">
-              <strong>${roleDisplay(this.language, role).name}</strong>
-              <p>${escapeHtml(view.roleApplications[role])}</p>
-            </div>
-          </div>
-          <p class="role-split-note">${en ? "This lesson is scoped to your current role. Other-role strategies are not mixed in." : "当前训练只针对你的角色，不混入其他角色策略。"}</p>
-        </section>
-        <section class="training-panel worked-examples-panel">
-          <h2>${this.t("trainingExamples")}</h2>
-          <div class="worked-examples">
-            ${view.workedExamples
-              .map(
-                (example) => `
-                  <article>
-                    <h3>${escapeHtml(example.title)}</h3>
-                    <p>${escapeHtml(example.scenario)}</p>
-                    <p class="application">${escapeHtml(example.application)}</p>
-                  </article>
-                `
-              )
-              .join("")}
-          </div>
-        </section>
-        <section class="training-panel training-story-panel">
-          <div class="story-meta">
-            <h2>${this.t("trainingStory")}</h2>
-            <span>${escapeHtml(view.story.source)}</span>
-          </div>
-          <h3>${escapeHtml(view.story.title)}</h3>
-          <p>${escapeHtml(view.story.scenario)}</p>
-          <blockquote>${escapeHtml(view.story.lesson)}</blockquote>
-          <section class="training-teach">
-            <div>
-              <h3>${this.t("trainingFormula")}</h3>
-              <code>${escapeHtml(view.formula.expression)}</code>
-              <p class="muted">${escapeHtml(view.formula.explanation)}</p>
-            </div>
-            <div>
-              <h3>${this.t("trainingApplication")}</h3>
-              <ul>
-                ${view.applicationPoints
-                  .map((point) => `<li>${escapeHtml(point)}</li>`)
-                  .join("")}
-              </ul>
-            </div>
-            <div>
-              <h3>${this.t("trainingExamples")}</h3>
-              ${
-                view.workedExamples[0]
-                  ? `
-                    <p>${escapeHtml(view.workedExamples[0].scenario)}</p>
-                    <p class="muted">${escapeHtml(view.workedExamples[0].application)}</p>
-                  `
-                  : ""
-              }
-            </div>
-          </section>
-          <section class="training-panel training-role-panel">
-            <h2>${this.t("trainingRoleApply")} · ${roleDisplay(this.language, this.save.profile.role).name}</h2>
-            <p>${escapeHtml(view.roleApplications[this.save.profile.role])}</p>
-          </section>
-          <button class="primary" data-action="training-start-quiz">${this.t("trainingStartQuiz")}</button>
-        </section>
-      </main>
-    `;
+    this.root.innerHTML = trainingView(this.save, this.language, {
+      abilityId: this.trainingAbilityId,
+      stage: this.trainingStage,
+      step: this.trainingStep,
+      answers: this.trainingAnswers,
+      result: this.trainingResult
+    });
     const board = this.root.querySelector<HTMLCanvasElement>("#training-board");
     if (board) {
+      const exp = this.save.profile.abilities[this.trainingAbilityId];
+      const ability = abilityDisplay(this.language, this.trainingAbilityId);
       renderTrainingBoard(
         board,
         this.trainingAbilityId,
