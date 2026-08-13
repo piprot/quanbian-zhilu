@@ -318,7 +318,7 @@ export class TeamAcademyApp {
           <div class="ta-roles">${roleTabs}</div>
         </section>
         <section class="ta-panel">
-          <h2>${en ? "Influence Dimensions" : "四维影响力"}</h2>
+          <h2>${en ? "Academy Influence" : "学院影响力"}</h2>
           <div class="ta-dimensions">
             ${(Object.keys(DIMENSION_LABELS) as InfluenceKey[])
               .map((key) => {

@@ -4479,7 +4479,7 @@ export class AdaptiveGameApp {
 
         <section class="coach-plan-panel">
           <h2>${en ? "Solo 90-Day Action Plan" : "单人 90 天行动计划"}</h2>
-          <p class="muted">${en ? "Answer two questions, and the coach will generate an adaptive plan from your role, ability gaps, five-dimension model, decision trajectory, and training progress." : "回答两个问题，教练会根据你的角色、能力短板、五维模型、决策轨迹和训练进度生成自适应计划。"}</p>
+          <p class="muted">${en ? "Answer two questions, and the coach will generate an adaptive plan from your role, ability gaps, leadership profile, decision trajectory, and training progress." : "回答两个问题，教练会根据你的角色、能力短板、领导力画像、决策轨迹和训练进度生成自适应计划。"}</p>
           ${this.coachPlanMarkup()}
         </section>
 
@@ -9884,7 +9884,7 @@ export class AdaptiveGameApp {
         </div>
       `;
     }).join("");
-    return `<section class="dimension-panel"><h2>${en ? "Five-Dimension Leadership Model" : "领导力五维模型"}</h2><div class="dimension-grid">${bars}</div></section>`;
+    return `<section class="dimension-panel"><h2>${en ? "Leadership Profile" : "领导力画像"}</h2><p class="muted">${en ? "Aggregated from your ten abilities." : "由你的十项能力聚合而来。"}</p><div class="dimension-grid">${bars}</div></section>`;
   }
 
   private resourceChips(profile: PlayerProfile): string {
