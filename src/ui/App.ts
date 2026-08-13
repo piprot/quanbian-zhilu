@@ -5414,6 +5414,7 @@ export class AdaptiveGameApp {
     if (this.handleDuelClick(action, actionTarget)) return;
     if (this.handleTrialClick(action, actionTarget)) return;
     if (this.handleSettingsClick(action, actionTarget)) return;
+    if (this.handleCloudClick(action, actionTarget)) return;
 
     switch (action) {
       case "open-node": {
@@ -6302,148 +6303,6 @@ export class AdaptiveGameApp {
         this.audio.ui();
         break;
       }
-      case "copy-save-link":
-        this.copySaveLink(actionTarget);
-        this.showToast(
-          this.language === "en"
-            ? "Save link copied."
-            : "存档链接已复制。"
-        );
-        break;
-      case "import-save": {
-        const input =
-          this.root.querySelector<HTMLInputElement>("input[data-import-save]");
-        input?.click();
-        break;
-      }
-      case "dismiss-backup-hint":
-        localStorage.setItem(
-          `${SAVE_BACKUP_HINT_KEY}-${APP_VERSION}`,
-          "1"
-        );
-        this.audio.ui();
-        this.showToast(
-          this.language === "en"
-            ? "Backup reminder dismissed for this version."
-            : "本次版本的备份提醒已关闭。"
-        );
-        this.renderMenu();
-        break;
-      case "rotate-events":
-        if (rotateRandomEventPool(this.save)) {
-          trackEvent("random_events_rotated");
-          this.audio.expert();
-          this.renderMap();
-        }
-        break;
-      case "toggle-map-detail":
-        this.mapDetailOpen = !this.mapDetailOpen;
-        this.audio.ui();
-        this.renderMap();
-        break;
-      case "cloud-sync":
-        void this.cloudSync();
-        break;
-      case "cloud-load":
-        void this.cloudLoad();
-        break;
-      case "cloud-leaderboard":
-        void this.cloudLeaderboard();
-        break;
-      case "cloud-login-token": {
-        const input = this.root.querySelector<HTMLInputElement>("input[data-login-token]");
-        const token = input?.value.trim() ?? "";
-        if (!token) {
-          this.cloudStatus =
-            this.language === "en" ? "Paste an account token first." : "请先粘贴账号 Token";
-          this.renderReport();
-          break;
-        }
-        this.cloudToken = token;
-        localStorage.setItem("adaptive-ascent-cloud-token", token);
-        void this.loginWithToken();
-        break;
-      }
-      case "cloud-register":
-        void this.cloudSync();
-        break;
-      case "cloud-login-recovery": {
-        const input = this.root.querySelector<HTMLInputElement>("input[data-recovery-code]");
-        const code = input?.value.trim() ?? "";
-        if (!code) {
-          this.cloudStatus =
-            this.language === "en"
-              ? "Paste a recovery code first."
-              : "请先粘贴恢复码";
-          this.renderReport();
-          break;
-        }
-        void this.loginWithRecovery(code);
-        break;
-      }
-      case "cloud-login-password": {
-        const username =
-          this.root.querySelector<HTMLInputElement>("input[data-account-username]")
-            ?.value.trim() ?? "";
-        const password =
-          this.root.querySelector<HTMLInputElement>("input[data-account-password]")
-            ?.value ?? "";
-        if (!username || !password) {
-          this.cloudStatus =
-            this.language === "en"
-              ? "Enter username and password."
-              : "请输入用户名和密码";
-          this.renderReport();
-          break;
-        }
-        void this.loginWithPassword(username, password);
-        break;
-      }
-      case "cloud-logout":
-        if (this.cloudToken && this.roomClient) {
-          this.roomClient.logout(this.cloudToken);
-        }
-        this.cloudToken = "";
-        this.cloudRecoveryCode = "";
-        this.cloudAccountName = undefined;
-        localStorage.removeItem("adaptive-ascent-cloud-token");
-        localStorage.removeItem("adaptive-ascent-recovery-code");
-        this.cloudStatus =
-          this.language === "en" ? "Logged out locally" : "已退出本地账号";
-        this.renderReport();
-        break;
-      case "cloud-use-remote":
-        if (this.cloudRemoteSave) {
-          try {
-            this.save = importSaveJson(JSON.stringify(this.cloudRemoteSave));
-            this.cloudConflict = false;
-            this.cloudStatus =
-              this.language === "en" ? "Cloud save applied" : "已使用云端存档";
-            this.audio.expert();
-            this.show("report");
-          } catch {
-            this.cloudStatus =
-              this.language === "en" ? "Cloud save could not be parsed" : "云端存档无法解析";
-            this.cloudConflict = false;
-            this.renderReport();
-          }
-        }
-        break;
-      case "cloud-force-local":
-        if (this.roomClient && this.cloudToken) {
-          this.cloudConflict = false;
-          this.roomClient.cloudSave(this.cloudToken, this.save);
-          this.cloudStatus =
-            this.language === "en" ? "Uploading local save" : "正在上传本地存档";
-          this.renderReport();
-        }
-        break;
-      case "cloud-match":
-        void this.cloudMatch();
-        break;
-      case "cloud-reconnect":
-        void this.cloudReconnect();
-        break;
       case "claim-challenge": {
         const challengeId = actionTarget.dataset.challenge ?? "";
         const today = todayKey();
@@ -7529,6 +7388,158 @@ export class AdaptiveGameApp {
           this.pendingRole = this.save.profile.role;
           this.show("profile");
         }
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private handleCloudClick(
+    action: string,
+    actionTarget: HTMLElement
+  ): boolean {
+    switch (action) {
+      case "copy-save-link":
+        this.copySaveLink(actionTarget);
+        this.showToast(
+          this.language === "en"
+            ? "Save link copied."
+            : "存档链接已复制。"
+        );
+        return true;
+      case "import-save": {
+        const input =
+          this.root.querySelector<HTMLInputElement>("input[data-import-save]");
+        input?.click();
+        return true;
+      }
+      case "dismiss-backup-hint":
+        localStorage.setItem(
+          `${SAVE_BACKUP_HINT_KEY}-${APP_VERSION}`,
+          "1"
+        );
+        this.audio.ui();
+        this.showToast(
+          this.language === "en"
+            ? "Backup reminder dismissed for this version."
+            : "本次版本的备份提醒已关闭。"
+        );
+        this.renderMenu();
+        return true;
+      case "rotate-events":
+        if (rotateRandomEventPool(this.save)) {
+          trackEvent("random_events_rotated");
+          this.audio.expert();
+          this.renderMap();
+        }
+        return true;
+      case "toggle-map-detail":
+        this.mapDetailOpen = !this.mapDetailOpen;
+        this.audio.ui();
+        this.renderMap();
+        return true;
+      case "cloud-sync":
+        void this.cloudSync();
+        return true;
+      case "cloud-load":
+        void this.cloudLoad();
+        return true;
+      case "cloud-leaderboard":
+        void this.cloudLeaderboard();
+        return true;
+      case "cloud-login-token": {
+        const input = this.root.querySelector<HTMLInputElement>("input[data-login-token]");
+        const token = input?.value.trim() ?? "";
+        if (!token) {
+          this.cloudStatus =
+            this.language === "en" ? "Paste an account token first." : "请先粘贴账号 Token";
+          this.renderReport();
+          return true;
+        }
+        this.cloudToken = token;
+        localStorage.setItem("adaptive-ascent-cloud-token", token);
+        void this.loginWithToken();
+        return true;
+      }
+      case "cloud-register":
+        void this.cloudSync();
+        return true;
+      case "cloud-login-recovery": {
+        const input = this.root.querySelector<HTMLInputElement>("input[data-recovery-code]");
+        const code = input?.value.trim() ?? "";
+        if (!code) {
+          this.cloudStatus =
+            this.language === "en"
+              ? "Paste a recovery code first."
+              : "请先粘贴恢复码";
+          this.renderReport();
+          return true;
+        }
+        void this.loginWithRecovery(code);
+        return true;
+      }
+      case "cloud-login-password": {
+        const username =
+          this.root.querySelector<HTMLInputElement>("input[data-account-username]")
+            ?.value.trim() ?? "";
+        const password =
+          this.root.querySelector<HTMLInputElement>("input[data-account-password]")
+            ?.value ?? "";
+        if (!username || !password) {
+          this.cloudStatus =
+            this.language === "en"
+              ? "Enter username and password."
+              : "请输入用户名和密码";
+          this.renderReport();
+          return true;
+        }
+        void this.loginWithPassword(username, password);
+        return true;
+      }
+      case "cloud-logout":
+        if (this.cloudToken && this.roomClient) {
+          this.roomClient.logout(this.cloudToken);
+        }
+        this.cloudToken = "";
+        this.cloudRecoveryCode = "";
+        this.cloudAccountName = undefined;
+        localStorage.removeItem("adaptive-ascent-cloud-token");
+        localStorage.removeItem("adaptive-ascent-recovery-code");
+        this.cloudStatus =
+          this.language === "en" ? "Logged out locally" : "已退出本地账号";
+        this.renderReport();
+        return true;
+      case "cloud-use-remote":
+        if (this.cloudRemoteSave) {
+          try {
+            this.save = importSaveJson(JSON.stringify(this.cloudRemoteSave));
+            this.cloudConflict = false;
+            this.cloudStatus =
+              this.language === "en" ? "Cloud save applied" : "已使用云端存档";
+            this.audio.expert();
+            this.show("report");
+          } catch {
+            this.cloudStatus =
+              this.language === "en" ? "Cloud save could not be parsed" : "云端存档无法解析";
+            this.cloudConflict = false;
+            this.renderReport();
+          }
+        }
+        return true;
+      case "cloud-force-local":
+        if (this.roomClient && this.cloudToken) {
+          this.cloudConflict = false;
+          this.roomClient.cloudSave(this.cloudToken, this.save);
+          this.cloudStatus =
+            this.language === "en" ? "Uploading local save" : "正在上传本地存档";
+          this.renderReport();
+        }
+        return true;
+      case "cloud-match":
+        void this.cloudMatch();
+        return true;
+      case "cloud-reconnect":
+        void this.cloudReconnect();
         return true;
       default:
         return false;
