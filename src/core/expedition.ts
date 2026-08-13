@@ -6,8 +6,8 @@ export interface PowerStageDef {
   nameEn: string;
   regionZh: string;
   regionEn: string;
-  relicZh: string;
-  relicEn: string;
+  focusZh: string;
+  focusEn: string;
   clueZh: string;
   clueEn: string;
   color: string;
@@ -21,8 +21,8 @@ export const POWER_STAGES: PowerStageDef[] = [
     nameEn: "Diagnose · Build Power",
     regionZh: "第 1–2 章",
     regionEn: "Chapters 1–2",
-    relicZh: "权力地图",
-    relicEn: "Power Map",
+    focusZh: "权力地图",
+    focusEn: "Power Map",
     clueZh:
       "在授权之前先诊断：谁被询问、谁保持沉默，比任何架构图更接近真实权力结构。",
     clueEn:
@@ -36,8 +36,8 @@ export const POWER_STAGES: PowerStageDef[] = [
     nameEn: "Staff · Align",
     regionZh: "第 3–4 章",
     regionEn: "Chapters 3–4",
-    relicZh: "制度流程",
-    relicEn: "Institution",
+    focusZh: "制度流程",
+    focusEn: "Institution",
     clueZh:
       "规则只有写成流程才能存续：把判断变成制度，组织才不会在权力交接时崩塌。",
     clueEn:
@@ -51,8 +51,8 @@ export const POWER_STAGES: PowerStageDef[] = [
     nameEn: "Decide · Hold",
     regionZh: "第 5–6 章",
     regionEn: "Chapters 5–6",
-    relicZh: "组织地图",
-    relicEn: "Org Map",
+    focusZh: "组织地图",
+    focusEn: "Org Map",
     clueZh:
       "真正的组织地图不在架构图上，而在资源流动里：钱、时间和关键任务流向哪里，权力就在哪里。",
     clueEn:
@@ -66,8 +66,8 @@ export const POWER_STAGES: PowerStageDef[] = [
     nameEn: "Anchor · Succeed",
     regionZh: "第 7–9 章",
     regionEn: "Chapters 7–9",
-    relicZh: "传承系统",
-    relicEn: "Succession",
+    focusZh: "传承系统",
+    focusEn: "Succession",
     clueZh:
       "成业之秘不是个人的威名，而是传位、复盘与交接制度：让系统在你离开后仍能自转。",
     clueEn:
@@ -87,8 +87,8 @@ export function stageForChapter(chapterId: number): PowerStageDef {
 export interface ReconStatus {
   foundPieces: number;
   totalPieces: number;
-  currentRelicZh: string;
-  currentRelicEn: string;
+  currentFocusZh: string;
+  currentFocusEn: string;
   chapterCluesFound: number;
   chapterCluesTotal: number;
 }
@@ -117,8 +117,8 @@ export function reconStatus(save: SaveState): ReconStatus {
   return {
     foundPieces,
     totalPieces,
-    currentRelicZh: civ.relicZh,
-    currentRelicEn: civ.relicEn,
+    currentFocusZh: civ.focusZh,
+    currentFocusEn: civ.focusEn,
     chapterCluesFound: Math.min(3, cluesFound),
     chapterCluesTotal: 3
   };

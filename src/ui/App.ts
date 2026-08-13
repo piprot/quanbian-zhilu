@@ -1738,7 +1738,7 @@ export class AdaptiveGameApp {
             </div>
             <div class="expedition-chapter-card" style="--civ:${stageForChapter(chapter.id).color}">
               <span>${this.language === "en" ? `Stage · ${stageForChapter(chapter.id).nameEn}` : `阶段 · ${stageForChapter(chapter.id).nameZh}`}</span>
-              <strong>${this.language === "en" ? stageForChapter(chapter.id).relicEn : stageForChapter(chapter.id).relicZh}</strong>
+              <strong>${this.language === "en" ? stageForChapter(chapter.id).focusEn : stageForChapter(chapter.id).focusZh}</strong>
               <p>${escapeHtml(this.language === "en" ? stageForChapter(chapter.id).clueEn : stageForChapter(chapter.id).clueZh)}</p>
             </div>
             <div class="node-list">
@@ -1800,7 +1800,7 @@ export class AdaptiveGameApp {
                 ${CHAPTERS.map((item) => {
                   const done = isChapterComplete(this.save, item.id);
                   const civ = stageForChapter(item.id);
-                  const title = escapeAttr(this.language === "en" ? civ.relicEn : civ.relicZh);
+                  const title = escapeAttr(this.language === "en" ? civ.focusEn : civ.focusZh);
                   return `<span class="${done ? "found" : "missing"} power-frag-wrap" title="${title}" style="--dot:${civ.color}">
                     <img class="power-frag" src="${artAsset(`power-stage-${item.id}`)}" alt="${title}" onerror="this.style.display='none'" loading="lazy" />
                     <span class="power-frag-text">${done ? "✓" : "○"}</span>
@@ -2128,7 +2128,7 @@ export class AdaptiveGameApp {
         </div>
         <section class="expedition-scene" style="--civ:${civ.color}">
           <div>
-            <span>${en ? `${civ.nameEn} · ${civ.relicEn}` : `${civ.nameZh} · ${civ.relicZh}`}</span>
+            <span>${en ? `${civ.nameEn} · ${civ.focusEn}` : `${civ.nameZh} · ${civ.focusZh}`}</span>
             <strong>${en ? "Intel Journal" : "情报笔记"}</strong>
           </div>
           <p>${escapeHtml(en ? civ.clueEn : civ.clueZh)}</p>
@@ -2733,7 +2733,7 @@ export class AdaptiveGameApp {
         <section class="transition-panel">
           <p class="eyebrow">${this.language === "en" ? `Chapter ${chapter.code} ${this.t("chapterComplete")}` : `第 ${chapter.code} 章完成`}</p>
           <h1>${chapterDisplay(this.language, chapter).title}</h1>
-          <p class="expedition-transition-line" style="--civ:${civ.color}">${this.language === "en" ? `${civ.nameEn} · ${civ.relicEn}` : `${civ.nameZh} · ${civ.relicZh}`}</p>
+          <p class="expedition-transition-line" style="--civ:${civ.color}">${this.language === "en" ? `${civ.nameEn} · ${civ.focusEn}` : `${civ.nameZh} · ${civ.focusZh}`}</p>
           <p class="transition-summary">${escapeHtml(chapterReflectionText(this.language, chapter.id))}</p>
           <div class="route-choice-panel">
             <h3>${this.t("routeTitle")}</h3>

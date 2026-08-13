@@ -7,8 +7,8 @@ export interface NpcStory {
     answerZh: string;
     answerEn: string;
   }>;
-  relicNoteZh: string;
-  relicNoteEn: string;
+  storyNoteZh: string;
+  storyNoteEn: string;
 }
 
 export const NPC_STORIES: Record<string, NpcStory> = {
@@ -37,8 +37,8 @@ export const NPC_STORIES: Record<string, NpcStory> = {
         answerEn: "Do not mention me in the weekly meeting. Give me a quiet channel and let me see the information used to solve problems, not to pick sides."
       }
     ],
-    relicNoteZh: "她把行政档案看作组织里最古老的“遗迹”：每一份日程和审批记录，都写着谁真正掌握组织的时间。",
-    relicNoteEn: "She treats the admin archive as the oldest relic in the organization: every calendar and approval records who truly owns the organization's time."
+    storyNoteZh: "她把行政档案看作组织最可靠的底账：每一份日程和审批记录，都写着谁真正掌握组织的时间。",
+    storyNoteEn: "She treats the admin archive as the organization's most reliable record: every calendar and approval records who truly owns the organization's time."
   },
   "npc-finance": {
     zh: [
@@ -65,8 +65,8 @@ export const NPC_STORIES: Record<string, NpcStory> = {
         answerEn: "I want a public review standard. I do not want to become the company's enemy tomorrow for cooperating with you."
       }
     ],
-    relicNoteZh: "她像整理组织法典的审计者：规则一旦写进流程，就不该被任何人的记忆改写。",
-    relicNoteEn: "She is like the auditor of the organization's code: once a rule enters the process, no one's memory should rewrite it."
+    storyNoteZh: "她像整理组织法典的审计者：规则一旦写进流程，就不该被任何人的记忆改写。",
+    storyNoteEn: "She is like the auditor of the organization's code: once a rule enters the process, no one's memory should rewrite it."
   },
   "npc-ops": {
     zh: [
@@ -93,8 +93,8 @@ export const NPC_STORIES: Record<string, NpcStory> = {
         answerEn: "Start with a small pilot, cap the failure cost at three days, and let me call a stop whenever I want."
       }
     ],
-    relicNoteZh: "他反对华美蓝图，只相信经过真实交付检验的流程，像工程团队验证一条新管线。",
-    relicNoteEn: "He distrusts pretty blueprints and trusts only processes proven by real delivery, like an engineering team validating a new pipeline."
+    storyNoteZh: "他反对华美蓝图，只相信经过真实交付检验的流程，像工程团队验证一条新管线。",
+    storyNoteEn: "He distrusts pretty blueprints and trusts only processes proven by real delivery, like an engineering team validating a new pipeline."
   },
   "npc-young": {
     zh: [
@@ -121,8 +121,8 @@ export const NPC_STORIES: Record<string, NpcStory> = {
         answerEn: "Look at the decision process before the result. If the process was recorded and the judgment had evidence, failure should still count as capability."
       }
     ],
-    relicNoteZh: "他不需要上司站在身后，只需要任务说明里写清楚他要交付什么。",
-    relicNoteEn: "He does not need a leader standing behind him, only a task brief that states exactly what to deliver."
+    storyNoteZh: "他不需要上司站在身后，只需要任务说明里写清楚他要交付什么。",
+    storyNoteEn: "He does not need a leader standing behind him, only a task brief that states exactly what to deliver."
   },
   "npc-veteran": {
     zh: [
@@ -149,8 +149,8 @@ export const NPC_STORIES: Record<string, NpcStory> = {
         answerEn: "I will take the three hardest clients through the new process, but only if I keep final veto power over client matters."
       }
     ],
-    relicNoteZh: "他不拒绝新流程，但要确保多年积累的客户信任不被一次翻新烧掉。",
-    relicNoteEn: "He welcomes new processes but insists that years of client trust are not burned in a renovation."
+    storyNoteZh: "他不拒绝新流程，但要确保多年积累的客户信任不被一次翻新烧掉。",
+    storyNoteEn: "He welcomes new processes but insists that years of client trust are not burned in a renovation."
   },
   "npc-chen": {
     zh: [
@@ -177,8 +177,8 @@ export const NPC_STORIES: Record<string, NpcStory> = {
         answerEn: "Let me speak once in a small circle, and quote my idea yourself. Once people get used to it, I will return to the big room."
       }
     ],
-    relicNoteZh: "他像一份被批注得面目全非的方案：观点还在，只是需要有人先承认那次批注错了。",
-    relicNoteEn: "He is like a proposal buried under harsh comments: the ideas remain, but someone must first admit the critique was wrong."
+    storyNoteZh: "他像一份被批注得面目全非的方案：观点还在，只是需要有人先承认那次批注错了。",
+    storyNoteEn: "He is like a proposal buried under harsh comments: the ideas remain, but someone must first admit the critique was wrong."
   },
   "npc-shen": {
     zh: [
@@ -205,8 +205,8 @@ export const NPC_STORIES: Record<string, NpcStory> = {
         answerEn: "A bottom-line list with only three items, plus a signal you can use to call a timeout."
       }
     ],
-    relicNoteZh: "他像谈判桌上的主攻手：局面一变就加速，但需要后方把底线同步给他。",
-    relicNoteEn: "He is the lead negotiator at the front: quick to accelerate, but needing the back office to sync the bottom line."
+    storyNoteZh: "他像谈判桌上的主攻手：局面一变就加速，但需要后方把底线同步给他。",
+    storyNoteEn: "He is the lead negotiator at the front: quick to accelerate, but needing the back office to sync the bottom line."
   },
   "npc-xu": {
     zh: [
@@ -233,8 +233,8 @@ export const NPC_STORIES: Record<string, NpcStory> = {
         answerEn: "Ten uninterrupted minutes, and someone who promises to help me complete the answer instead of only interrogating me."
       }
     ],
-    relicNoteZh: "她像反复出现在草稿里的新线索：还没被正式解读，却已经三次证明自己值得追查。",
-    relicNoteEn: "She is like a clue that keeps appearing in drafts: not yet formally decoded, yet already proving three times that it deserves a follow-up."
+    storyNoteZh: "她像反复出现在草稿里的新线索：还没被正式解读，却已经三次证明自己值得追查。",
+    storyNoteEn: "She is like a clue that keeps appearing in drafts: not yet formally decoded, yet already proving three times that it deserves a follow-up."
   },
   "npc-he": {
     zh: [
@@ -261,8 +261,8 @@ export const NPC_STORIES: Record<string, NpcStory> = {
         answerEn: "Give me a mandatory recovery window, and make a rule: after two consecutive failures, someone has to review with me."
       }
     ],
-    relicNoteZh: "他像系统值班室的守门人：处理故障最快，但连续值守后必须有人替他按下暂停。",
-    relicNoteEn: "He is the on-call guard of the system: fastest at resolving incidents, but after long shifts someone must press pause for him."
+    storyNoteZh: "他像系统值班室的守门人：处理故障最快，但连续值守后必须有人替他按下暂停。",
+    storyNoteEn: "He is the on-call guard of the system: fastest at resolving incidents, but after long shifts someone must press pause for him."
   },
   "npc-tang": {
     zh: [
@@ -289,8 +289,8 @@ export const NPC_STORIES: Record<string, NpcStory> = {
         answerEn: "From 4:00 to 5:30 every afternoon, no meetings. Emergencies require a direct call from you, not an @mention in the group."
       }
     ],
-    relicNoteZh: "她像负责最终审校的负责人：方案必须安静完成，嘈杂的临时插入只会让每一页多出错误。",
-    relicNoteEn: "She is the final reviewer of the deck: it needs quiet focus, and last-minute interruptions add errors to every page."
+    storyNoteZh: "她像负责最终审校的负责人：方案必须安静完成，嘈杂的临时插入只会让每一页多出错误。",
+    storyNoteEn: "She is the final reviewer of the deck: it needs quiet focus, and last-minute interruptions add errors to every page."
   },
   "npc-fang": {
     zh: [
@@ -317,8 +317,8 @@ export const NPC_STORIES: Record<string, NpcStory> = {
         answerEn: "I want a fixed process that reviews the mechanism before reviewing the person, and this time it cannot stay on paper."
       }
     ],
-    relicNoteZh: "他像连续扛了三轮项目的负责人：愿意重新开始，但需要先看到问题记录、负荷与真正的恢复计划。",
-    relicNoteEn: "He is the lead who carried three rounds of the same project: willing to start over, but only with issue logs, workload data, and a real recovery plan."
+    storyNoteZh: "他像连续扛了三轮项目的负责人：愿意重新开始，但需要先看到问题记录、负荷与真正的恢复计划。",
+    storyNoteEn: "He is the lead who carried three rounds of the same project: willing to start over, but only with issue logs, workload data, and a real recovery plan."
   }
 };
 

@@ -64,7 +64,7 @@ export function npcStoryMarkup(
         `
     )
     .join("");
-  const relic = en ? story.relicNoteEn : story.relicNoteZh;
+  const note = en ? story.storyNoteEn : story.storyNoteZh;
   const arc = npcArcFor(npc.id);
   const arcMarkup = arc
     ? `
@@ -88,7 +88,7 @@ export function npcStoryMarkup(
           ${paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}
         </div>
         <div class="npc-dialogue">${dialogue}</div>
-        <p class="npc-relic-note">${escapeHtml(relic)}</p>
+        <p class="npc-story-note">${escapeHtml(note)}</p>
         ${arcMarkup}
       </details>
     `;
@@ -171,7 +171,7 @@ export function expeditionHeroMarkup(
       <section class="expedition-hero" style="--civ:${civ.color}">
         <div>
           <p class="eyebrow">${en ? "Nine-Chapter Power Structure" : "九章权力架构"}</p>
-          <h1>${en ? civ.nameEn : civ.nameZh} · ${en ? civ.relicEn : civ.relicZh}</h1>
+          <h1>${en ? civ.nameEn : civ.nameZh} · ${en ? civ.focusEn : civ.focusZh}</h1>
           <p>${escapeHtml(en ? civ.clueEn : civ.clueZh)}</p>
         </div>
         <div class="progress-ring">
