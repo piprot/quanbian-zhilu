@@ -1,6 +1,6 @@
 import type { SaveState } from "./types";
 
-export interface CivilizationDef {
+export interface PowerStageDef {
   id: string;
   nameZh: string;
   nameEn: string;
@@ -14,9 +14,9 @@ export interface CivilizationDef {
   chapters: number[];
 }
 
-export const CIVILIZATIONS: CivilizationDef[] = [
+export const POWER_STAGES: PowerStageDef[] = [
   {
-    id: "egypt",
+    id: "opening",
     nameZh: "识局 · 谋权",
     nameEn: "Diagnose · Build Power",
     regionZh: "第 1–2 章",
@@ -31,7 +31,7 @@ export const CIVILIZATIONS: CivilizationDef[] = [
     chapters: [1, 2]
   },
   {
-    id: "mesopotamia",
+    id: "people",
     nameZh: "用人 · 驭势",
     nameEn: "Staff · Align",
     regionZh: "第 3–4 章",
@@ -46,7 +46,7 @@ export const CIVILIZATIONS: CivilizationDef[] = [
     chapters: [3, 4]
   },
   {
-    id: "indus",
+    id: "authority",
     nameZh: "执权 · 掌权",
     nameEn: "Decide · Hold",
     regionZh: "第 5–6 章",
@@ -61,7 +61,7 @@ export const CIVILIZATIONS: CivilizationDef[] = [
     chapters: [5, 6]
   },
   {
-    id: "china",
+    id: "legacy",
     nameZh: "固权 · 成业",
     nameEn: "Anchor · Succeed",
     regionZh: "第 7–9 章",
@@ -77,14 +77,14 @@ export const CIVILIZATIONS: CivilizationDef[] = [
   }
 ];
 
-export function civilizationForChapter(chapterId: number): CivilizationDef {
+export function stageForChapter(chapterId: number): PowerStageDef {
   return (
-    CIVILIZATIONS.find((civ) => civ.chapters.includes(chapterId)) ??
-    CIVILIZATIONS[0]
+    POWER_STAGES.find((civ) => civ.chapters.includes(chapterId)) ??
+    POWER_STAGES[0]
   );
 }
 
-export interface ExpeditionStatus {
+export interface ReconStatus {
   foundPieces: number;
   totalPieces: number;
   currentRelicZh: string;
@@ -93,7 +93,7 @@ export interface ExpeditionStatus {
   chapterCluesTotal: number;
 }
 
-export function expeditionStatus(save: SaveState): ExpeditionStatus {
+export function reconStatus(save: SaveState): ReconStatus {
   const totalPieces = 9;
   const foundPieces = Math.min(
     totalPieces,
@@ -102,7 +102,7 @@ export function expeditionStatus(save: SaveState): ExpeditionStatus {
     ).length
   );
   const currentChapter = save.unlockedChapters.at(-1) ?? 1;
-  const civ = civilizationForChapter(currentChapter);
+  const civ = stageForChapter(currentChapter);
   const cluesFound =
     save.explorationFound
       ? Object.values(save.explorationFound).flat().length
@@ -124,7 +124,7 @@ export function expeditionStatus(save: SaveState): ExpeditionStatus {
   };
 }
 
-export interface ExplorationMoment {
+export interface ReconMoment {
   kind: "survey" | "talk" | "decode";
   titleZh: string;
   titleEn: string;
@@ -148,11 +148,11 @@ const DECODE_CLUES_EN = [
   "Do not decide too fast; first count who sits on the decision chain."
 ];
 
-export function explorationMoments(
+export function reconMoments(
   chapterId: number,
   nodeId: string,
   seed: number
-): ExplorationMoment[] {
+): ReconMoment[] {
   const hash = (value: string): number => {
     let result = seed * 31 + chapterId * 17;
     for (let i = 0; i < value.length; i += 1) {

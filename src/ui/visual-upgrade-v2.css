@@ -160,7 +160,7 @@ html[data-vu="off"] * {
   color: var(--vu-muted);
   line-height: 1.65;
 }
-.treasure-ring {
+.progress-ring {
   position: relative;
   z-index: 1;
   display: grid;
@@ -175,13 +175,13 @@ html[data-vu="off"] * {
   text-align: center;
   flex: 0 0 auto;
 }
-.treasure-ring strong {
+.progress-ring strong {
   display: block;
   font-family: var(--vu-font-display);
   font-size: 26px;
   color: var(--vu-gold-bright);
 }
-.treasure-ring span {
+.progress-ring span {
   display: block;
   margin-top: 2px;
   font-size: 12px;
@@ -253,13 +253,13 @@ html[data-vu="off"] * {
   color: var(--vu-gold);
   font-size: 13px;
 }
-.treasure-panel .treasure-track {
+.power-panel .power-track {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   margin: 8px 0;
 }
-.treasure-panel .treasure-track span {
+.power-panel .power-track span {
   display: grid;
   place-items: center;
   width: 26px;
@@ -270,7 +270,7 @@ html[data-vu="off"] * {
   font-size: 13px;
   background: rgba(7, 12, 16, 0.5);
 }
-.treasure-panel .treasure-track span.found {
+.power-panel .power-track span.found {
   color: #07100d;
   background: var(--dot, var(--vu-gold));
   box-shadow: 0 0 12px color-mix(in srgb, var(--dot, var(--vu-gold)) 45%, transparent);
@@ -1105,7 +1105,7 @@ html[data-vu="off"] * {
   .expedition-hero {
     grid-template-columns: 1fr;
   }
-  .treasure-ring {
+  .progress-ring {
     width: 92px;
     height: 92px;
   }
@@ -2587,10 +2587,10 @@ button:focus-visible,
 }
 
 /* --- 11.3 藏宝图残片（替换原圆圈字符） --- */
-.treasure-track {
+.power-track {
   gap: 10px;
 }
-.treasure-frag-wrap {
+.power-frag-wrap {
   position: relative;
   width: 52px;
   height: 52px;
@@ -2606,11 +2606,11 @@ button:focus-visible,
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 2px 8px rgba(0, 0, 0, 0.35);
 }
-.treasure-frag-wrap.missing {
+.power-frag-wrap.missing {
   filter: grayscale(0.8);
   opacity: 0.55;
 }
-.treasure-frag-wrap.found {
+.power-frag-wrap.found {
   border-color: rgba(var(--dot-rgb, 86, 211, 168), 0.65);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
@@ -2618,7 +2618,7 @@ button:focus-visible,
     0 0 18px rgba(var(--dot-rgb, 86, 211, 168), 0.35),
     0 2px 10px rgba(0, 0, 0, 0.4);
 }
-.treasure-frag {
+.power-frag {
   position: absolute;
   inset: 4px;
   width: calc(100% - 8px);
@@ -2627,7 +2627,7 @@ button:focus-visible,
   border-radius: 7px;
   z-index: 0;
 }
-.treasure-frag-text {
+.power-frag-text {
   position: relative;
   z-index: 1;
   font-weight: 700;
@@ -2636,7 +2636,7 @@ button:focus-visible,
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
   pointer-events: none;
 }
-.treasure-frag-wrap:not(.found) .treasure-frag-text {
+.power-frag-wrap:not(.found) .power-frag-text {
   opacity: 0.9;
 }
 

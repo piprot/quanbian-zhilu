@@ -105,9 +105,9 @@ import { RoomClient, type RoomServerMessage } from "../net/roomClient";
 import { GameAudioV2 } from "../audio-v2";
 import { ThemeMusic } from "../core/theme-music";
 import {
-  civilizationForChapter,
-  expeditionStatus,
-  explorationMoments
+  stageForChapter,
+  reconStatus,
+  reconMoments
 } from "../core/expedition";
 import { npcStoryFor } from "../core/npcStories";
 import { npcArcFor } from "../core/npcArcs";
@@ -1097,7 +1097,7 @@ export class AdaptiveGameApp {
   private explorationPanelMarkup(node: StoryNode): string {
     const en = this.language === "en";
     const seed = this.save.scenarioSeed ?? 1;
-    const moments = explorationMoments(node.chapterId, node.id, seed);
+    const moments = reconMoments(node.chapterId, node.id, seed);
     const found = this.save.explorationFound?.[node.id] ?? [];
     const doneAll = (this.save.explorationCompleted ?? []).includes(node.id);
     const actions = moments
@@ -1271,9 +1271,9 @@ export class AdaptiveGameApp {
   }
 
   private expeditionHeroMarkup(chapterId: number): string {
-    const civ = civilizationForChapter(chapterId);
+    const civ = stageForChapter(chapterId);
     const en = this.language === "en";
-    const exp = expeditionStatus(this.save);
+    const exp = reconStatus(this.save);
     return `
       <section class="expedition-hero" style="--civ:${civ.color}">
         <div>
@@ -1281,7 +1281,7 @@ export class AdaptiveGameApp {
           <h1>${en ? civ.nameEn : civ.nameZh} · ${en ? civ.relicEn : civ.relicZh}</h1>
           <p>${escapeHtml(en ? civ.clueEn : civ.clueZh)}</p>
         </div>
-        <div class="treasure-ring">
+        <div class="progress-ring">
           <strong>${exp.foundPieces} / ${exp.totalPieces}</strong>
           <span>${en ? "Chapters completed" : "章节进度"}</span>
         </div>
@@ -1454,7 +1454,7 @@ export class AdaptiveGameApp {
    *
    * 命名规范（与 scripts/generate-real-art.mjs 同步）：
    *   menu-card-00 ~ menu-card-10      首页十大模块卡片封面
-   *   treasure-fragment-1 ~ treasure-fragment-9  权力架构九章进度标记
+   *   power-stage-1 ~ power-stage-9  权力架构九章进度标记
    *   role-parachute / role-founder / role-highPotential  三张角色立绘（jpg，替代原有 svg 简笔画）
    *   duel-lobby / duel-match / duel-reveal  1v1 三场景
    *   ach-cat-story/training/trial/duel/event/rank  成就六大类封面
@@ -2310,10 +2310,10 @@ export class AdaptiveGameApp {
               <p>${this.chapterDisplay(chapter).subtitle}</p>
               <p class="chapter-main-progress">${this.language === "en" ? `Core ${coreDoneCount} / 2 · Extended ${extraDoneCount} / 7` : `核心 ${coreDoneCount} / 2 · 扩展 ${extraDoneCount} / 7`}</p>
             </div>
-            <div class="expedition-chapter-card" style="--civ:${civilizationForChapter(chapter.id).color}">
-              <span>${this.language === "en" ? `Stage · ${civilizationForChapter(chapter.id).nameEn}` : `阶段 · ${civilizationForChapter(chapter.id).nameZh}`}</span>
-              <strong>${this.language === "en" ? civilizationForChapter(chapter.id).relicEn : civilizationForChapter(chapter.id).relicZh}</strong>
-              <p>${escapeHtml(this.language === "en" ? civilizationForChapter(chapter.id).clueEn : civilizationForChapter(chapter.id).clueZh)}</p>
+            <div class="expedition-chapter-card" style="--civ:${stageForChapter(chapter.id).color}">
+              <span>${this.language === "en" ? `Stage · ${stageForChapter(chapter.id).nameEn}` : `阶段 · ${stageForChapter(chapter.id).nameZh}`}</span>
+              <strong>${this.language === "en" ? stageForChapter(chapter.id).relicEn : stageForChapter(chapter.id).relicZh}</strong>
+              <p>${escapeHtml(this.language === "en" ? stageForChapter(chapter.id).clueEn : stageForChapter(chapter.id).clueZh)}</p>
             </div>
             <div class="node-list">
               ${mainNodes.map((node) => this.nodeRow(node)).join("")}
@@ -2368,16 +2368,16 @@ export class AdaptiveGameApp {
               }
             </div>
             ${this.npcCameoMarkup(chapter.id)}
-            <div class="mini-panel treasure-panel">
+            <div class="mini-panel power-panel">
               <h3>${this.language === "en" ? "Power Structure" : "权力架构"}</h3>
-              <div class="treasure-track">
+              <div class="power-track">
                 ${CHAPTERS.map((item) => {
                   const done = isChapterComplete(this.save, item.id);
-                  const civ = civilizationForChapter(item.id);
+                  const civ = stageForChapter(item.id);
                   const title = escapeAttr(this.language === "en" ? civ.relicEn : civ.relicZh);
-                  return `<span class="${done ? "found" : "missing"} treasure-frag-wrap" title="${title}" style="--dot:${civ.color}">
-                    <img class="treasure-frag" src="${this.artAsset(`treasure-fragment-${item.id}`)}" alt="${title}" onerror="this.style.display='none'" loading="lazy" />
-                    <span class="treasure-frag-text">${done ? "✓" : "○"}</span>
+                  return `<span class="${done ? "found" : "missing"} power-frag-wrap" title="${title}" style="--dot:${civ.color}">
+                    <img class="power-frag" src="${this.artAsset(`power-stage-${item.id}`)}" alt="${title}" onerror="this.style.display='none'" loading="lazy" />
+                    <span class="power-frag-text">${done ? "✓" : "○"}</span>
                   </span>`;
                 }).join("")}
               </div>
@@ -2635,7 +2635,7 @@ export class AdaptiveGameApp {
     const scenarioShell = scenarioShellFor(node.chapterId, scenarioSeed);
     const showingOutcome = this.lastOutcomeNodeId === node.id && this.lastOutcome;
     const showOnboarding = this.save.playCount === 0 && !showingOutcome;
-    const civ = civilizationForChapter(node.chapterId);
+    const civ = stageForChapter(node.chapterId);
     const narrative = chapterNarrative(node.chapterId);
     const isExtraMainNode =
       node.kind === "main" && /n[3-9]$/.test(node.id);
@@ -3296,7 +3296,7 @@ export class AdaptiveGameApp {
     }
     const chapter = getChapter(this.pendingChapterTransition);
     const next = chapter.id < CHAPTERS.length ? CHAPTERS[chapter.id] : undefined;
-    const civ = civilizationForChapter(chapter.id);
+    const civ = stageForChapter(chapter.id);
     this.root.innerHTML = `
       <header class="topbar">
         <div class="brand">${this.t("brand")}</div>
@@ -8172,7 +8172,7 @@ export class AdaptiveGameApp {
     const kind = target.dataset.kind;
     const node = getNode(this.storyNodeId);
     const seed = this.save.scenarioSeed ?? 1;
-    const moments = explorationMoments(node.chapterId, this.storyNodeId, seed);
+    const moments = reconMoments(node.chapterId, this.storyNodeId, seed);
     if (!kind || !moments.some((moment) => moment.kind === kind)) return;
     const found = [...(this.save.explorationFound?.[this.storyNodeId] ?? [])];
     if (found.includes(kind)) return;

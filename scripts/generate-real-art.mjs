@@ -103,16 +103,16 @@ const MANIFEST = [
   { dir: "art", name: "menu-card-09", size: "landscape_16_9", prompt: "Three leadership role dossiers with portraits: parachute executive, startup founder, and high potential young manager, file folders on mahogany desk, dramatic warm lamp light, film noir mood" },
   { dir: "art", name: "menu-card-10", size: "landscape_16_9", prompt: "Corporate training coach workshop, whiteboard with team radar chart comparison, facilitation post-its, executives in meeting room, cinematic warm lighting with depth" },
 
-  // ---------- 2. 藏宝图 9 残片：square_hd 独立文物残片 ----------
-  { dir: "art", name: "treasure-fragment-1", size: "square_hd", prompt: "Ancient cracked jade seal fragment, Chinese dynasty artifact, side lit on dark velvet cloth, museum macro photography, cinematic close up, texture in cracks" },
-  { dir: "art", name: "treasure-fragment-2", size: "square_hd", prompt: "Fragment of Tang dynasty silk scroll with golden calligraphy, torn edges, aged patina, museum shot dark background, warm directional light, extreme detail" },
-  { dir: "art", name: "treasure-fragment-3", size: "square_hd", prompt: "Broken bronze ancient Chinese military tally half, corroded verdigris patina, dark display case, museum lighting, macro cinematic shot, mysterious mood" },
-  { dir: "art", name: "treasure-fragment-4", size: "square_hd", prompt: "Ancient Chinese bamboo slips oracle fragment, ink characters on broken strips, aged wood, low key side lighting, museum still life, cinematic mood" },
-  { dir: "art", name: "treasure-fragment-5", size: "square_hd", prompt: "Gold inlaid lacquerware shard with floral motif, ancient Chinese court artifact, dark velvet backdrop, macro cinematic lighting, rich texture" },
-  { dir: "art", name: "treasure-fragment-6", size: "square_hd", prompt: "Weathered stone stele rubbing fragment with carved dragons, Chinese legend artifact, dramatic side lighting, museum display, dark mood, texture of chiseled grooves" },
-  { dir: "art", name: "treasure-fragment-7", size: "square_hd", prompt: "Torn ancient Chinese military map fragment, ink on mulberry paper, red seal stamp, edges frayed, dark velvet background, museum photography, cinematic low key" },
-  { dir: "art", name: "treasure-fragment-8", size: "square_hd", prompt: "Fragment of ceremonial jade Gui tablet, ancient scholar artifact, smooth worn edge, dark cloth, soft side lighting, museum macro, mysterious silhouette" },
-  { dir: "art", name: "treasure-fragment-9", size: "square_hd", prompt: "Shard of blue and white imperial porcelain with dragon pattern, cracked glaze, dark velvet display, dramatic top down cinematic lighting, museum grade detail" },
+  // ---------- 2. 权力架构九章进度标记：square_hd 领导力隐喻 ----------
+  { dir: "art", name: "power-stage-1", size: "square_hd", prompt: "Diagnose the power structure: executive examining a glowing organizational hierarchy map with key decision-makers highlighted, dark cinematic boardroom, professional analytical mood" },
+  { dir: "art", name: "power-stage-2", size: "square_hd", prompt: "Build power before acting: strategic chess pieces on a marble conference table representing organizational influence, dark cinematic lighting, power dynamics metaphor" },
+  { dir: "art", name: "power-stage-3", size: "square_hd", prompt: "Place the right people: hands placing glowing profile cards into matching organizational slots, talent matching, dark cinematic office, warm accent light" },
+  { dir: "art", name: "power-stage-4", size: "square_hd", prompt: "Align a reluctant team: leader rallying diverse team members around a shared glowing objective, dark boardroom, cinematic dramatic lighting" },
+  { dir: "art", name: "power-stage-5", size: "square_hd", prompt: "Decide with authority: a single decisive hand signing an executive document under a dramatic spotlight, dark office, cinematic mood" },
+  { dir: "art", name: "power-stage-6", size: "square_hd", prompt: "Hold power through boundaries: translucent institutional walls forming a clear structure with glowing boundary lines, dark cinematic architectural metaphor" },
+  { dir: "art", name: "power-stage-7", size: "square_hd", prompt: "Institutionalize the system: a blueprint transforming into a self-running organizational machine with gears and org chart, dark cinematic engineering mood" },
+  { dir: "art", name: "power-stage-8", size: "square_hd", prompt: "Break through uncertainty: a leader steering through a storm and breaking a glass wall toward clarity, dynamic cinematic, dark moody" },
+  { dir: "art", name: "power-stage-9", size: "square_hd", prompt: "Anchor and succeed: passing a glowing baton from one leader to the next in a succession handover, dark cinematic stage, warm symbolic light" },
 
   // ---------- 3. 角色立绘（替代原 SVG 简笔画）：portrait_4_3 人物半身像 ----------
   { dir: "art", name: "role-parachute", size: "portrait_4_3", prompt: "Portrait of parachute executive middle-aged Chinese man in tailored dark suit, confident gaze, modern office background blurred, cinematic three point lighting, mature leader look, film grain" },
