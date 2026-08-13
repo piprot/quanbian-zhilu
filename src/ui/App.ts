@@ -3,9 +3,7 @@ import {
   ABILITY_ORDER,
   ROLES,
   RESOURCE_NAMES,
-  abilityLevel,
-  rankForTotal,
-  totalAbilityLevels
+  abilityLevel
 } from "../core/abilities";
 import {
   ACHIEVEMENTS,
@@ -57,7 +55,6 @@ import {
   isNodeComplete,
   loadSave,
   optionGateFor,
-  optionQualityLabel,
   profileSummary,
   recordDuelResult,
   resetSave,
@@ -83,8 +80,7 @@ import {
   SIDE_QUEST_ARCS,
   getChapter,
   getNode,
-  getNodeForRole,
-  sideNodesForChapter
+  getNodeForRole
 } from "../core/story";
 import { chapterNarrative } from "../core/chapterNarrative";
 import type {
@@ -165,15 +161,7 @@ import { hiddenRouteSteps } from "../core/hiddenRoutes";
 import { ROLE_ROADMAPS } from "../core/roleTraining";
 import { uiString, type Language } from "../core/i18n";
 import { readAnalyticsEvents, trackEvent } from "../core/analytics";
-import {
-  ABILITY_EN,
-  ABILITY_DETAIL_EN,
-  CHAPTER_EN,
-  NPC_EN,
-  RESOURCE_EN,
-  ROLE_EN,
-  SIDE_ARC_EN
-} from "../core/translations";
+import { ROLE_EN } from "../core/translations";
 import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, relationStatusText, sideArcDisplay, npcAvatarColor, achievementDisplay, challengeDisplay, challengeCategoryLabel, assessmentDisplay, chapterReflectionText, aiArchetypeLabel, leadershipLensText, roleMove, nodeIntel, relationNoteText, resourceChips, chapterBadge, dimensionMarkup } from "./display";
 import { buildReportMarkdown, downloadText, encodeSaveLink } from "./export";
 import { artAsset, chapterArtStyle } from "./assets";
@@ -369,7 +357,6 @@ export class AdaptiveGameApp {
   private liveDistribution?: Map<number, number>;
   private hiddenBranchAbilityId?: AbilityId;
   private hiddenRouteStep = 0;
-  private hiddenRouteLastAnswer?: number;
   private hiddenRouteLastCorrect?: boolean;
   private endingChoice?: string;
   private pendingBranchNodeId?: string;
@@ -418,7 +405,6 @@ export class AdaptiveGameApp {
   private duelRevealTimer?: number;
   private duelPrediction?: DuelQuality;
   private duelPredictionPhase = false;
-  private duelPredictionCorrect?: boolean;
   private duelPredictionHistory: boolean[] = [];
   private duelPredictionBonusTotal = 0;
   private duelRoundResult?: DuelEngine["roundResults"][number];
@@ -452,7 +438,6 @@ export class AdaptiveGameApp {
   private roundTimerId?: number;
   private roundDeadline = 0;
   private roundDurationMs = 0;
-  private activeDecisionNodeId?: string;
   private interferenceText?: string;
   private lastTimedOut = false;
   private energyRestoreUsed = false;
@@ -5341,7 +5326,7 @@ export class AdaptiveGameApp {
           ${nodeView.options
             .map(
               (option, index) => `
-                <button class="option-card ${this.optionState(index)}" data-action="duel-pick" data-option="${index}" ${this.duelPickEnabled(index) ? "" : "disabled"}>
+                <button class="option-card ${this.optionState(index)}" data-action="duel-pick" data-option="${index}" ${this.duelPickEnabled() ? "" : "disabled"}>
                   <span class="option-letter">${String.fromCharCode(65 + index)}</span>
                   <span class="option-body">
                     <strong>${escapeHtml(option.label)}</strong>
@@ -5415,7 +5400,7 @@ export class AdaptiveGameApp {
     if (this.handleTrialClick(action, actionTarget)) return;
     if (this.handleSettingsClick(action, actionTarget)) return;
     if (this.handleCloudClick(action, actionTarget)) return;
-    if (this.handleExportClick(action, actionTarget)) return;
+    if (this.handleExportClick(action)) return;
     if (this.handleLiveClick(action, actionTarget)) return;
     if (this.handleCustomScenarioClick(action, actionTarget)) return;
     if (this.handleCoachClick(action, actionTarget)) return;
@@ -5658,7 +5643,6 @@ export class AdaptiveGameApp {
         this.duelPrediction = prediction;
         this.duelPredictionPhase = false;
         if (this.duelMode === "remote") {
-          this.duelPredictionCorrect = undefined;
           this.duelPredictionHistory.push(false);
           const ownOption = this.remoteOwnOption ?? 0;
           if (this.usingCloudMatch && this.roomClient) {
@@ -5678,7 +5662,6 @@ export class AdaptiveGameApp {
         const bonus = engine
           ? engine.predictOpponentStyle(predictingIndex, prediction)
           : 0;
-        this.duelPredictionCorrect = bonus > 0;
         this.duelPredictionHistory.push(bonus > 0);
         this.duelPredictionBonusTotal += bonus;
         this.audio.duelPick();
@@ -6387,10 +6370,7 @@ export class AdaptiveGameApp {
     }
   }
 
-  private handleExportClick(
-    action: string,
-    actionTarget: HTMLElement
-  ): boolean {
+  private handleExportClick(action: string): boolean {
     switch (action) {
       case "export-save":
         this.exportSave();
@@ -6902,7 +6882,6 @@ export class AdaptiveGameApp {
         const step = Math.min(this.hiddenRouteStep, steps.length - 1);
         const selected = Number(actionTarget.dataset.option);
         const correct = selected === steps[step].answer;
-        this.hiddenRouteLastAnswer = selected;
         this.hiddenRouteLastCorrect = correct;
         if (correct) {
           this.save.hiddenRouteProgress[abilityId] = Math.max(
@@ -6927,7 +6906,6 @@ export class AdaptiveGameApp {
             this.hiddenRouteStep + 1
           );
         }
-        this.hiddenRouteLastAnswer = undefined;
         this.hiddenRouteLastCorrect = undefined;
         this.audio.ui();
         this.renderHiddenBranch();
@@ -7354,7 +7332,6 @@ export class AdaptiveGameApp {
             ) as AbilityId;
             this.hiddenRouteStep =
               this.save.hiddenRouteProgress[this.hiddenBranchAbilityId] ?? 0;
-            this.hiddenRouteLastAnswer = undefined;
             this.hiddenRouteLastCorrect = undefined;
             this.pendingBranchNodeId = undefined;
             this.audio.ui();
@@ -8393,7 +8370,6 @@ export class AdaptiveGameApp {
             predictedStyle
           )
         : 0;
-      this.duelPredictionCorrect = bonus > 0;
       this.duelPredictionBonusTotal += bonus;
       this.duelPrediction = undefined;
       this.duelPredictionPhase = false;
@@ -8474,7 +8450,6 @@ export class AdaptiveGameApp {
     this.duelRoundResult = round;
     this.duelPrediction = undefined;
     this.duelPredictionPhase = false;
-    this.duelPredictionCorrect = undefined;
     this.renderDuel();
     window.clearTimeout(this.duelRoundResultTimer);
     this.duelRoundResultTimer = window.setTimeout(() => {
@@ -8683,7 +8658,7 @@ export class AdaptiveGameApp {
     `;
   }
 
-  private duelPickEnabled(optionIndex: number): boolean {
+  private duelPickEnabled(): boolean {
     if (!this.duelEngine) return false;
     if (this.duelMode === "ai") {
       return this.duelEngine.picks[0] === null;
@@ -8900,7 +8875,6 @@ export class AdaptiveGameApp {
                 predictedStyle
               )
             : 0;
-          this.duelPredictionCorrect = bonus > 0;
           this.duelPredictionBonusTotal += bonus;
       this.duelPrediction = undefined;
       this.duelPredictionPhase = false;
