@@ -5409,6 +5409,8 @@ export class AdaptiveGameApp {
       return;
     }
 
+    if (this.handleTrainingClick(action, actionTarget)) return;
+
     switch (action) {
       case "open-node": {
         const nodeId = actionTarget.dataset.node;
@@ -6194,105 +6196,6 @@ export class AdaptiveGameApp {
         break;
       case "coach-import":
         this.importCoachParticipants();
-        break;
-      case "open-training": {
-        const abilityId = actionTarget.dataset.ability as AbilityId | undefined;
-        if (abilityId && EXPANDED_TRAINING[abilityId]) {
-          this.audio.ui();
-          this.trainingReturnView =
-            this.view === "report" || this.view === "assessmentResult"
-              ? this.view
-              : "ability";
-          this.trainingAbilityId = abilityId;
-          this.trainingStage = "story";
-          this.trainingStep = 0;
-          this.trainingAnswers = Array(
-            EXPANDED_TRAINING[abilityId].questions.length
-          ).fill(0);
-          this.trainingResult = undefined;
-          this.show("training");
-        }
-        break;
-      }
-      case "training-back":
-        this.audio.ui();
-        this.show(
-          this.trainingReturnView === "training"
-            ? "ability"
-            : this.trainingReturnView
-        );
-        break;
-      case "training-start-quiz":
-        this.audio.trainingStart();
-        this.trainingStage = "quiz";
-        this.trainingStep = 0;
-        this.trainingAnswers = Array(
-          EXPANDED_TRAINING[this.trainingAbilityId].questions.length
-        ).fill(0);
-        this.renderTraining();
-        break;
-      case "training-option": {
-        const trainingQuestion = EXPANDED_TRAINING[this.trainingAbilityId].questions[this.trainingStep];
-        this.trainingAnswers[this.trainingStep] = Number(
-          actionTarget.dataset.option
-        );
-        if (Number(actionTarget.dataset.option) === trainingQuestion.answer) {
-          this.audio.trainingCorrect();
-        } else {
-          this.audio.ui();
-        }
-        this.renderTraining();
-        break;
-      }
-      case "training-next":
-        this.trainingStep = Math.min(
-          EXPANDED_TRAINING[this.trainingAbilityId].questions.length - 1,
-          this.trainingStep + 1
-        );
-        this.audio.ui();
-        this.renderTraining();
-        break;
-      case "training-prev":
-        this.trainingStep = Math.max(0, this.trainingStep - 1);
-        this.audio.ui();
-        this.renderTraining();
-        break;
-      case "training-submit": {
-        const questions = EXPANDED_TRAINING[this.trainingAbilityId].questions;
-        const scored = scoreTrainingAnswers(questions, this.trainingAnswers);
-        const result = applyTrainingResult(
-          this.save,
-          this.trainingAbilityId,
-          scored.correct,
-          scored.total
-        );
-        trackEvent("training_result", {
-          abilityId: this.trainingAbilityId,
-          correct: scored.correct,
-          total: scored.total,
-          firstComplete: result.firstComplete
-        });
-        this.trainingResult = { ...result, answered: scored.answered };
-        this.trainingStage = "result";
-        if (result.correct === scored.total) {
-          this.audio.trainingMastery();
-        } else if (result.correct >= 1) {
-          this.audio.trainingCorrect();
-        } else {
-          this.audio.risk();
-        }
-        this.renderTraining();
-        break;
-      }
-      case "training-restart":
-        this.trainingStage = "story";
-        this.trainingStep = 0;
-        this.trainingAnswers = Array(
-          EXPANDED_TRAINING[this.trainingAbilityId].questions.length
-        ).fill(0);
-        this.trainingResult = undefined;
-        this.audio.ui();
-        this.renderTraining();
         break;
       case "export-save":
         this.exportSave();
@@ -7476,6 +7379,116 @@ export class AdaptiveGameApp {
           this.show("profile");
         }
         break;
+    }
+  }
+
+  /** 训练视图点击：从 handleClick 拆出的训练域动作，返回 true 表示已处理。 */
+  private handleTrainingClick(
+    action: string,
+    actionTarget: HTMLElement
+  ): boolean {
+    switch (action) {
+      case "open-training": {
+        const abilityId = actionTarget.dataset.ability as AbilityId | undefined;
+        if (abilityId && EXPANDED_TRAINING[abilityId]) {
+          this.audio.ui();
+          this.trainingReturnView =
+            this.view === "report" || this.view === "assessmentResult"
+              ? this.view
+              : "ability";
+          this.trainingAbilityId = abilityId;
+          this.trainingStage = "story";
+          this.trainingStep = 0;
+          this.trainingAnswers = Array(
+            EXPANDED_TRAINING[abilityId].questions.length
+          ).fill(0);
+          this.trainingResult = undefined;
+          this.show("training");
+        }
+        return true;
+      }
+      case "training-back":
+        this.audio.ui();
+        this.show(
+          this.trainingReturnView === "training"
+            ? "ability"
+            : this.trainingReturnView
+        );
+        return true;
+      case "training-start-quiz":
+        this.audio.trainingStart();
+        this.trainingStage = "quiz";
+        this.trainingStep = 0;
+        this.trainingAnswers = Array(
+          EXPANDED_TRAINING[this.trainingAbilityId].questions.length
+        ).fill(0);
+        this.renderTraining();
+        return true;
+      case "training-option": {
+        const trainingQuestion = EXPANDED_TRAINING[this.trainingAbilityId].questions[this.trainingStep];
+        this.trainingAnswers[this.trainingStep] = Number(
+          actionTarget.dataset.option
+        );
+        if (Number(actionTarget.dataset.option) === trainingQuestion.answer) {
+          this.audio.trainingCorrect();
+        } else {
+          this.audio.ui();
+        }
+        this.renderTraining();
+        return true;
+      }
+      case "training-next":
+        this.trainingStep = Math.min(
+          EXPANDED_TRAINING[this.trainingAbilityId].questions.length - 1,
+          this.trainingStep + 1
+        );
+        this.audio.ui();
+        this.renderTraining();
+        return true;
+      case "training-prev":
+        this.trainingStep = Math.max(0, this.trainingStep - 1);
+        this.audio.ui();
+        this.renderTraining();
+        return true;
+      case "training-submit": {
+        const questions = EXPANDED_TRAINING[this.trainingAbilityId].questions;
+        const scored = scoreTrainingAnswers(questions, this.trainingAnswers);
+        const result = applyTrainingResult(
+          this.save,
+          this.trainingAbilityId,
+          scored.correct,
+          scored.total
+        );
+        trackEvent("training_result", {
+          abilityId: this.trainingAbilityId,
+          correct: scored.correct,
+          total: scored.total,
+          firstComplete: result.firstComplete
+        });
+        this.trainingResult = { ...result, answered: scored.answered };
+        this.trainingStage = "result";
+        if (result.correct === scored.total) {
+          this.audio.trainingMastery();
+        } else if (result.correct >= 1) {
+          this.audio.trainingCorrect();
+        } else {
+          this.audio.risk();
+        }
+        this.renderTraining();
+        return true;
+      }
+      case "training-restart":
+        this.trainingStage = "story";
+        this.trainingStep = 0;
+        this.trainingAnswers = Array(
+          EXPANDED_TRAINING[this.trainingAbilityId].questions.length
+        ).fill(0);
+        this.trainingResult = undefined;
+        this.audio.ui();
+        this.renderTraining();
+        return true;
+      default:
+        return false;
     }
   }
 
