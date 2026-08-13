@@ -1844,6 +1844,39 @@ button.trial-now {
   background: var(--blue);
 }
 
+/* 信息折叠：移动端默认收起「情报/公式」，点开显示；桌面保持展开 */
+details.fold > summary {
+  cursor: pointer;
+  list-style: none;
+}
+details.fold > summary::-webkit-details-marker {
+  display: none;
+}
+details.fold:not([open]) .intel-head {
+  margin-bottom: 0;
+}
+.intel-head small::after {
+  content: " ▸";
+}
+details.fold[open] .intel-head small::after {
+  content: " ▾";
+}
+.story-lesson details.fold {
+  margin: 6px 0 0;
+}
+.story-lesson details.fold > summary {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 13px;
+}
+.story-lesson details.fold > summary::after {
+  content: " ▸";
+  color: var(--muted);
+}
+.story-lesson details.fold[open] > summary::after {
+  content: " ▾";
+}
+
 .decision-panel {
   padding: 18px;
   border: 1px solid var(--line);

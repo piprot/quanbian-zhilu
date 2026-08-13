@@ -2235,21 +2235,26 @@ export class AdaptiveGameApp {
               }
               <section class="story-lesson" style="--dot:${ABILITIES[chapterFocusAbility].color}">
                 <span>${en ? "Chapter Practice" : "本章修炼"} · ${abilityDisplay(this.language, chapterFocusAbility).name}</span>
-                <code>${escapeHtml(lessonExtra.formula.expression)}</code>
-                <p>${escapeHtml(lessonExtra.roleApplications[this.save.profile.role])}</p>
+                <details class="fold fold-formula">
+                  <summary>${en ? "Practice formula" : "修炼公式"}</summary>
+                  <code>${escapeHtml(lessonExtra.formula.expression)}</code>
+                  <p>${escapeHtml(lessonExtra.roleApplications[this.save.profile.role])}</p>
+                </details>
                 <button data-action="open-training" data-ability="${chapterFocusAbility}">${en ? "Enter Practice" : "进入修炼"}</button>
               </section>
             </section>
           </section>
           <aside class="story-side">
             <section class="intel-panel">
-              <div class="intel-head">
-                <span>${this.t("intelTitle")}</span>
-                <small>${this.t("intelHint")}</small>
-              </div>
-              <div class="intel-list">
-                ${nodeIntel(this.language, this.save.profile.role, node).map((clue) => `<p>${escapeHtml(clue)}</p>`).join("")}
-              </div>
+              <details class="fold fold-intel">
+                <summary class="intel-head">
+                  <span>${this.t("intelTitle")}</span>
+                  <small>${this.t("intelHint")}</small>
+                </summary>
+                <div class="intel-list">
+                  ${nodeIntel(this.language, this.save.profile.role, node).map((clue) => `<p>${escapeHtml(clue)}</p>`).join("")}
+                </div>
+              </details>
             </section>
             <section class="decision-panel">
               ${
@@ -2340,6 +2345,7 @@ export class AdaptiveGameApp {
         </section>
       </main>
     `;
+    this.applyStoryFolds();
     const storyArt = this.root.querySelector<HTMLCanvasElement>("#story-art");
     if (storyArt) {
       renderPowerBoard(storyArt, node.id.length * 11 + node.chapterId * 13);
@@ -2350,6 +2356,16 @@ export class AdaptiveGameApp {
     if (relationsArt) {
       renderRelationGraph(relationsArt, this.save);
     }
+  }
+
+  // 移动端信息折叠：情境页默认收起「情报/公式」，点开才显示；桌面端保持展开。
+  private applyStoryFolds(): void {
+    const mobile = window.matchMedia("(max-width: 980px)").matches;
+    this.root
+      .querySelectorAll<HTMLDetailsElement>("details.fold")
+      .forEach((fold) => {
+        fold.open = !mobile;
+      });
   }
 
   private organizationalInvest(): void {
