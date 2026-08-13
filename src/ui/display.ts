@@ -420,12 +420,12 @@ export function dimensionMarkup(language: Language, save: SaveState): string {
           <div class="dimension-head">
             <strong>${en ? def.en : def.zh}</strong>
             <span>${en ? def.enSub : def.zhSub}</span>
-            <em>Lv.${level}</em>
+            <em>${en ? `Tier ${level}` : `第 ${level} 档`}</em>
           </div>
           <div class="dimension-bar"><i style="width:${Math.min(100, exp)}%"></i></div>
           <small>${en ? def.growEn : def.growZh}</small>
         </div>
       `;
   }).join("");
-  return `<section class="dimension-panel"><h2>${en ? "Leadership Profile" : "领导力画像"}</h2><p class="muted">${en ? "Aggregated from your ten abilities." : "由你的十项能力聚合而来。"}</p><div class="dimension-grid">${bars}</div></section>`;
+  return `<section class="dimension-panel"><h2>${en ? "Leadership Profile" : "领导力画像"}</h2><p class="muted">${en ? "Aggregated from your ten abilities into a leadership-style profile — not a separate ability level." : "由你的十项能力自动聚合，是领导风格画像，不是独立的能力等级。"}</p><div class="dimension-grid">${bars}</div></section>`;
 }

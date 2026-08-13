@@ -4283,7 +4283,7 @@ export class AdaptiveGameApp {
             <span>${this.t("trialEnergyCost")} ${trialCostFor(this.save, stage)}</span>
             <span>${this.t("trialHp")} ${this.save.trialHp} / 100</span>
             <span>${stage.gates.map((gate) => `${abilityDisplay(this.language, gate.abilityId).name} Lv.${gate.level}`).join(" + ")}</span>
-            ${stage.dimension ? `<span>${en ? LEADERSHIP_DIMENSIONS[stage.dimension].en : LEADERSHIP_DIMENSIONS[stage.dimension].zh} · Lv.${dimensionLevel(this.save.dimensionExp?.[stage.dimension] ?? 0)}</span>` : ""}
+            ${stage.dimension ? `<span>${en ? LEADERSHIP_DIMENSIONS[stage.dimension].en : LEADERSHIP_DIMENSIONS[stage.dimension].zh} · ${en ? `Tier ${dimensionLevel(this.save.dimensionExp?.[stage.dimension] ?? 0)}` : `第 ${dimensionLevel(this.save.dimensionExp?.[stage.dimension] ?? 0)} 档`}</span>` : ""}
           </div>
           <div class="trial-faction-bars">
             <span>${this.t("trialTrust")} ${this.trialFactionTrust}</span>
