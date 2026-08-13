@@ -72,7 +72,6 @@ import {
 } from "../core/game";
 import {
   CHAPTERS,
-  CHAPTER_REFLECTIONS,
   forkNodeForRoute,
   NODE_INTEL,
   RANDOM_EVENT_IDS,
@@ -178,12 +177,8 @@ import { readAnalyticsEvents, trackEvent } from "../core/analytics";
 import {
   ABILITY_EN,
   ABILITY_DETAIL_EN,
-  ACHIEVEMENT_EN,
-  ASSESSMENT_EN,
   BRANCH_NODE_EN,
   CHAPTER_EN,
-  CHAPTER_REFLECTION_EN,
-  CHALLENGE_EN,
   FORK_NODE_EN,
   MAIN_NODE_EN,
   MAIN_NODE_THEORY_EN,
@@ -195,7 +190,7 @@ import {
   SIDE_ARC_EN,
   SIDE_NODE_EN
 } from "../core/translations";
-import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, relationStatusText, sideArcDisplay } from "./display";
+import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, relationStatusText, sideArcDisplay, npcAvatarColor, achievementDisplay, challengeDisplay, challengeCategoryLabel, assessmentDisplay, chapterReflectionText, aiArchetypeLabel, leadershipLensText, roleMove } from "./display";
 import { buildReportMarkdown, downloadText, encodeSaveLink } from "./export";
 import { renderAbilityRadar, renderGroupRadar } from "./charts";
 import { renderPowerBoard } from "./art";
@@ -924,25 +919,6 @@ export class AdaptiveGameApp {
     return fallback;
   }
 
-  private npcAvatarColor(id: string): string {
-    const colors: Record<string, string> = {
-      "npc-assistant": "#4db7d6",
-      "npc-finance": "#e9826c",
-      "npc-ops": "#f2c14e",
-      "npc-young": "#57c7a3",
-      "npc-veteran": "#d97aa2",
-      "npc-chen": "#5ca9e9",
-      "npc-shen": "#8f8cd9",
-      "npc-xu": "#7fb069",
-      "npc-he": "#e9b872",
-      "npc-tang": "#d4a5e8",
-      "npc-fang": "#e9826c"
-    };
-    return colors[id] ?? "#41c7c0";
-  }
-
-
-
   private relationNoteText(npc: (typeof NPCS)[number]): string {
     if (this.language !== "en") return npcRelation(this.save, npc).note;
     if (
@@ -1034,7 +1010,7 @@ export class AdaptiveGameApp {
         : "完成相关主线或支线后，解锁这个人的故事。";
     return `
       <div class="npc-cameo-panel">
-        <span class="npc-cameo-dot" style="--dot:${this.npcAvatarColor(npc.id)}"></span>
+        <span class="npc-cameo-dot" style="--dot:${npcAvatarColor(npc.id)}"></span>
         <div>
           <strong>${escapeHtml(view.name)}</strong>
           <small>${escapeHtml(view.title)}</small>
@@ -1237,69 +1213,6 @@ export class AdaptiveGameApp {
         </div>
       </section>
     `;
-  }
-
-  private achievementDisplay(id: string) {
-    const fallback = ACHIEVEMENTS.find((item) => item.id === id);
-    const en = ACHIEVEMENT_EN[id];
-    return this.language === "en" && en
-      ? { name: en.name, description: en.description }
-      : {
-          name: fallback?.name ?? id,
-          description: fallback?.description ?? ""
-        };
-  }
-
-
-  private challengeDisplay(
-    challenge: ReturnType<typeof dailyChallenges>[number]
-  ) {
-    const en = CHALLENGE_EN[challenge.id];
-    return this.language === "en" && en
-      ? { ...challenge, title: en.title, description: en.description }
-      : challenge;
-  }
-
-  private challengeCategoryLabel(
-    category: "ability" | "chapter" | "trial" | "duel"
-  ): string {
-    if (this.language === "en") {
-      return (
-        {
-          ability: "Ability",
-          chapter: "Chapter",
-          trial: "Trial",
-          duel: "Duel"
-        }[category] ?? category
-      );
-    }
-    return (
-      {
-        ability: "能力",
-        chapter: "章节",
-        trial: "试炼",
-        duel: "对决"
-      }[category] ?? category
-    );
-  }
-
-  private assessmentDisplay(question: (typeof ASSESSMENT_QUESTIONS)[number]) {
-    const en = ASSESSMENT_EN[question.id];
-    if (this.language !== "en" || !en) return question;
-    return {
-      ...question,
-      prompt: en.prompt,
-      options: question.options.map((option, index) => ({
-        ...option,
-        label: en.options[index] ?? option.label
-      }))
-    };
-  }
-
-  private chapterReflectionText(chapterId: number): string {
-    return this.language === "en"
-      ? CHAPTER_REFLECTION_EN[chapterId] ?? ""
-      : CHAPTER_REFLECTIONS[chapterId] ?? "";
   }
 
   private render(): void {
@@ -1735,7 +1648,7 @@ export class AdaptiveGameApp {
       return;
     }
     const question = ASSESSMENT_QUESTIONS[this.assessmentStep];
-    const questionView = this.assessmentDisplay(question);
+    const questionView = assessmentDisplay(this.language, question);
     const selected = this.assessmentAnswers[this.assessmentStep];
     const en = this.language === "en";
     this.root.innerHTML = `
@@ -1973,7 +1886,7 @@ export class AdaptiveGameApp {
                         this.save,
                         achievement.id
                       );
-                      const view = this.achievementDisplay(achievement.id);
+                      const view = achievementDisplay(this.language, achievement.id);
                       const progress = achievementProgress(
                         this.save,
                         achievement.id
@@ -2267,7 +2180,7 @@ export class AdaptiveGameApp {
                 ? `
                   <section class="chapter-reflection">
                     <h3>${this.t("chapterReflectionTitle")}</h3>
-                    <p>${escapeHtml(this.chapterReflectionText(chapter.id))}</p>
+                    <p>${escapeHtml(chapterReflectionText(this.language, chapter.id))}</p>
                   </section>
                   ${
                     chapterPassed
@@ -2358,12 +2271,12 @@ export class AdaptiveGameApp {
                   (challenge) => {
                     const today = todayKey();
                     const claimedToday = (this.save.claimedDaily[today] ?? []).includes(challenge.id);
-                    const view = this.challengeDisplay(challenge);
+                    const view = challengeDisplay(this.language, challenge);
                     return `
                     <div class="challenge-row ${challenge.done ? "done" : ""}">
                       <div>
                         <strong>${escapeHtml(view.title)}</strong>
-                        <small>${this.challengeCategoryLabel(challenge.category)}</small>
+                        <small>${challengeCategoryLabel(this.language, challenge.category)}</small>
                         <span>${challenge.current} / ${challenge.target}</span>
                         <p>${escapeHtml(view.description)}</p>
                       </div>
@@ -2389,10 +2302,10 @@ export class AdaptiveGameApp {
                   (challenge) => `
                     <div class="challenge-row ${challenge.done ? "done" : ""}">
                       <div>
-                        <strong>${escapeHtml(this.challengeDisplay(challenge).title)}</strong>
-                        <small>${this.challengeCategoryLabel(challenge.category)}</small>
+                        <strong>${escapeHtml(challengeDisplay(this.language, challenge).title)}</strong>
+                        <small>${challengeCategoryLabel(this.language, challenge.category)}</small>
                         <span>${challenge.current} / ${challenge.target}</span>
-                        <p>${escapeHtml(this.challengeDisplay(challenge).description)}</p>
+                        <p>${escapeHtml(challengeDisplay(this.language, challenge).description)}</p>
                       </div>
                       ${
                         (this.save.claimedWeekly?.[weekKey()] ?? []).includes(
@@ -2741,7 +2654,7 @@ export class AdaptiveGameApp {
               ${
                 sceneNpc
                   ? `
-                    <div class="npc-scene-quote" style="--dot:${this.npcAvatarColor(sceneNpc.id)}">
+                    <div class="npc-scene-quote" style="--dot:${npcAvatarColor(sceneNpc.id)}">
                       <span>${escapeHtml(npcDisplay(this.language, sceneNpc).name)}</span>
                       <p>${escapeHtml(
                         this.language === "en"
@@ -2843,7 +2756,7 @@ export class AdaptiveGameApp {
                                       <span class="option-body">
                                         <strong>${escapeHtml(option.label)}</strong>
                                         <em>${escapeHtml(option.summary)}</em>
-                                        <small class="role-move">${this.roleMove(option.quality)}</small>
+                                        <small class="role-move">${roleMove(this.language, this.save.profile.role,option.quality)}</small>
                                         ${gateNote ? `<small class="option-gate-note">${escapeHtml(gateNote)}</small>` : ""}
                                       </span>
                                     </button>
@@ -3252,7 +3165,7 @@ export class AdaptiveGameApp {
           <p class="eyebrow">${this.language === "en" ? `Chapter ${chapter.code} ${this.t("chapterComplete")}` : `第 ${chapter.code} 章完成`}</p>
           <h1>${chapterDisplay(this.language, chapter).title}</h1>
           <p class="expedition-transition-line" style="--civ:${civ.color}">${this.language === "en" ? `${civ.nameEn} · ${civ.relicEn}` : `${civ.nameZh} · ${civ.relicZh}`}</p>
-          <p class="transition-summary">${escapeHtml(this.chapterReflectionText(chapter.id))}</p>
+          <p class="transition-summary">${escapeHtml(chapterReflectionText(this.language, chapter.id))}</p>
           <div class="route-choice-panel">
             <h3>${this.t("routeTitle")}</h3>
             <p class="muted">${this.t("routeHint")}</p>
@@ -4381,7 +4294,7 @@ export class AdaptiveGameApp {
                         ? personal.blindSpotNodes
                             .map(
                               (spot) =>
-                                `<p><strong>${escapeHtml(spot.nodeTitle)}</strong><small>${this.roleMove(spot.quality)}</small></p>`
+                                `<p><strong>${escapeHtml(spot.nodeTitle)}</strong><small>${roleMove(this.language, this.save.profile.role,spot.quality)}</small></p>`
                             )
                             .join("")
                         : `<p class="muted">${en ? "No missed moves yet." : "暂未发现明显失误。"}</p>`
@@ -5122,7 +5035,7 @@ export class AdaptiveGameApp {
         </section>
         <section class="duel-review-discussion" aria-label="${en ? "Debrief discussion" : "复盘讨论"}">
           <h2>${en ? "Debrief Discussion" : "复盘讨论"}</h2>
-          <p class="muted">${en ? `Opponent style: ${this.aiArchetypeLabel(engine.players[1].archetype ?? "builder")}` : `对手风格：${this.aiArchetypeLabel(engine.players[1].archetype ?? "builder")}`}</p>
+          <p class="muted">${en ? `Opponent style: ${aiArchetypeLabel(this.language,engine.players[1].archetype ?? "builder")}` : `对手风格：${aiArchetypeLabel(this.language,engine.players[1].archetype ?? "builder")}`}</p>
           <ul>
             <li>${en ? `Where did ${engine.players[1].name} push you outside your usual pattern?` : `${engine.players[1].name}在哪些回合把你逼出了平时的判断习惯？`}</li>
             <li>${en ? "Which decision would you defend in front of your team, and which would you revisit?" : "哪一次选择你敢在团队面前辩护，哪一次你会重新考虑？"}</li>
@@ -5571,7 +5484,7 @@ export class AdaptiveGameApp {
                 <div class="mode-note">
                   <h2>${this.language === "en" ? "AI Practice" : "AI 陪练"}</h2>
                   <p>${this.language === "en" ? "The system builds an opponent from each scenario's expert baseline and your ability level, then adjusts difficulty based on your expert-decision rate. Best for sustained decision training." : "系统会根据每道情境的专家基准和你的能力水平生成对手，并基于你的专家判断率动态调整难度。适合持续训练决策质量。"}</p>
-                  <p class="muted">${this.language === "en" ? `Next opponent style: ${this.aiArchetypeLabel(this.aiArchetype())}` : `下一场对手风格：${this.aiArchetypeLabel(this.aiArchetype())}`}</p>
+                  <p class="muted">${this.language === "en" ? `Next opponent style: ${aiArchetypeLabel(this.language,this.aiArchetype())}` : `下一场对手风格：${aiArchetypeLabel(this.language,this.aiArchetype())}`}</p>
                   <button class="primary" data-action="start-ai-duel">${this.language === "en" ? "Start Duel" : "开始对战"}</button>
                   <button data-action="start-challenge-duel">${this.language === "en" ? "7-Round Challenge" : "7 回合挑战赛"}</button>
                   <button data-action="start-endless-duel">${this.language === "en" ? "Endless Challenge" : "无尽挑战"}</button>
@@ -8518,21 +8431,6 @@ export class AdaptiveGameApp {
     return archetypes[counter % archetypes.length];
   }
 
-  private aiArchetypeLabel(archetype: AiArchetype): string {
-    if (this.language === "en") {
-      return archetype === "executor"
-        ? "Iron Executor"
-        : archetype === "builder"
-          ? "Relationship Builder"
-          : "Gambler";
-    }
-    return archetype === "executor"
-      ? "铁血执行者"
-      : archetype === "builder"
-        ? "关系构建者"
-        : "赌徒";
-  }
-
   private startAiDuel(): void {
     const human = buildDuelProfile(this.save.profile, this.save.profile.name, "#41c7c0");
     const history = this.save.decisionHistory;
@@ -9065,7 +8963,7 @@ export class AdaptiveGameApp {
       <div class="player-panel">
         <span class="player-color" style="--dot:${player.color}"></span>
         <strong>${escapeHtml(player.name)}</strong>
-        ${player.isHuman ? "" : `<small class="ai-style-tag">${this.aiArchetypeLabel(player.archetype ?? "builder")}</small>`}
+        ${player.isHuman ? "" : `<small class="ai-style-tag">${aiArchetypeLabel(this.language,player.archetype ?? "builder")}</small>`}
         <small>${picked ? (this.language === "en" ? "Choice made" : "已作出选择") : (this.language === "en" ? "Thinking" : "正在思考")}</small>
       </div>
     `;
@@ -9806,92 +9704,6 @@ export class AdaptiveGameApp {
     });
   }
 
-  private roleOptionLabel(option: StoryOption, index: number): string {
-    return this.roleOptionView(option, index).label;
-  }
-
-  private roleOptionSummary(option: StoryOption, index: number): string {
-    return this.roleOptionView(option, index).summary;
-  }
-
-  private roleOptionFeedback(option: StoryOption, index: number): string {
-    return this.roleOptionView(option, index).feedback;
-  }
-
-  private roleOptionView(
-    option: StoryOption,
-    index: number
-  ): (typeof ROLE_OPTION_SETS)[RoleId][OptionQuality][number] {
-    return ROLE_OPTION_SETS[this.save.profile.role][option.quality][
-      index % 3
-    ];
-  }
-
-  private roleMove(quality: OptionQuality): string {
-    const role = this.save.profile.role;
-    const label = roleDisplay(this.language, role).shortName;
-    if (this.language === "en") {
-      if (role === "parachute") {
-        return quality === "expert"
-          ? `${label} play: diagnose the power map before acting publicly`
-          : quality === "partial"
-            ? `${label} play: build authority first, repair relationships later`
-            : `${label} play: move fast and set boundaries without waiting for consensus`;
-      }
-      if (role === "founder") {
-        return quality === "expert"
-          ? `${label} play: validate cash flow before scaling`
-          : quality === "partial"
-            ? `${label} play: protect delivery before adding systems`
-            : `${label} play: push decisively and test fast`;
-      }
-      return quality === "expert"
-        ? `${label} play: build horizontal consensus before deciding`
-        : quality === "partial"
-          ? `${label} play: win key support before broad execution`
-          : `${label} play: escalate around resistance`;
-    }
-    if (role === "parachute") {
-      return quality === "expert"
-        ? `${label}打法：先诊断权力结构，再公开行动`
-        : quality === "partial"
-          ? `${label}打法：先建立权威，再补关系`
-          : `${label}打法：快速立威，不等待共识`;
-    }
-    if (role === "founder") {
-      return quality === "expert"
-        ? `${label}打法：先验证现金流，再规模化`
-        : quality === "partial"
-          ? `${label}打法：先保交付，再谈体系`
-          : `${label}打法：用创始人权力强推，快速试错`;
-    }
-    return quality === "expert"
-      ? `${label}打法：先建立横向共识，再推动决策`
-      : quality === "partial"
-        ? `${label}打法：先争取关键支持，再尝试落地`
-        : `${label}打法：越级推动，绕过部门阻力`;
-  }
-
-
-  private leadershipLensText(quality: OptionQuality): string {
-    if (this.language === "en") {
-      if (quality === "expert") {
-        return "Adaptive move: diagnose from the balcony, hold the tension, and give the work back to the team. This builds long-term capacity instead of short-term compliance.";
-      }
-      if (quality === "partial") {
-        return "Technical move: it solves the symptom quickly but keeps ownership with you. Follow up by returning the work and adding a check node.";
-      }
-      return "Authority or avoidance move: useful only for urgent technical problems. Used too often, it suppresses dissent and the team stops bringing real information.";
-    }
-    if (quality === "expert") {
-      return "自适应动作：登台观察、稳住张力、把工作还给团队。它建设的是长期能力，而不是短期服从。";
-    }
-    if (quality === "partial") {
-      return "技术性解决：快速处理了症状，但责任仍在你手里。下一步要把工作还回去，并补一个验证节点。";
-    }
-    return "权威或回避动作：只适合紧急的技术问题。用得太多，会压住不同意见，团队不再带真实信息上来。";
-  }
-
   private reviewBoardMarkup(): string {
     const entries = reviewBoard(this.save.reviewCards ?? [], (nodeId) =>
       this.reviewAbilityFor(nodeId)
@@ -10196,7 +10008,7 @@ export class AdaptiveGameApp {
         ${this.sixPartReviewMarkup(outcome)}
         <div class="leadership-lens ${option.quality}">
           <strong>${this.language === "en" ? "Adaptive Leadership Lens" : "自适应领导力视角"}</strong>
-          <p>${escapeHtml(this.leadershipLensText(option.quality))}</p>
+          <p>${escapeHtml(leadershipLensText(this.language, option.quality))}</p>
         </div>
         <div class="outcome-effects score-pop">
           <span><b>+${outcome.qualityScore}</b> ${this.language === "en" ? "Expert Fit" : "专家契合分"}</span>
