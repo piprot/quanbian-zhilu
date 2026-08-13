@@ -163,6 +163,7 @@ import { artAsset, chapterArtStyle } from "./assets";
 import { storyNodeDisplay } from "./nodeView";
 import { escapeAttr, escapeHtml, formatDelta } from "./escape";
 import { abilityView, endingView, reportView } from "./reportView";
+import { difficultySelector, settingsView } from "./settingsView";
 import {
   chapterTrainingMarkup,
   expeditionHeroMarkup,
@@ -1826,7 +1827,7 @@ export class AdaptiveGameApp {
               <h3>${this.t("situation")}</h3>
               <p>${this.language === "en" ? `Completed ${summary.chapterCount}/9 chapters, ${this.save.completedSideQuests.length}/${SIDE_QUEST_ARCS.reduce((count, arc) => count + arc.nodes.length, 0)} side quests, ${this.save.completedRandomEvents.length} random events. Latest decision: ${this.latestDecisionText()}.` : `已完成 ${summary.chapterCount}/9 章，支线 ${this.save.completedSideQuests.length}/${SIDE_QUEST_ARCS.reduce((count, arc) => count + arc.nodes.length, 0)}，随机事件 ${this.save.completedRandomEvents.length}，最近决策 ${this.latestDecisionText()}。`}</p>
             </div>
-            <div>${this.difficultySelectorMarkup()}</div>
+            <div>${difficultySelector(this.save, this.language)}</div>
             <div class="challenge-panel">
               <h3>${this.t("dailyTitle")}</h3>
               ${dailyChallenges(this.save)
@@ -1959,42 +1960,6 @@ export class AdaptiveGameApp {
         </section>
       </main>
     `;
-  }
-
-  private difficultySelectorMarkup(): string {
-    const options: Array<{ id: "normal" | "pressure" | "extreme"; label: string }> = [
-      { id: "normal", label: this.t("difficultyNormal") },
-      { id: "pressure", label: this.t("difficultyPressure") },
-      { id: "extreme", label: this.t("difficultyExtreme") }
-    ];
-    const buttons = options
-      .map(
-        (option) => `
-          <button
-            class="diff-btn ${this.save.difficulty === option.id ? "active" : ""}"
-            data-action="set-difficulty"
-            data-difficulty="${option.id}"
-          >${escapeHtml(option.label)}</button>`
-      )
-      .join("");
-    const note =
-      this.save.difficulty === "normal"
-        ? this.language === "en"
-          ? "Active: no resource scaling, no story timer, standard trial energy, untimed duels"
-          : "已生效：资源不缩放、剧情无时限、试炼精力标准、对决不强制计时"
-        : this.save.difficulty === "pressure"
-          ? this.language === "en"
-            ? "Active: 1.4x resource losses, story/duel rounds from 22s (scaled by text length), 1.15x trial energy, more disruptions"
-            : "已生效：资源损耗 1.4 倍、剧情/对决 22 秒起（随文本长度增加）、试炼精力 1.15 倍、干扰更多"
-          : this.language === "en"
-            ? "Active: 1.8x resource losses, story/duel rounds from 14s (scaled by text length), 1.3x trial energy, frequent disruptions"
-            : "已生效：资源损耗 1.8 倍、剧情/对决 14 秒起（随文本长度增加）、试炼精力 1.3 倍、干扰频繁";
-    return `
-      <div class="mini-panel difficulty-panel">
-        <h3>${this.t("difficultyLabel")} <span class="diff-active">${this.language === "en" ? "Active" : "已生效"}</span></h3>
-        <div class="diff-row">${buttons}</div>
-        <p class="muted">${escapeHtml(note)}</p>
-      </div>`;
   }
 
   /** 上一章章末路线横幅：让玩家看到选择真的带到了下一章。 */
@@ -4326,99 +4291,13 @@ export class AdaptiveGameApp {
 
 
   private renderSettings(): void {
-    const en = this.language === "en";
-    this.root.innerHTML = `
-      <header class="topbar">
-        <div class="brand">${this.t("brand")}</div>
-        <button class="link" data-action="open-menu">${this.t("returnHome")}</button>
-      </header>
-      <main class="settings-shell" aria-label="${this.t("settingsTitle")}">
-        <section class="settings-hero">
-          <p class="eyebrow">${this.t("settingsTitle")}</p>
-          <h1>${en ? "One place to tune the experience" : "一个地方，管理你的体验"}</h1>
-        </section>
-        <section class="settings-grid">
-          <div class="settings-panel">
-            <h2>${en ? "Audio & Language" : "声音与语言"}</h2>
-            <button data-action="toggle-sound">${this.muted ? this.t("soundOff") : this.t("soundOn")}</button>
-            <button data-action="toggle-music">${this.musicMuted ? this.t("musicOff") : this.t("musicOn")}</button>
-            <label class="field">
-              <span>${this.t("musicVolume")}</span>
-              <select data-select="music-volume">
-                <option value="0" ${this.musicVolume === 0 ? "selected" : ""}>0</option>
-                <option value="25" ${this.musicVolume === 25 ? "selected" : ""}>25</option>
-                <option value="50" ${this.musicVolume === 50 ? "selected" : ""}>50</option>
-                <option value="75" ${this.musicVolume === 75 ? "selected" : ""}>75</option>
-                <option value="100" ${this.musicVolume === 100 ? "selected" : ""}>100</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>${en ? "SFX Volume" : "音效音量"}</span>
-              <select data-select="sfx-volume">
-                <option value="0" ${this.sfxVolume === 0 ? "selected" : ""}>0</option>
-                <option value="25" ${this.sfxVolume === 25 ? "selected" : ""}>25</option>
-                <option value="50" ${this.sfxVolume === 50 ? "selected" : ""}>50</option>
-                <option value="75" ${this.sfxVolume === 75 ? "selected" : ""}>75</option>
-                <option value="100" ${this.sfxVolume === 100 ? "selected" : ""}>100</option>
-              </select>
-            </label>
-            <button data-action="preview-sfx">${en ? "Preview SFX" : "试听音效"}</button>
-            <button data-action="toggle-language">${this.t("language")}</button>
-            ${
-              this.musicVolume === 0 || this.sfxVolume === 0
-                ? `<p class="muted volume-zero-note">${en ? "Volume is 0: audio stays silent while toggles are on." : "音量为 0：开关虽为开，当前仍无声。"}</p>`
-                : ""
-            }
-          </div>
-          <div class="settings-panel">
-            <h2>${this.t("difficultyLabel")}</h2>
-            ${this.difficultySelectorMarkup()}
-          </div>
-          <div class="settings-panel">
-            <h2>${this.t("settingsHelp")}</h2>
-            <p>${this.t("settingsHelpText")}</p>
-          </div>
-          <div class="settings-panel">
-            <h2>${this.t("settingsData")}</h2>
-            <button data-action="open-assessment">${this.t("assessmentReopen")}</button>
-            <button data-action="export-save">${this.t("exportSave")}</button>
-            <button data-action="export-analytics">${this.language === "en" ? "Export Event Log" : "导出事件日志"}</button>
-            <button data-action="export-return-package">${this.language === "en" ? "Export Return Package" : "生成回传包"}</button>
-            <button data-action="import-save">${this.t("importSave")}</button>
-            <label class="file-button">
-              ${this.t("importSave")}
-              <input type="file" data-import-save accept="application/json" hidden />
-            </label>
-            <button data-action="reset-profile">${this.t("resetProfile")}</button>
-            <p class="muted">${this.language === "en" ? `Version ${APP_VERSION} 路 Static build` : `版本 ${APP_VERSION} 路 静态版`}</p>
-          </div>
-          <div class="settings-panel">
-            <h2>${this.t("settingsAccessibility")}</h2>
-            <p>${this.t("shortcutsTitle")}</p>
-            <p class="muted">${this.t("shortcutsText")}</p>
-            <p>${this.t("fontSize")}</p>
-            <div class="settings-actions">
-              <button data-action="settings-font-size" data-size="0.9">90%</button>
-              <button data-action="settings-font-size" data-size="1">100%</button>
-              <button data-action="settings-font-size" data-size="1.15">115%</button>
-            </div>
-            <p class="muted">${en ? "Reduced-motion preferences are respected by the UI." : "界面已支持系统减少动态效果偏好。"}</p>
-          </div>
-          <div class="settings-panel">
-            <h2>${this.language === "en" ? "About Ascend" : "关于升维"}</h2>
-            <p>${this.language === "en" ? "Ascend is an offline-first leadership scenario game based on The Book of Power, Heifetz adaptive leadership, and scenario-golf scoring." : "升维是一款基于《权经》九章架构、Heifetz 自适应领导力与情境高尔夫计分法的可离线领导力情境游戏。"}</p>
-            <p class="muted">${this.language === "en" ? "v1.1 路 standard mode has no decision timer; failed chapters can be retried; duels can be resumed after refresh." : "v1.1 路 标准档不计时；未达一星的章节可重打；对局刷新后可续战。"}</p>
-            <p class="muted">${this.language === "en" ? "Static content includes the full campaign, role branches, 9 side quests, training formulas, trials, local duels, save export/import and manual WebRTC. Account, cloud save, leaderboard and auto-match are bundled and become active in the online build." : "静态版包含完整主线、角色分岔、9 个支线、训练公式、试炼、本地对战、存档导出/导入与手动远程对战；账号、云存档、排行榜与自动匹配已内置，在线版构建后启用。"}</p>
-          </div>
-          <div class="settings-panel">
-            <h2>${this.language === "en" ? "Feedback for Coaches" : "体验反馈"}</h2>
-            <label>${this.language === "en" ? "Rating" : "评分"}<select data-feedback-rating>${[1, 2, 3, 4, 5].map((value) => `<option value="${value}">${value} / 5</option>`).join("")}</select></label>
-            <label>${this.language === "en" ? "Feedback" : "反馈内容"}<textarea data-feedback-text rows="3" maxlength="800" placeholder="${this.language === "en" ? "What worked, what confused you, and what you would change." : "哪些有效、哪里困惑、最想改什么。"}"></textarea></label>
-            <button data-action="generate-feedback">${this.language === "en" ? "Copy Feedback Package" : "生成并复制反馈"}</button>
-          </div>
-        </section>
-      </main>
-    `;
+    this.root.innerHTML = settingsView(this.save, this.language, {
+      muted: this.muted,
+      musicMuted: this.musicMuted,
+      musicVolume: this.musicVolume,
+      sfxVolume: this.sfxVolume,
+      version: APP_VERSION
+    });
   }
 
   private renderEnding(): void {
