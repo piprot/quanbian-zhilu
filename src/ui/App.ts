@@ -89,15 +89,13 @@ import {
 import { chapterNarrative } from "../core/chapterNarrative";
 import type {
   AbilityId,
-  ChapterDef,
   ChoiceOutcome,
   OptionQuality,
   PlayerProfile,
   ResourceKey,
   RoleId,
   SaveState,
-  StoryNode,
-  StoryOption
+  StoryNode
 } from "../core/types";
 import { ManualRtcPeer, type RtcMessage } from "../net/rtc";
 import { RoomClient, type RoomServerMessage } from "../net/roomClient";
@@ -105,11 +103,9 @@ import { GameAudioV2 } from "../audio-v2";
 import { ThemeMusic } from "../core/theme-music";
 import {
   stageForChapter,
-  reconStatus,
   reconMoments
 } from "../core/expedition";
 import { npcStoryFor } from "../core/npcStories";
-import { npcArcFor } from "../core/npcArcs";
 import {
   LeadershipGamesApp,
   type LeadershipGameId
@@ -182,6 +178,16 @@ import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDis
 import { buildReportMarkdown, downloadText, encodeSaveLink } from "./export";
 import { artAsset, chapterArtStyle } from "./assets";
 import { storyNodeDisplay } from "./nodeView";
+import { escapeAttr, escapeHtml, formatDelta } from "./escape";
+import {
+  chapterTrainingMarkup,
+  expeditionHeroMarkup,
+  npcCameoMarkup,
+  npcStoryMarkup,
+  optionCostSummary,
+  primaryAbilityForOption,
+  storyOptionOrder
+} from "./storyMarkup";
 import { renderAbilityRadar, renderGroupRadar } from "./charts";
 import { renderPowerBoard } from "./art";
 import { renderTrainingBoard } from "./trainingArt";
@@ -717,102 +723,6 @@ export class AdaptiveGameApp {
   }
 
 
-  private storyOptionOrder(node: StoryNode): number[] {
-    const order = node.options.map((_, index) => index);
-    const seed =
-      (node.id.length * 131 +
-        node.chapterId * 17 +
-        this.save.playCount * 7 +
-        this.save.profile.role.length) %
-      Math.max(1, order.length);
-    for (let i = 1; i < order.length; i += 1) {
-      const j = (i + seed * (i + 1)) % (i + 1);
-      [order[i], order[j]] = [order[j], order[i]];
-    }
-    return order;
-  }
-
-  private npcStoryMarkup(npc: (typeof NPCS)[number]): string {
-    const story = npcStoryFor(npc.id);
-    if (!story) return "";
-    const en = this.language === "en";
-    const paragraphs = en ? story.en : story.zh;
-    const dialogue = story.dialogue
-      .map(
-        (line) => `
-          <div class="npc-dialogue-line">
-            <strong>${escapeHtml(en ? line.questionEn : line.questionZh)}</strong>
-            <p>${escapeHtml(en ? line.answerEn : line.answerZh)}</p>
-          </div>
-        `
-      )
-      .join("");
-    const relic = en ? story.relicNoteEn : story.relicNoteZh;
-    const arc = npcArcFor(npc.id);
-    const arcMarkup = arc
-      ? `
-        <div class="npc-arc">
-          <h4>${en ? "Deeper Story" : "关系深化"}</h4>
-          ${(en ? arc.en : arc.zh)
-            .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
-            .join("")}
-          <div class="npc-dialogue-line">
-            <strong>${escapeHtml(en ? arc.dialogue.questionEn : arc.dialogue.questionZh)}</strong>
-            <p>${escapeHtml(en ? arc.dialogue.answerEn : arc.dialogue.answerZh)}</p>
-          </div>
-          <p class="npc-quest">${en ? "Next step" : "下一步"}：${escapeHtml(en ? arc.questEn : arc.questZh)}</p>
-        </div>
-      `
-      : "";
-    return `
-      <details class="npc-story">
-        <summary>${en ? "Story & Letters" : "故事与书信"}</summary>
-        <div class="npc-story-copy">
-          ${paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}
-        </div>
-        <div class="npc-dialogue">${dialogue}</div>
-        <p class="npc-relic-note">${escapeHtml(relic)}</p>
-        ${arcMarkup}
-      </details>
-    `;
-  }
-
-  private chapterNpc(chapterId: number): (typeof NPCS)[number] | undefined {
-    return NPCS.find((npc) => {
-      if (!npc.nodeId.startsWith("c")) return false;
-      return Number(npc.nodeId.slice(1, 2)) === chapterId;
-    });
-  }
-
-  private npcCameoMarkup(chapterId: number): string {
-    const npc = this.chapterNpc(chapterId);
-    if (!npc) return "";
-    const relation = npcRelation(this.save, npc);
-    const view = npcDisplay(this.language, npc);
-    const story = npcStoryFor(npc.id);
-    const known = relation.status !== "尚未接触";
-    const en = this.language === "en";
-    const quote = known
-      ? story
-        ? en
-          ? story.en[0]
-          : story.zh[0]
-        : view.description
-      : en
-        ? "Complete the related main or side scenario to open this person's story."
-        : "完成相关主线或支线后，解锁这个人的故事。";
-    return `
-      <div class="npc-cameo-panel">
-        <span class="npc-cameo-dot" style="--dot:${npcAvatarColor(npc.id)}"></span>
-        <div>
-          <strong>${escapeHtml(view.name)}</strong>
-          <small>${escapeHtml(view.title)}</small>
-          <p>${escapeHtml(quote)}</p>
-        </div>
-      </div>
-    `;
-  }
-
   private explorationPanelMarkup(node: StoryNode): string {
     const en = this.language === "en";
     const seed = this.save.scenarioSeed ?? 1;
@@ -863,7 +773,7 @@ export class AdaptiveGameApp {
     if (!option) return "";
     const en = this.language === "en";
     if (this.integrityGateMode === "ability") {
-      const primary = this.primaryAbilityForOption(option);
+      const primary = primaryAbilityForOption(option);
       const distractors = ABILITY_ORDER.filter((id) => id !== primary).slice(
         0,
         2
@@ -890,7 +800,7 @@ export class AdaptiveGameApp {
         </section>
       `;
     }
-    const cost = this.optionCostSummary(option);
+    const cost = optionCostSummary(this.language,option);
     const wrongOne = en
       ? "No cost at all; the choice itself is the answer"
       : "没有代价，选择本身就是答案";
@@ -917,92 +827,6 @@ export class AdaptiveGameApp {
             ${escapeHtml(wrongTwo)}
             <small>${en ? "Ignoring who carries the cost" : "忽略了代价由谁承担"}</small>
           </button>
-        </div>
-      </section>
-    `;
-  }
-
-  private optionCostSummary(option: StoryOption): string {
-    const en = this.language === "en";
-    const negative = (Object.entries(option.resources) as Array<
-      [ResourceKey, number]
-    >).filter(([, value]) => value < 0);
-    const positive = (Object.entries(option.resources) as Array<
-      [ResourceKey, number]
-    >).filter(([, value]) => value > 0);
-    if (negative.length && positive.length) {
-      const lose = negative
-        .map(([key, value]) => `${resourceDisplay(this.language, key)} ${Math.abs(value)}`)
-        .join("、");
-      const gain = positive
-        .map(([key, value]) => `${resourceDisplay(this.language, key)} +${value}`)
-        .join("、");
-      return en
-        ? `Spend ${lose} to gain ${gain}`
-        : `消耗 ${lose}，换取 ${gain}`;
-    }
-    if (negative.length) {
-      const lose = negative
-        .map(([key, value]) => `${resourceDisplay(this.language, key)} ${Math.abs(value)}`)
-        .join("、");
-      return en ? `It costs ${lose}` : `它需要付出 ${lose}`;
-    }
-    return en
-      ? "It takes on the uncertainty of a strong signal"
-      : "它承担了一次强信号带来的不确定性";
-  }
-
-  private primaryAbilityForOption(option: StoryOption): AbilityId {
-    const ids = Object.keys(option.effects) as AbilityId[];
-    return (
-      ids.sort(
-        (a, b) => (option.effects[b] ?? 0) - (option.effects[a] ?? 0)
-      )[0] ?? "insight"
-    );
-  }
-
-  private chapterTrainingMarkup(chapterId: number): string {
-    const chapter = getChapter(chapterId);
-    const en = this.language === "en";
-    const items = chapter.focus
-      .map((id) => {
-        const ability = abilityDisplay(this.language, id);
-        const extra =
-          this.language === "en" ? EXPANDED_TRAINING_EN[id] : EXPANDED_TRAINING[id];
-        const done = this.save.completedTraining.includes(id);
-        return `
-          <div class="chapter-training-item">
-            <strong>${ability.name} Lv.${abilityLevel(this.save.profile.abilities[id])}</strong>
-            <code>${escapeHtml(extra.formula.expression)}</code>
-            <small>${done ? (en ? "Practiced ✓" : "已修炼 ✓") : (en ? "Not practiced" : "未修炼")}</small>
-            <button data-action="open-training" data-ability="${id}">${en ? "Practice" : "修炼"}</button>
-          </div>
-        `;
-      })
-      .join("");
-    return `
-      <section class="chapter-training-card">
-        <h3>${en ? "Chapter Ability Practice" : "本章能力修炼"}</h3>
-        <p>${en ? "Train the chapter's focus abilities before entering harder scenarios." : "先把本章重点能力练到能用，再进入更难的情境。"}</p>
-        <div class="chapter-training-grid">${items}</div>
-      </section>
-    `;
-  }
-
-  private expeditionHeroMarkup(chapterId: number): string {
-    const civ = stageForChapter(chapterId);
-    const en = this.language === "en";
-    const exp = reconStatus(this.save);
-    return `
-      <section class="expedition-hero" style="--civ:${civ.color}">
-        <div>
-          <p class="eyebrow">${en ? "Nine-Chapter Power Structure" : "九章权力架构"}</p>
-          <h1>${en ? civ.nameEn : civ.nameZh} · ${en ? civ.relicEn : civ.relicZh}</h1>
-          <p>${escapeHtml(en ? civ.clueEn : civ.clueZh)}</p>
-        </div>
-        <div class="progress-ring">
-          <strong>${exp.foundPieces} / ${exp.totalPieces}</strong>
-          <span>${en ? "Chapters completed" : "章节进度"}</span>
         </div>
       </section>
     `;
@@ -1759,7 +1583,7 @@ export class AdaptiveGameApp {
                 </div>
                 <span class="npc-status">${relationStatusText(this.language, relation.status)}</span>
                 <em>${relationNoteText(this.language, this.save, npc)}</em>
-                ${relation.status !== "尚未接触" ? this.npcStoryMarkup(npc) : ""}
+                ${relation.status !== "尚未接触" ? npcStoryMarkup(this.language,npc) : ""}
               </div>
             `;
           }).join("")}
@@ -1861,7 +1685,7 @@ export class AdaptiveGameApp {
         </div>
       </header>
       <main class="map-shell ${this.mapDetailOpen ? "map-detail-open" : ""}" style="${chapterArtStyle(chapter.id)}" aria-label="${this.language === "en" ? "Campaign map" : "主线地图"}">
-        ${this.expeditionHeroMarkup(chapter.id)}
+        ${expeditionHeroMarkup(this.language, this.save,chapter.id)}
         ${
           this.save.playCount === 0 && !this.guideSteps().includes("map-intro")
             ? `
@@ -1956,7 +1780,7 @@ export class AdaptiveGameApp {
                 `
                 : ""
             }
-            ${this.chapterTrainingMarkup(chapter.id)}
+            ${chapterTrainingMarkup(this.language, this.save,chapter.id)}
             <section class="quest-board">
               <h3>${this.t("sideQuestArcsTitle")}</h3>
               <p class="muted">${this.t("sideQuestHint")}</p>
@@ -1984,7 +1808,7 @@ export class AdaptiveGameApp {
                   : ""
               }
             </div>
-            ${this.npcCameoMarkup(chapter.id)}
+            ${npcCameoMarkup(this.language, this.save,chapter.id)}
             <div class="mini-panel power-panel">
               <h3>${this.language === "en" ? "Power Structure" : "权力架构"}</h3>
               <div class="power-track">
@@ -2281,7 +2105,7 @@ export class AdaptiveGameApp {
         )
       )
     ];
-    const optionOrder = this.storyOptionOrder(node);
+    const optionOrder = storyOptionOrder(this.save,node);
     const optionGates = optionOrder.map((index) =>
       optionGateFor(this.save, node.options[index], node.chapterId)
     );
@@ -7837,7 +7661,7 @@ export class AdaptiveGameApp {
     const ability = target.dataset.ability as AbilityId | undefined;
     const node = getNode(this.integrityGateNodeId);
     const option = node.options[this.pendingIntegrityOption];
-    const primary = this.primaryAbilityForOption(option);
+    const primary = primaryAbilityForOption(option);
     const correct =
       this.integrityGateMode === "ability"
         ? ability === primary
@@ -8080,7 +7904,7 @@ export class AdaptiveGameApp {
     ) {
       return;
     }
-    const optionOrder = this.storyOptionOrder(rawNode);
+    const optionOrder = storyOptionOrder(this.save,rawNode);
     const displayIndex = optionOrder.indexOf(optionIndex);
     this.recordPickPosition(displayIndex);
     if (optionIndex === optionOrder[0]) {
@@ -9834,19 +9658,3 @@ export class AdaptiveGameApp {
   }
 }
 
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function escapeAttr(value: string): string {
-  return escapeHtml(value);
-}
-
-function formatDelta(value: number): string {
-  return value > 0 ? `+${value}` : String(value);
-}
