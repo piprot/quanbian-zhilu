@@ -5419,6 +5419,7 @@ export class AdaptiveGameApp {
     if (this.handleLiveClick(action, actionTarget)) return;
     if (this.handleCustomScenarioClick(action, actionTarget)) return;
     if (this.handleCoachClick(action, actionTarget)) return;
+    if (this.handleEndingClick(action, actionTarget)) return;
 
     switch (action) {
       case "open-node": {
@@ -5796,181 +5797,6 @@ export class AdaptiveGameApp {
         );
         this.audio.ui();
         this.show("teamAcademy");
-        break;
-      case "open-wrong-review": {
-        const wrongIds = [
-          ...new Set(
-            this.save.decisionHistory
-              .filter((record) => record.quality !== "expert")
-              .map((record) => record.nodeId)
-          )
-        ]
-          .slice(-8)
-          .reverse();
-        if (wrongIds.length === 0) {
-          this.showToast(
-            this.language === "en"
-              ? "No missed moves to review yet."
-              : "暂无可回练的错题。"
-          );
-          break;
-        }
-        this.wrongReviewQueue = wrongIds;
-        this.wrongReviewIndex = 0;
-        this.storyNodeId = wrongIds[0];
-        this.replayMode = true;
-        this.lastOutcome = undefined;
-        this.lastOutcomeNodeId = undefined;
-        this.audio.ui();
-        this.show("story");
-        break;
-      }
-      case "next-wrong-review":
-        this.wrongReviewIndex += 1;
-        if (this.wrongReviewIndex >= this.wrongReviewQueue.length) {
-          this.wrongReviewQueue = [];
-          this.wrongReviewIndex = 0;
-          this.replayMode = false;
-          this.audio.ui();
-          this.show("report");
-          break;
-        }
-        this.storyNodeId = this.wrongReviewQueue[this.wrongReviewIndex];
-        this.lastOutcome = undefined;
-        this.lastOutcomeNodeId = undefined;
-        this.audio.ui();
-        this.show("story");
-        break;
-      case "open-ending":
-        if (isChapterPassed(this.save, 9)) {
-          this.audio.ui();
-          this.show("ending");
-        }
-        break;
-      case "ending-back":
-        this.audio.ui();
-        this.show("report");
-        break;
-      case "ending-share": {
-        const textarea = this.root.querySelector<HTMLTextAreaElement>(
-          "#ending-share-target"
-        );
-        const summary = profileSummary(this.save);
-        const text =
-          `${this.save.profile.name} · ${rankName(this.language, summary.rank)} · ${this.language === "en" ? "Ascend" : "升维"}\n` +
-          `${this.language === "en" ? `Total Ability ${summary.total}` : `综合能力值 ${summary.total}`}`;
-        if (textarea) {
-          textarea.value = text;
-          void navigator.clipboard?.writeText(text);
-        }
-        this.audio.ui();
-        break;
-      }
-      case "ending-card": {
-        const en = this.language === "en";
-        const canvas = this.root.querySelector<HTMLCanvasElement>(
-          "#ending-card-canvas"
-        );
-        if (canvas) {
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            const summary = profileSummary(this.save);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const bg = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            bg.addColorStop(0, "#0a1013");
-            bg.addColorStop(1, "#17262e");
-            ctx.fillStyle = bg;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#f2c14e";
-            ctx.font = "700 34px 'Microsoft YaHei', sans-serif";
-            ctx.fillText("升维", 48, 78);
-            ctx.fillStyle = "#e7eef2";
-            ctx.font = "700 42px 'Microsoft YaHei', sans-serif";
-            ctx.fillText(
-              `${this.save.profile.name} · ${rankName(this.language, summary.rank)}`,
-              48,
-              170
-            );
-            ctx.fillStyle = "#9fb3c8";
-            ctx.font = "22px 'Microsoft YaHei', sans-serif";
-            ctx.fillText(
-              `${en ? "Total Ability" : "综合能力值"} ${summary.total}`,
-              48,
-              240
-            );
-            ctx.fillText(
-              `${en ? "Chapters" : "章节"} ${summary.chapterCount}/9`,
-              48,
-              290
-            );
-            ctx.fillStyle = "#f2c14e";
-            ctx.fillText("升维 · 自适应领导力情境游戏", 48, 430);
-            const url = canvas.toDataURL("image/png");
-            const anchor = document.createElement("a");
-            anchor.href = url;
-            anchor.download = `${en ? "Ascend-ending" : "升维结局"}.png`;
-            anchor.click();
-          }
-        }
-        this.audio.ui();
-        break;
-      }
-      case "ending-choice": {
-        const ending = actionTarget.dataset.ending;
-        if (ending) {
-          this.endingChoice = ending;
-          recordAlternateEnding(this.save, `ending-${ending}`);
-          this.audio.expert();
-          this.renderEnding();
-        }
-        break;
-      }
-      case "hidden-option": {
-        const abilityId = this.hiddenBranchAbilityId;
-        if (!abilityId) break;
-        const steps = hiddenRouteSteps(abilityId);
-        const step = Math.min(this.hiddenRouteStep, steps.length - 1);
-        const selected = Number(actionTarget.dataset.option);
-        const correct = selected === steps[step].answer;
-        this.hiddenRouteLastAnswer = selected;
-        this.hiddenRouteLastCorrect = correct;
-        if (correct) {
-          this.save.hiddenRouteProgress[abilityId] = Math.max(
-            this.save.hiddenRouteProgress[abilityId] ?? 0,
-            step + 1
-          );
-          if (step + 1 >= steps.length) {
-            recordHiddenRoute(this.save, `hidden-${abilityId}`);
-          }
-        }
-        this.audio.ui();
-        this.renderHiddenBranch();
-        break;
-      }
-      case "hidden-next": {
-        const abilityId = this.hiddenBranchAbilityId;
-        if (!abilityId) break;
-        if (this.hiddenRouteLastCorrect) {
-          const steps = hiddenRouteSteps(abilityId);
-          this.hiddenRouteStep = Math.min(
-            steps.length - 1,
-            this.hiddenRouteStep + 1
-          );
-        }
-        this.hiddenRouteLastAnswer = undefined;
-        this.hiddenRouteLastCorrect = undefined;
-        this.audio.ui();
-        this.renderHiddenBranch();
-        break;
-      }
-      case "continue-hidden-exit":
-        this.audio.ui();
-        if (this.lastOutcome && this.lastOutcomeNodeId) {
-          this.storyNodeId = this.lastOutcomeNodeId;
-          this.show("story");
-        } else {
-          this.show("map");
-        }
         break;
       case "claim-challenge": {
         const challengeId = actionTarget.dataset.challenge ?? "";
@@ -7584,6 +7410,191 @@ export class AdaptiveGameApp {
         return true;
       case "coach-import":
         this.importCoachParticipants();
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private handleEndingClick(
+    action: string,
+    actionTarget: HTMLElement
+  ): boolean {
+    switch (action) {
+      case "open-wrong-review": {
+        const wrongIds = [
+          ...new Set(
+            this.save.decisionHistory
+              .filter((record) => record.quality !== "expert")
+              .map((record) => record.nodeId)
+          )
+        ]
+          .slice(-8)
+          .reverse();
+        if (wrongIds.length === 0) {
+          this.showToast(
+            this.language === "en"
+              ? "No missed moves to review yet."
+              : "暂无可回练的错题。"
+          );
+          return true;
+        }
+        this.wrongReviewQueue = wrongIds;
+        this.wrongReviewIndex = 0;
+        this.storyNodeId = wrongIds[0];
+        this.replayMode = true;
+        this.lastOutcome = undefined;
+        this.lastOutcomeNodeId = undefined;
+        this.audio.ui();
+        this.show("story");
+        return true;
+      }
+      case "next-wrong-review":
+        this.wrongReviewIndex += 1;
+        if (this.wrongReviewIndex >= this.wrongReviewQueue.length) {
+          this.wrongReviewQueue = [];
+          this.wrongReviewIndex = 0;
+          this.replayMode = false;
+          this.audio.ui();
+          this.show("report");
+          return true;
+        }
+        this.storyNodeId = this.wrongReviewQueue[this.wrongReviewIndex];
+        this.lastOutcome = undefined;
+        this.lastOutcomeNodeId = undefined;
+        this.audio.ui();
+        this.show("story");
+        return true;
+      case "open-ending":
+        if (isChapterPassed(this.save, 9)) {
+          this.audio.ui();
+          this.show("ending");
+        }
+        return true;
+      case "ending-back":
+        this.audio.ui();
+        this.show("report");
+        return true;
+      case "ending-share": {
+        const textarea = this.root.querySelector<HTMLTextAreaElement>(
+          "#ending-share-target"
+        );
+        const summary = profileSummary(this.save);
+        const text =
+          `${this.save.profile.name} · ${rankName(this.language, summary.rank)} · ${this.language === "en" ? "Ascend" : "升维"}\n` +
+          `${this.language === "en" ? `Total Ability ${summary.total}` : `综合能力值 ${summary.total}`}`;
+        if (textarea) {
+          textarea.value = text;
+          void navigator.clipboard?.writeText(text);
+        }
+        this.audio.ui();
+        return true;
+      }
+      case "ending-card": {
+        const en = this.language === "en";
+        const canvas = this.root.querySelector<HTMLCanvasElement>(
+          "#ending-card-canvas"
+        );
+        if (canvas) {
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            const summary = profileSummary(this.save);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const bg = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            bg.addColorStop(0, "#0a1013");
+            bg.addColorStop(1, "#17262e");
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#f2c14e";
+            ctx.font = "700 34px 'Microsoft YaHei', sans-serif";
+            ctx.fillText("升维", 48, 78);
+            ctx.fillStyle = "#e7eef2";
+            ctx.font = "700 42px 'Microsoft YaHei', sans-serif";
+            ctx.fillText(
+              `${this.save.profile.name} · ${rankName(this.language, summary.rank)}`,
+              48,
+              170
+            );
+            ctx.fillStyle = "#9fb3c8";
+            ctx.font = "22px 'Microsoft YaHei', sans-serif";
+            ctx.fillText(
+              `${en ? "Total Ability" : "综合能力值"} ${summary.total}`,
+              48,
+              240
+            );
+            ctx.fillText(
+              `${en ? "Chapters" : "章节"} ${summary.chapterCount}/9`,
+              48,
+              290
+            );
+            ctx.fillStyle = "#f2c14e";
+            ctx.fillText("升维 · 自适应领导力情境游戏", 48, 430);
+            const url = canvas.toDataURL("image/png");
+            const anchor = document.createElement("a");
+            anchor.href = url;
+            anchor.download = `${en ? "Ascend-ending" : "升维结局"}.png`;
+            anchor.click();
+          }
+        }
+        this.audio.ui();
+        return true;
+      }
+      case "ending-choice": {
+        const ending = actionTarget.dataset.ending;
+        if (ending) {
+          this.endingChoice = ending;
+          recordAlternateEnding(this.save, `ending-${ending}`);
+          this.audio.expert();
+          this.renderEnding();
+        }
+        return true;
+      }
+      case "hidden-option": {
+        const abilityId = this.hiddenBranchAbilityId;
+        if (!abilityId) return true;
+        const steps = hiddenRouteSteps(abilityId);
+        const step = Math.min(this.hiddenRouteStep, steps.length - 1);
+        const selected = Number(actionTarget.dataset.option);
+        const correct = selected === steps[step].answer;
+        this.hiddenRouteLastAnswer = selected;
+        this.hiddenRouteLastCorrect = correct;
+        if (correct) {
+          this.save.hiddenRouteProgress[abilityId] = Math.max(
+            this.save.hiddenRouteProgress[abilityId] ?? 0,
+            step + 1
+          );
+          if (step + 1 >= steps.length) {
+            recordHiddenRoute(this.save, `hidden-${abilityId}`);
+          }
+        }
+        this.audio.ui();
+        this.renderHiddenBranch();
+        return true;
+      }
+      case "hidden-next": {
+        const abilityId = this.hiddenBranchAbilityId;
+        if (!abilityId) return true;
+        if (this.hiddenRouteLastCorrect) {
+          const steps = hiddenRouteSteps(abilityId);
+          this.hiddenRouteStep = Math.min(
+            steps.length - 1,
+            this.hiddenRouteStep + 1
+          );
+        }
+        this.hiddenRouteLastAnswer = undefined;
+        this.hiddenRouteLastCorrect = undefined;
+        this.audio.ui();
+        this.renderHiddenBranch();
+        return true;
+      }
+      case "continue-hidden-exit":
+        this.audio.ui();
+        if (this.lastOutcome && this.lastOutcomeNodeId) {
+          this.storyNodeId = this.lastOutcomeNodeId;
+          this.show("story");
+        } else {
+          this.show("map");
+        }
         return true;
       default:
         return false;
