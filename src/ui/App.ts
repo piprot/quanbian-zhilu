@@ -102,11 +102,8 @@ import {
   reconMoments
 } from "../core/expedition";
 import { npcStoryFor } from "../core/npcStories";
-import {
-  LeadershipGamesApp,
-  type LeadershipGameId
-} from "./leadership-games";
-import { TeamAcademyApp } from "./team-academy";
+import type { LeadershipGamesApp, LeadershipGameId } from "./leadership-games";
+import type { TeamAcademyApp } from "./team-academy";
 import {
   LEADERSHIP_DIMENSIONS,
   dimensionLevel
@@ -2401,7 +2398,8 @@ export class AdaptiveGameApp {
     this.renderMap();
   }
 
-  private openLeadershipGames(): void {
+  private async openLeadershipGames(): Promise<void> {
+    const { LeadershipGamesApp } = await import("./leadership-games");
     this.leadershipGames = new LeadershipGamesApp(this.language, {
       onBack: () => this.show("map"),
       onReward: (gameId, won, score, achievements, branch) =>
@@ -2430,9 +2428,27 @@ export class AdaptiveGameApp {
     this.show("leadershipGames");
   }
 
+  private async openTeamAcademy(): Promise<void> {
+    const { TeamAcademyApp } = await import("./team-academy");
+    this.teamAcademy = new TeamAcademyApp(
+      this.save.profile.role as "parachute" | "founder" | "highPotential",
+      this.language,
+      {
+        onBack: () => this.show("menu"),
+        onAudio: (kind) => {
+          if (kind === "correct") this.audio.expert();
+          else if (kind === "wrong") this.audio.risk();
+          else this.audio.ui();
+        }
+      }
+    );
+    this.audio.ui();
+    this.show("teamAcademy");
+  }
+
   private renderLeadershipGames(): void {
     if (!this.leadershipGames) {
-      this.openLeadershipGames();
+      void this.openLeadershipGames();
       return;
     }
     this.leadershipGames.render(this.root);
@@ -7055,20 +7071,7 @@ export class AdaptiveGameApp {
         this.show("report");
         return true;
       case "open-team-academy":
-        this.teamAcademy = new TeamAcademyApp(
-          this.save.profile.role as "parachute" | "founder" | "highPotential",
-          this.language,
-          {
-            onBack: () => this.show("menu"),
-            onAudio: (kind) => {
-              if (kind === "correct") this.audio.expert();
-              else if (kind === "wrong") this.audio.risk();
-              else this.audio.ui();
-            }
-          }
-        );
-        this.audio.ui();
-        this.show("teamAcademy");
+        void this.openTeamAcademy();
         return true;
       default:
         return false;
@@ -7191,7 +7194,7 @@ export class AdaptiveGameApp {
         this.chooseStoryOption(actionTarget);
         return true;
       case "open-leadership-games":
-        this.openLeadershipGames();
+        void this.openLeadershipGames();
         return true;
       case "organizational-invest":
         this.organizationalInvest();
