@@ -159,7 +159,7 @@ export class DuelEngine {
     return bestIndex;
   }
 
-  /** 鍥炲悎瓒呮椂鏃跺己鍒朵负鏌愪綅鐜╁鏀惧叆椋庨櫓鍥炲悎锛岄槻姝㈠弻鏂逛笉閫夋垨涓€鏂归€冨紑鑰屾案涔呭寕璧枫€?*/
+  /** 回合超时时强制为某位玩家放入风险回合，防止双方不选或一方逃开而永久卡死。 */
   forceTimeoutPick(playerIndex: 0 | 1): void {
     if (this.picks[playerIndex] !== null) {
       return;

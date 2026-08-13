@@ -8943,7 +8943,7 @@ export class AdaptiveGameApp {
         })
       );
     } catch {
-      // 蹇呴』闈欓粯澶辫触锛屼笉褰卞搷瀵瑰眬
+      // 必须静默失败，不影响对局
     }
   }
 

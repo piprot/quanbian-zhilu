@@ -1012,7 +1012,7 @@ export function resourceStrainFor(
   return strain;
 }
 
-/** 瀵艰嚧涓嬩竴绔犺В閿佺殑鏈€浣庡垎鏁帮紙涓€鏄燂級銆?*/
+/** 导致下一章解锁的最低分数（一星）。 */
 export const CHAPTER_PASS_STARS = 70;
 
 export function chapterStarCount(stars: number): number {
@@ -1027,7 +1027,7 @@ export function isChapterComplete(save: SaveState, chapterId: number): boolean {
   return Boolean(record && record.completedNodeIds.length >= 2);
 }
 
-/** 绔犺妭鏄惁杈惧埌涓€鏄熼棬妲涳紙鍙В閿佷笅涓€绔犮€佸彲鍏ュ骇澶嶇洏锛夈€?*/
+/** 章节是否达到一星门槛（可解锁下一章、可入座复盘）。 */
 export function isChapterPassed(save: SaveState, chapterId: number): boolean {
   const record = save.chapterRecords.find((item) => item.chapterId === chapterId);
   return Boolean(
@@ -1037,7 +1037,7 @@ export function isChapterPassed(save: SaveState, chapterId: number): boolean {
   );
 }
 
-/** 宸叉瀯鎴愪絾鏈揪涓€鏄熺殑绔犺妭鍙噸鏂板啋闄╋紝娓呴櫎璇ョ珷鑺傝褰曚笌鍐崇瓥鍘嗗彶鍚庨噸鏂扮粨绠椼€?*/
+/** 已构成但未达一星的章节可重新冒险，清除该章节记录与决策历史后重新结算。 */
 export function retryChapter(save: SaveState, chapterId: number): void {
   save.chapterRecords = save.chapterRecords.filter(
     (record) => record.chapterId !== chapterId
@@ -1163,7 +1163,7 @@ export function applyTrainingResult(
       save.achievements.push("training_all");
     }
   } else {
-    // 鍥涘埌澶嶄範缁欏皬棰濊兘閲忥紝閬垮厤鈥滀簩娆￠浂鏀剁泭鈥濓紝浣嗕笉鍐嶆彁渚涜兘鍔涚粡楠屻€?
+    // 复习给小额能量，避免「二次零收益」，但不再提供能力经验。
     save.masteryPoints += 2;
     save.trialEnergy = clamp(save.trialEnergy + 6, 0, 100);
   }
@@ -1206,7 +1206,7 @@ export function applyDailyTrialRecovery(save: SaveState): boolean {
   return true;
 }
 
-/** 涓绘儏璧勬簮锛堢簿鍔涖€佷俊浠汇€佸奖鍝嶅姏銆佺粍缁囪祫婧愶級姣忔棩浣庨鎭㈠涓€娆★紝璁╄祫婧愮幆鏈夊彲鎰熺煡鐨勬仮澶嶈矾寰勩€?*/
+/** 主线资源（精力、信任、影响力、组织资源）每日低额恢复一次，让资源环有可感知的恢复路径。 */
 export function applyDailyResourceRecovery(save: SaveState): boolean {
   const today = todayDateKey();
   if (save.lastResourceDate === today) {
@@ -1237,7 +1237,7 @@ export function applyDailyResourceRecovery(save: SaveState): boolean {
   return true;
 }
 
-/** 闅忔満浜嬩欢鍏ㄩ儴瀹屾垚鍚庢壄鍔ㄤ簨浠舵睜锛岄噸鏂板彲鎺ヨЕ骞剁粰涓€娆″皬濂栧姳銆?*/
+/** 随机事件全部完成后扭动事件池，重新可接触并给一次小奖励。 */
 export function rotateRandomEventPool(save: SaveState): boolean {
   if (save.completedRandomEvents.length < randomEventEligibleCount(save)) {
     return false;
@@ -1436,7 +1436,7 @@ export function completePracticeTask(
   rewardExp: number
 ): boolean {
   if (save.completedPracticeTasks.includes(taskId)) {
-    // 淇偧浠诲姟鍙噸澶嶇粌涔狅紝閲嶅涔犲彧缁欏皬棰濊兘閲忥紝涓嶅啀澧炲姞鑳藉姏缁忛獙銆?
+    // 修炼任务可重复练习，重复练习只给小额能量，不再增加能力经验。
     save.trialEnergy = clamp(
       save.trialEnergy + Math.max(3, Math.floor(rewardEnergy / 2)),
       0,

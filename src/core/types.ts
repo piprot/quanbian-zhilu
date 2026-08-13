@@ -95,7 +95,7 @@ export interface DuelProfile {
   resources: Record<ResourceKey, number>;
   color: string;
   isHuman: boolean;
-  /** AI 闅惧害寮哄害锛堝奖鍝嶉€夋嫨绮惧噯鐜囷級銆?*/
+  /** AI 难度强度（影响选择精确率）。 */
   strength?: number;
   archetype?: AiArchetype;
 }
@@ -173,9 +173,9 @@ export interface SaveState {
   /** 存档核心进度的内容哈希。用于云端同步冲突判定（同游玩次数但内容不同也能识别）。 */
   saveHash?: string;
   lastStoryNodeId?: string;
-  /** 鏈満鏈€楂樺涓嬪緱鍒嗭紝鐢ㄤ簬鏈湴鎴愮哗鐣欏瓨銆?*/
+  /** 本局最高单局得分，用于本地成绩留存。 */
   bestScore?: number;
-  /** 瀹屾垚鏁翠釜涓冪珷鏉冨姏鏋舵瀯鐨勬鏁帮紝鐢ㄤ簬銆屾父鐜╂鏁般€嶈€屼笉鏄喅绛栨鏁般€?*/
+  /** 完成整个九章权力架构的次数，用于「游玩次数」而不是决策次数。 */
   campaignCompletions?: number;
   /** 探秘玩法：每个剧情节点已完成的勘察/访谈/破译动作。 */
   explorationFound?: Record<string, string[]>;

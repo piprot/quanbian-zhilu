@@ -175,7 +175,7 @@ export function dailyChallenges(save: SaveState): ChallengeState[] {
     });
 }
 
-/** 鏈€杩戜竴鍛ㄧ殑绱㈠紩锛屽舰寮忎负 YYYY-Www銆?*/
+/** 最近一周的索引，形式为 YYYY-Www。 */
 export function weekKey(): string {
   const now = new Date();
   const target = new Date(now.getTime());
@@ -197,7 +197,7 @@ export function weekEndsAt(): number {
   return nextMonday.getTime();
 }
 
-/** 鍛ㄥ父鎸戞垬锛氭寜鍛ㄥ害绉嶅瓙浠庢睜瀛愰噷鍙?2 椤癸紝缁欓暱鏈熻繍钀ユ彁渚涘惊鐜€?*/
+/** 周常挑战：按周度种子从池子里取 2 项，给长期运营提供循环。 */
 export function weeklyChallenges(save: SaveState): ChallengeState[] {
   const week = weekKey();
   const seed = [...week].reduce((sum, char) => sum * 31 + char.charCodeAt(0), 7);
