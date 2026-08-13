@@ -1,12 +1,16 @@
 import { ABILITIES, ROLES, RESOURCE_NAMES } from "../core/abilities";
 import { optionQualityLabel } from "../core/game";
 import type { Language } from "../core/i18n";
+import { NPCS } from "../core/npcs";
+import { SIDE_QUEST_ARCS } from "../core/story";
 import {
   ABILITY_DETAIL_EN,
   ABILITY_EN,
   CHAPTER_EN,
+  NPC_EN,
   RESOURCE_EN,
-  ROLE_EN
+  ROLE_EN,
+  SIDE_ARC_EN
 } from "../core/translations";
 import type {
   AbilityId,
@@ -82,4 +86,41 @@ export function qualityLabel(language: Language, quality: OptionQuality): string
         : "High-Risk Response";
   }
   return optionQualityLabel(quality);
+}
+
+export function npcDisplay(
+  language: Language,
+  npc: (typeof NPCS)[number]
+): { name: string; title: string; description: string } {
+  const en = NPC_EN[npc.id];
+  return language === "en" && en
+    ? { name: en.name, title: en.title, description: en.description }
+    : { name: npc.name, title: npc.title, description: npc.description };
+}
+
+export function relationStatusText(language: Language, status: string): string {
+  if (language !== "en") return status;
+  if (status === "已建立关系") return "Established";
+  if (status === "存在线索") return "Lead Found";
+  return "Not Contacted";
+}
+
+export function sideArcDisplay(
+  language: Language,
+  arc: (typeof SIDE_QUEST_ARCS)[number]
+): { title: string; summary: string; intro: string; conclusion: string } {
+  const en = SIDE_ARC_EN[arc.id];
+  return language === "en" && en
+    ? {
+        title: en.title,
+        summary: en.summary,
+        intro: en.intro,
+        conclusion: en.conclusion
+      }
+    : {
+        title: arc.title,
+        summary: arc.summary,
+        intro: arc.intro,
+        conclusion: arc.conclusion
+      };
 }

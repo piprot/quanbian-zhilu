@@ -195,7 +195,8 @@ import {
   SIDE_ARC_EN,
   SIDE_NODE_EN
 } from "../core/translations";
-import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel } from "./display";
+import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, relationStatusText, sideArcDisplay } from "./display";
+import { buildReportMarkdown, downloadText, encodeSaveLink } from "./export";
 import { renderAbilityRadar, renderGroupRadar } from "./charts";
 import { renderPowerBoard } from "./art";
 import { renderTrainingBoard } from "./trainingArt";
@@ -940,19 +941,7 @@ export class AdaptiveGameApp {
     return colors[id] ?? "#41c7c0";
   }
 
-  private npcDisplay(npc: (typeof NPCS)[number]) {
-    const en = NPC_EN[npc.id];
-    return this.language === "en" && en
-      ? { name: en.name, title: en.title, description: en.description }
-      : { name: npc.name, title: npc.title, description: npc.description };
-  }
 
-  private relationStatusText(status: string): string {
-    if (this.language !== "en") return status;
-    if (status === "已建立关系") return "Established";
-    if (status === "存在线索") return "Lead Found";
-    return "Not Contacted";
-  }
 
   private relationNoteText(npc: (typeof NPCS)[number]): string {
     if (this.language !== "en") return npcRelation(this.save, npc).note;
@@ -1030,7 +1019,7 @@ export class AdaptiveGameApp {
     const npc = this.chapterNpc(chapterId);
     if (!npc) return "";
     const relation = npcRelation(this.save, npc);
-    const view = this.npcDisplay(npc);
+    const view = npcDisplay(this.language, npc);
     const story = npcStoryFor(npc.id);
     const known = relation.status !== "尚未接触";
     const en = this.language === "en";
@@ -1261,12 +1250,6 @@ export class AdaptiveGameApp {
         };
   }
 
-  private sideArcDisplay(arc: (typeof SIDE_QUEST_ARCS)[number]) {
-    const en = SIDE_ARC_EN[arc.id];
-    return this.language === "en" && en
-      ? { title: en.title, summary: en.summary, intro: en.intro, conclusion: en.conclusion }
-      : { title: arc.title, summary: arc.summary, intro: arc.intro, conclusion: arc.conclusion };
-  }
 
   private challengeDisplay(
     challenge: ReturnType<typeof dailyChallenges>[number]
@@ -2089,7 +2072,7 @@ export class AdaptiveGameApp {
         <section class="relation-grid">
           ${NPCS.map((npc) => {
             const relation = npcRelation(this.save, npc);
-            const view = this.npcDisplay(npc);
+            const view = npcDisplay(this.language, npc);
             return `
               <div class="npc-card ${relation.status === "已建立关系" ? "trusted" : relation.status === "存在线索" ? "known" : "hidden"}">
                 <div class="npc-avatar-wrap">
@@ -2101,7 +2084,7 @@ export class AdaptiveGameApp {
                   <small>${view.title}</small>
                   <p>${view.description}</p>
                 </div>
-                <span class="npc-status">${this.relationStatusText(relation.status)}</span>
+                <span class="npc-status">${relationStatusText(this.language, relation.status)}</span>
                 <em>${this.relationNoteText(npc)}</em>
                 ${relation.status !== "尚未接触" ? this.npcStoryMarkup(npc) : ""}
               </div>
@@ -2759,13 +2742,13 @@ export class AdaptiveGameApp {
                 sceneNpc
                   ? `
                     <div class="npc-scene-quote" style="--dot:${this.npcAvatarColor(sceneNpc.id)}">
-                      <span>${escapeHtml(this.npcDisplay(sceneNpc).name)}</span>
+                      <span>${escapeHtml(npcDisplay(this.language, sceneNpc).name)}</span>
                       <p>${escapeHtml(
                         this.language === "en"
                           ? (npcStoryFor(sceneNpc.id)?.en[1] ??
-                              this.npcDisplay(sceneNpc).description)
+                              npcDisplay(this.language, sceneNpc).description)
                           : (npcStoryFor(sceneNpc.id)?.zh[1] ??
-                              this.npcDisplay(sceneNpc).description)
+                              npcDisplay(this.language, sceneNpc).description)
                       )}</p>
                     </div>
                   `
@@ -5345,7 +5328,7 @@ export class AdaptiveGameApp {
       (npc) => npcRelation(this.save, npc).status !== "尚未接触"
     )
       .map((npc) => {
-        const view = this.npcDisplay(npc);
+        const view = npcDisplay(this.language, npc);
         return `<li>${escapeHtml(view.name)} · ${escapeHtml(view.title)}</li>`;
       })
       .join("");
@@ -9129,29 +9112,20 @@ export class AdaptiveGameApp {
   }
 
   private exportSave(): void {
-    const blob = new Blob([JSON.stringify(this.save, null, 2)], {
-      type: "application/json"
-    });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${this.language === "en" ? "Ascend" : "升维"}-${this.save.profile.name}-${this.language === "en" ? "save" : "存档"}.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    downloadText(
+      `${this.language === "en" ? "Ascend" : "升维"}-${this.save.profile.name}-${this.language === "en" ? "save" : "存档"}.json`,
+      JSON.stringify(this.save, null, 2),
+      "application/json"
+    );
     this.audio.ui();
   }
 
   private exportAnalytics(): void {
-    const events = readAnalyticsEvents();
-    const blob = new Blob([JSON.stringify(events, null, 2)], {
-      type: "application/json"
-    });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${this.language === "en" ? "Ascend-events" : "升维事件日志"}.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    downloadText(
+      `${this.language === "en" ? "Ascend-events" : "升维事件日志"}.json`,
+      JSON.stringify(readAnalyticsEvents(), null, 2),
+      "application/json"
+    );
     this.audio.ui();
   }
 
@@ -9163,116 +9137,26 @@ export class AdaptiveGameApp {
       save: this.save,
       events: readAnalyticsEvents()
     };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {
-      type: "application/json"
-    });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${this.language === "en" ? "Ascend-return-package" : "升维回传包"}.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    downloadText(
+      `${this.language === "en" ? "Ascend-return-package" : "升维回传包"}.json`,
+      JSON.stringify(payload, null, 2),
+      "application/json"
+    );
     this.audio.ui();
   }
 
   private exportReport(): void {
-    const summary = profileSummary(this.save);
-    const decision = decisionProfile(this.save);
-    const training = recommendedTraining(
-      this.save.profile.abilities,
-      this.save.profile.role
-    );
-    const strengths = ABILITY_ORDER.slice()
-      .sort(
-        (a, b) =>
-          abilityLevel(this.save.profile.abilities[b]) -
-          abilityLevel(this.save.profile.abilities[a])
-      )
-      .slice(0, 3);
     const en = this.language === "en";
-    const role = roleDisplay(this.language, this.save.profile.role);
-    const lines = [
-      `# ${this.save.profile.name} ${en ? "Leadership Review Report" : "领导力复盘报告"}`,
-      "",
-      `${en ? "Role" : "角色"}：${role.name}`,
-      `${en ? "Rank" : "段位"}：${rankName(this.language, summary.rank)}`,
-      `${en ? "Total Ability" : "综合能力值"}：${summary.total}`,
-      `${en ? "Decision Profile" : "决策画像"}：${decision.identity}`,
-      "",
-      en ? "## Ability Status" : "## 能力现状",
-      ...ABILITY_ORDER.map(
-        (id) =>
-          `- ${abilityDisplay(this.language, id).name} Lv.${abilityLevel(this.save.profile.abilities[id])}：${abilityDisplay(this.language, id).tagline}`
-      ),
-      "",
-      en ? "## Strengths" : "## 优势能力",
-      ...strengths.map((id) => `- ${abilityDisplay(this.language, id).name}：${abilityDisplay(this.language, id).tagline}`),
-      "",
-      en ? "## Recommended Training" : "## 建议训练",
-      ...training.map((id) => `- ${abilityDisplay(this.language, id).name}：${abilityDisplay(this.language, id).tagline}`),
-      "",
-      en ? "## Chapter Performance" : "## 章节表现",
-      ...CHAPTERS.map((chapter) => {
-        const chapterView = chapterDisplay(this.language, chapter);
-        const record = this.save.chapterRecords.find(
-          (item) => item.chapterId === chapter.id
-        );
-        const status =
-          record && record.completedNodeIds.length >= 2
-            ? en
-              ? "Complete"
-              : "已完成"
-            : en
-              ? "Incomplete"
-              : "未完成";
-        return `- ${chapterView.title}：${status}`;
-      }),
-      "",
-      en ? "## Side Story Arcs" : "## 支线剧情弧",
-      ...SIDE_QUEST_ARCS.map((arc) => {
-        const arcView = this.sideArcDisplay(arc);
-        return `- ${arcView.title}：${arc.nodes.filter((id) => this.save.completedSideQuests.includes(id)).length}/${arc.nodes.length}`;
-      }),
-      "",
-      en ? "## Relationships" : "## 人物关系",
-      ...NPCS.map((npc) => {
-        const npcView = this.npcDisplay(npc);
-        const relation = npcRelation(this.save, npc);
-        return `- ${npcView.name}（${npcView.title}）：${this.relationStatusText(relation.status)}`;
-      }),
-      "",
-      en ? "## Duel Record" : "## 对决记录",
-      `- ${en ? "Wins" : "胜场"}：${this.save.duelWins}`,
-      `- ${en ? "Losses" : "负场"}：${this.save.duelLosses}`,
-      `- ${en ? "Random Events" : "随机事件"}：${this.save.completedRandomEvents.length}`,
-      `- ${en ? "Mastery Points" : "修炼点"}：${this.save.masteryPoints}`,
-      "",
-      en ? "## Recent Duels" : "## 近期对决",
-      ...this.save.duelHistory.slice(-5).map(
-        (entry) =>
-          `- ${entry.won ? (en ? "Win" : "胜") : (en ? "Loss" : "负")} ${entry.opponentName} ${entry.playerScore}:${entry.opponentScore}`
-      )
-    ];
-    const blob = new Blob([lines.join("\n")], {
-      type: "text/markdown;charset=utf-8"
-    });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${en ? "Ascend" : "升维"}-${this.save.profile.name}-${en ? "report" : "报告"}.md`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    downloadText(
+      `${en ? "Ascend" : "升维"}-${this.save.profile.name}-${en ? "report" : "报告"}.md`,
+      buildReportMarkdown(this.save, this.language),
+      "text/markdown;charset=utf-8"
+    );
     this.audio.ui();
   }
 
   private copySaveLink(target: HTMLElement): void {
-    const json = JSON.stringify(this.save);
-    const encoded = btoa(unescape(encodeURIComponent(json)))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
-    const url = `${location.origin}${location.pathname}#save=${encoded}`;
-    void navigator.clipboard?.writeText(url);
+    void navigator.clipboard?.writeText(encodeSaveLink(this.save));
     const original = target.textContent;
     target.textContent =
       this.language === "en" ? "Link copied" : "链接已复制";
@@ -9676,7 +9560,7 @@ export class AdaptiveGameApp {
       isNodeComplete(this.save, id)
     ).length;
     const done = doneCount === arc.nodes.length;
-    const view = this.sideArcDisplay(arc);
+    const view = sideArcDisplay(this.language, arc);
     return `
       <div class="quest-arc ${done ? "complete" : ""}">
         <div class="quest-arc-head">
