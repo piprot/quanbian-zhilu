@@ -4,28 +4,35 @@ import { ASSESSMENT_QUESTIONS } from "../core/assessment";
 import type { ChallengeState } from "../core/challenges";
 import { optionQualityLabel } from "../core/game";
 import type { Language } from "../core/i18n";
-import { NPCS } from "../core/npcs";
-import { CHAPTER_REFLECTIONS, SIDE_QUEST_ARCS } from "../core/story";
+import { NPCS, npcRelation } from "../core/npcs";
+import { CHAPTER_REFLECTIONS, getChapter, NODE_INTEL, SIDE_QUEST_ARCS } from "../core/story";
 import {
   ABILITY_DETAIL_EN,
   ABILITY_EN,
   ACHIEVEMENT_EN,
   ASSESSMENT_EN,
+  BRANCH_NODE_EN,
   CHAPTER_EN,
   CHAPTER_REFLECTION_EN,
   CHALLENGE_EN,
   NPC_EN,
+  RANDOM_NODE_EN,
   RESOURCE_EN,
   ROLE_EN,
-  SIDE_ARC_EN
+  ROLE_OPTION_EN,
+  SIDE_ARC_EN,
+  SIDE_NODE_EN
 } from "../core/translations";
 import type {
   AbilityId,
   AiArchetype,
   ChapterDef,
   OptionQuality,
+  PlayerProfile,
   ResourceKey,
-  RoleId
+  RoleId,
+  SaveState,
+  StoryNode
 } from "../core/types";
 
 /** 显示辅助：从 App 抽出的、仅依赖 language 的纯格式化函数。 */
@@ -303,4 +310,68 @@ export function roleMove(
     : quality === "partial"
       ? `${label}打法：先争取关键支持，再尝试落地`
       : `${label}打法：越级推动，绕过部门阻力`;
+}
+
+export function nodeIntel(
+  language: Language,
+  role: RoleId,
+  node: StoryNode
+): string[] {
+  const fallback = NODE_INTEL[node.id] ?? [];
+  if (language !== "en") return fallback;
+  if (node.kind === "side") return SIDE_NODE_EN[node.id]?.intel ?? fallback;
+  if (node.kind === "random") {
+    return RANDOM_NODE_EN[node.id]?.intel ?? fallback;
+  }
+  if (node.kind === "branch") {
+    const branch = BRANCH_NODE_EN[node.id];
+    if (!branch) return fallback;
+    const chapter = getChapter(node.chapterId);
+    return [
+      chapterDisplay(language, chapter).title,
+      chapterDisplay(language, chapter).subtitle,
+      ROLE_OPTION_EN[role].expert[0].summary
+    ];
+  }
+  return fallback;
+}
+
+export function relationNoteText(
+  language: Language,
+  save: SaveState,
+  npc: (typeof NPCS)[number]
+): string {
+  if (language !== "en") return npcRelation(save, npc).note;
+  if (
+    npc.nodeId.startsWith("s") &&
+    save.completedSideQuests.includes(npc.nodeId)
+  ) {
+    return "You faced this person directly in a side quest, and the relationship became organizational capability.";
+  }
+  if (npc.nodeId.startsWith("c")) {
+    const chapterId = Number(npc.nodeId.slice(1, 2));
+    const record = save.chapterRecords.find(
+      (item) => item.chapterId === chapterId
+    );
+    if (record && record.completedNodeIds.includes(npc.nodeId)) {
+      return "You met them in this scenario, but a long-term relationship has not yet formed.";
+    }
+  }
+  return "Complete the related main or side scenario to bring them into your relationship network.";
+}
+
+export function resourceChips(
+  language: Language,
+  profile: PlayerProfile
+): string {
+  return (Object.keys(RESOURCE_NAMES) as ResourceKey[])
+    .map(
+      (key) => `
+          <span class="resource-chip">
+            <b>${resourceDisplay(language, key)}</b>
+            <i>${Math.round(profile.resources[key])}</i>
+          </span>
+        `
+    )
+    .join("");
 }

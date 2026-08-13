@@ -19,6 +19,8 @@ import {
   unlockedCount
 } from "../core/achievements";
 import {
+  aiArchetype,
+  aiOpponentRole,
   DuelEngine,
   DUEL_ROUND_TIMEOUT_MS,
   type DuelSnapshot,
@@ -88,7 +90,6 @@ import {
 import { chapterNarrative } from "../core/chapterNarrative";
 import type {
   AbilityId,
-  AiArchetype,
   ChapterDef,
   ChoiceOutcome,
   OptionQuality,
@@ -190,7 +191,7 @@ import {
   SIDE_ARC_EN,
   SIDE_NODE_EN
 } from "../core/translations";
-import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, relationStatusText, sideArcDisplay, npcAvatarColor, achievementDisplay, challengeDisplay, challengeCategoryLabel, assessmentDisplay, chapterReflectionText, aiArchetypeLabel, leadershipLensText, roleMove } from "./display";
+import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, relationStatusText, sideArcDisplay, npcAvatarColor, achievementDisplay, challengeDisplay, challengeCategoryLabel, assessmentDisplay, chapterReflectionText, aiArchetypeLabel, leadershipLensText, roleMove, nodeIntel, relationNoteText, resourceChips } from "./display";
 import { buildReportMarkdown, downloadText, encodeSaveLink } from "./export";
 import { renderAbilityRadar, renderGroupRadar } from "./charts";
 import { renderPowerBoard } from "./art";
@@ -896,47 +897,6 @@ export class AdaptiveGameApp {
           })
         }
       : node;
-  }
-
-  private nodeIntel(node: StoryNode): string[] {
-    const fallback = NODE_INTEL[node.id] ?? [];
-    if (this.language !== "en") return fallback;
-    if (node.kind === "side") return SIDE_NODE_EN[node.id]?.intel ?? fallback;
-    if (node.kind === "random") {
-      return RANDOM_NODE_EN[node.id]?.intel ?? fallback;
-    }
-    if (node.kind === "branch") {
-      const branch = BRANCH_NODE_EN[node.id];
-      if (!branch) return fallback;
-      const chapter = getChapter(node.chapterId);
-      const role = this.save.profile.role;
-      return [
-        chapterDisplay(this.language, chapter).title,
-        chapterDisplay(this.language, chapter).subtitle,
-        ROLE_OPTION_EN[role].expert[0].summary
-      ];
-    }
-    return fallback;
-  }
-
-  private relationNoteText(npc: (typeof NPCS)[number]): string {
-    if (this.language !== "en") return npcRelation(this.save, npc).note;
-    if (
-      npc.nodeId.startsWith("s") &&
-      this.save.completedSideQuests.includes(npc.nodeId)
-    ) {
-      return "You faced this person directly in a side quest, and the relationship became organizational capability.";
-    }
-    if (npc.nodeId.startsWith("c")) {
-      const chapterId = Number(npc.nodeId.slice(1, 2));
-      const record = this.save.chapterRecords.find(
-        (item) => item.chapterId === chapterId
-      );
-      if (record && record.completedNodeIds.includes(npc.nodeId)) {
-        return "You met them in this scenario, but a long-term relationship has not yet formed.";
-      }
-    }
-    return "Complete the related main or side scenario to bring them into your relationship network.";
   }
 
   private npcStoryMarkup(npc: (typeof NPCS)[number]): string {
@@ -1998,7 +1958,7 @@ export class AdaptiveGameApp {
                   <p>${view.description}</p>
                 </div>
                 <span class="npc-status">${relationStatusText(this.language, relation.status)}</span>
-                <em>${this.relationNoteText(npc)}</em>
+                <em>${relationNoteText(this.language, this.save, npc)}</em>
                 ${relation.status !== "尚未接触" ? this.npcStoryMarkup(npc) : ""}
               </div>
             `;
@@ -2153,7 +2113,7 @@ export class AdaptiveGameApp {
             <p class="muted chapter-count-hint">${this.language === "en" ? "Core 2/2 unlocks the next chapter; 7 extended scenarios add optional depth and rewards." : "完成每章前 2 个核心主线即可推进章节；另外 7 个主线扩展情境提供额外深度与奖励。"}</p>
           </div>
           <div class="resource-strip">
-            ${this.resourceChips(this.save.profile)}
+            ${resourceChips(this.language, this.save.profile)}
           </div>
         </section>
         <section class="chapter-track">
@@ -2542,7 +2502,7 @@ export class AdaptiveGameApp {
       <header class="topbar">
         <div class="brand">${this.t("brand")}</div>
         <div class="topbar-meta">
-          ${this.resourceChips(this.save.profile)}
+          ${resourceChips(this.language, this.save.profile)}
           <span id="round-timer" class="round-timer" style="display:none"></span>
         </div>
       </header>
@@ -2682,7 +2642,7 @@ export class AdaptiveGameApp {
                 <small>${this.t("intelHint")}</small>
               </div>
               <div class="intel-list">
-                ${this.nodeIntel(node).map((clue) => `<p>${escapeHtml(clue)}</p>`).join("")}
+                ${nodeIntel(this.language, this.save.profile.role, node).map((clue) => `<p>${escapeHtml(clue)}</p>`).join("")}
               </div>
             </section>
             <section class="decision-panel">
@@ -5484,7 +5444,7 @@ export class AdaptiveGameApp {
                 <div class="mode-note">
                   <h2>${this.language === "en" ? "AI Practice" : "AI 陪练"}</h2>
                   <p>${this.language === "en" ? "The system builds an opponent from each scenario's expert baseline and your ability level, then adjusts difficulty based on your expert-decision rate. Best for sustained decision training." : "系统会根据每道情境的专家基准和你的能力水平生成对手，并基于你的专家判断率动态调整难度。适合持续训练决策质量。"}</p>
-                  <p class="muted">${this.language === "en" ? `Next opponent style: ${aiArchetypeLabel(this.language,this.aiArchetype())}` : `下一场对手风格：${aiArchetypeLabel(this.language,this.aiArchetype())}`}</p>
+                  <p class="muted">${this.language === "en" ? `Next opponent style: ${aiArchetypeLabel(this.language,aiArchetype(this.save))}` : `下一场对手风格：${aiArchetypeLabel(this.language,aiArchetype(this.save))}`}</p>
                   <button class="primary" data-action="start-ai-duel">${this.language === "en" ? "Start Duel" : "开始对战"}</button>
                   <button data-action="start-challenge-duel">${this.language === "en" ? "7-Round Challenge" : "7 回合挑战赛"}</button>
                   <button data-action="start-endless-duel">${this.language === "en" ? "Endless Challenge" : "无尽挑战"}</button>
@@ -8419,18 +8379,6 @@ export class AdaptiveGameApp {
     this.renderStory();
   }
 
-  private aiOpponentRole(): RoleId {
-    const roles: RoleId[] = ["parachute", "founder", "highPotential"];
-    const counter = (this.save.duelWins ?? 0) + (this.save.duelLosses ?? 0);
-    return roles[counter % roles.length];
-  }
-
-  private aiArchetype(): AiArchetype {
-    const counter = (this.save.duelWins ?? 0) + (this.save.duelLosses ?? 0);
-    const archetypes: AiArchetype[] = ["executor", "builder", "gambler"];
-    return archetypes[counter % archetypes.length];
-  }
-
   private startAiDuel(): void {
     const human = buildDuelProfile(this.save.profile, this.save.profile.name, "#41c7c0");
     const history = this.save.decisionHistory;
@@ -8444,10 +8392,10 @@ export class AdaptiveGameApp {
       Math.min(4, Math.round(expertRatio * 4 + this.save.duelWins * 0.15))
     );
     const ai = buildAiProfile(
-      this.aiOpponentRole(),
+      aiOpponentRole(this.save),
       strength,
       this.save.profile.abilities,
-      this.aiArchetype()
+      aiArchetype(this.save)
     );
     this.audio.ensure();
     this.audio.round();
@@ -8467,10 +8415,10 @@ export class AdaptiveGameApp {
   private startChallengeDuel(): void {
     const human = buildDuelProfile(this.save.profile, this.save.profile.name, "#41c7c0");
     const ai = buildAiProfile(
-      this.aiOpponentRole(),
+      aiOpponentRole(this.save),
       4,
       this.save.profile.abilities,
-      this.aiArchetype()
+      aiArchetype(this.save)
     );
     this.audio.ensure();
     this.audio.round();
@@ -8495,10 +8443,10 @@ export class AdaptiveGameApp {
     );
     const strength = Math.min(5, Math.max(1, Math.round(this.save.duelWins / 4) + 1));
     const ai = buildAiProfile(
-      this.aiOpponentRole(),
+      aiOpponentRole(this.save),
       strength,
       this.save.profile.abilities,
-      this.aiArchetype()
+      aiArchetype(this.save)
     );
     this.audio.ensure();
     this.audio.round();
@@ -9628,19 +9576,6 @@ export class AdaptiveGameApp {
       `;
     }).join("");
     return `<section class="dimension-panel"><h2>${en ? "Leadership Profile" : "领导力画像"}</h2><p class="muted">${en ? "Aggregated from your ten abilities." : "由你的十项能力聚合而来。"}</p><div class="dimension-grid">${bars}</div></section>`;
-  }
-
-  private resourceChips(profile: PlayerProfile): string {
-    return (Object.keys(RESOURCE_NAMES) as ResourceKey[])
-      .map(
-        (key) => `
-          <span class="resource-chip">
-            <b>${resourceDisplay(this.language, key)}</b>
-            <i>${Math.round(profile.resources[key])}</i>
-          </span>
-        `
-      )
-      .join("");
   }
 
   private abilityCard(id: AbilityId): string {

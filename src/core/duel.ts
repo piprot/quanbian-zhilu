@@ -7,13 +7,29 @@ import {
 import { duelNodes } from "./story.ts";
 import type {
   AbilityId,
+  AiArchetype,
   DuelProfile,
   DuelResult,
   RoleId,
+  SaveState,
   StoryNode
 } from "./types.ts";
 
 export const DUEL_ROUND_TIMEOUT_MS = 60000;
+
+/** AI 对手角色按累计对局数轮换，避免连续同角色。 */
+export function aiOpponentRole(save: SaveState): RoleId {
+  const roles: RoleId[] = ["parachute", "founder", "highPotential"];
+  const counter = (save.duelWins ?? 0) + (save.duelLosses ?? 0);
+  return roles[counter % roles.length];
+}
+
+/** AI 对手决策风格按累计对局数轮换。 */
+export function aiArchetype(save: SaveState): AiArchetype {
+  const archetypes: AiArchetype[] = ["executor", "builder", "gambler"];
+  const counter = (save.duelWins ?? 0) + (save.duelLosses ?? 0);
+  return archetypes[counter % archetypes.length];
+}
 
 export interface DuelSnapshot {
   players: DuelProfile[];
