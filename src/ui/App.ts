@@ -5421,6 +5421,7 @@ export class AdaptiveGameApp {
     if (this.handleCoachClick(action, actionTarget)) return;
     if (this.handleEndingClick(action, actionTarget)) return;
     if (this.handleReviewClick(action, actionTarget)) return;
+    if (this.handleMapClick(action, actionTarget)) return;
 
     switch (action) {
       case "open-node": {
@@ -5658,142 +5659,6 @@ export class AdaptiveGameApp {
             : "认证点 = 测评总分 + 角色重点能力等级合计；完成 30 题测评提升总分，训练角色重点能力提升等级。"
         );
         this.audio.ui();
-        break;
-      case "claim-challenge": {
-        const challengeId = actionTarget.dataset.challenge ?? "";
-        const today = todayKey();
-        if (!(this.save.claimedDaily[today] ?? []).includes(challengeId)) {
-          const reward =
-            dailyChallenges(this.save).find(
-              (challenge) => challenge.id === challengeId
-            )?.reward ?? 3;
-          this.save.claimedDaily[today] = [
-            ...(this.save.claimedDaily[today] ?? []),
-            challengeId
-          ];
-          this.save.masteryPoints += reward;
-          this.persistSave();
-          trackEvent("daily_claim", { challengeId });
-          this.audio.expert();
-          this.renderMap();
-        }
-        break;
-      }
-      case "claim-weekly": {
-        const challengeId = actionTarget.dataset.challenge ?? "";
-        const week = weekKey();
-        const weekly = weeklyChallenges(this.save);
-        const reward =
-          weekly.find((challenge) => challenge.id === challengeId)?.reward ?? 4;
-        this.save.claimedWeekly = {
-          ...(this.save.claimedWeekly ?? {}),
-          [week]: [
-            ...((this.save.claimedWeekly ?? {})[week] ?? []),
-            challengeId
-          ]
-        };
-        this.save.masteryPoints += reward;
-        this.save.trialEnergy = clamp(this.save.trialEnergy + 15, 0, 100);
-        this.persistSave();
-        trackEvent("weekly_claim", { challengeId });
-        this.audio.expert();
-        this.renderMap();
-        break;
-      }
-      case "toggle-pressure":
-        this.save.highPressureMode = !this.save.highPressureMode;
-        this.persistSave();
-        this.audio.ui();
-        this.renderMap();
-        break;
-      case "set-difficulty": {
-        // D1：把难度选择器写入存档，重渲染地图让按钮高亮与说明立即反映所选档位；
-        // 资源缩放由 applyStoryChoice 以 save.difficulty 为准，下个决策即生效。
-        const difficulty = actionTarget.dataset.difficulty;
-        if (difficulty === "normal" || difficulty === "pressure" || difficulty === "extreme") {
-          this.audio.ui();
-          this.save.difficulty = difficulty;
-          this.persistSave();
-          this.showToast(
-            this.language === "en"
-              ? `Difficulty set to ${difficulty === "normal" ? "Normal" : difficulty === "pressure" ? "Pressure" : "Extreme"}.`
-              : `难度已切换为${difficulty === "normal" ? "标准" : difficulty === "pressure" ? "高压" : "极限"}。`
-          );
-          if (this.view === "settings") {
-            this.renderSettings();
-          } else {
-            this.renderMap();
-          }
-        }
-        break;
-      }
-      case "toggle-achievement-favorite": {
-        const achievementId = actionTarget.dataset.achievement;
-        if (!achievementId) break;
-        if (this.favoriteAchievements.has(achievementId)) {
-          this.favoriteAchievements.delete(achievementId);
-        } else {
-          this.favoriteAchievements.add(achievementId);
-        }
-        try {
-          localStorage.setItem(
-            ACHIEVEMENT_FAVORITE_KEY,
-            JSON.stringify([...this.favoriteAchievements])
-          );
-        } catch {
-          // ignore storage failures
-        }
-        this.audio.ui();
-        this.renderAchievements();
-        break;
-      }
-      case "toggle-hint":
-        this.storyHintRevealed = !this.storyHintRevealed;
-        this.audio.ui();
-        this.renderStory();
-        break;
-      case "energy-restore":
-        if (!this.energyRestoreUsed) {
-          this.save.profile.resources.energy = Math.min(
-            100,
-            this.save.profile.resources.energy + 25
-          );
-          this.energyRestoreUsed = true;
-          this.persistSave();
-          this.audio.expert();
-          this.showToast(
-            this.language === "en"
-              ? "Energy restored +25."
-              : "精力已恢复 +25。"
-          );
-          this.renderStory();
-        }
-        break;
-      case "choose-option":
-        this.chooseStoryOption(actionTarget);
-        break;
-      case "open-leadership-games":
-        this.openLeadershipGames();
-        break;
-      case "organizational-invest":
-        this.organizationalInvest();
-        break;
-      case "claim-production":
-        this.claimProduction();
-        break;
-      case "claim-duel-bonus":
-        this.claimDuelBonus();
-        break;
-      case "dismiss-map-guide":
-        this.markGuideStep("map-intro");
-        this.audio.ui();
-        this.renderMap();
-        break;
-      case "expedition-explore":
-        this.exploreNodeAction(actionTarget);
-        break;
-      case "integrity-answer":
-        this.answerIntegrityGate(actionTarget);
         break;
       case "continue-story":
         if (
@@ -7606,6 +7471,149 @@ export class AdaptiveGameApp {
         );
         this.audio.ui();
         this.show("teamAcademy");
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private handleMapClick(action: string, actionTarget: HTMLElement): boolean {
+    switch (action) {
+      case "claim-challenge": {
+        const challengeId = actionTarget.dataset.challenge ?? "";
+        const today = todayKey();
+        if (!(this.save.claimedDaily[today] ?? []).includes(challengeId)) {
+          const reward =
+            dailyChallenges(this.save).find(
+              (challenge) => challenge.id === challengeId
+            )?.reward ?? 3;
+          this.save.claimedDaily[today] = [
+            ...(this.save.claimedDaily[today] ?? []),
+            challengeId
+          ];
+          this.save.masteryPoints += reward;
+          this.persistSave();
+          trackEvent("daily_claim", { challengeId });
+          this.audio.expert();
+          this.renderMap();
+        }
+        return true;
+      }
+      case "claim-weekly": {
+        const challengeId = actionTarget.dataset.challenge ?? "";
+        const week = weekKey();
+        const weekly = weeklyChallenges(this.save);
+        const reward =
+          weekly.find((challenge) => challenge.id === challengeId)?.reward ?? 4;
+        this.save.claimedWeekly = {
+          ...(this.save.claimedWeekly ?? {}),
+          [week]: [
+            ...((this.save.claimedWeekly ?? {})[week] ?? []),
+            challengeId
+          ]
+        };
+        this.save.masteryPoints += reward;
+        this.save.trialEnergy = clamp(this.save.trialEnergy + 15, 0, 100);
+        this.persistSave();
+        trackEvent("weekly_claim", { challengeId });
+        this.audio.expert();
+        this.renderMap();
+        return true;
+      }
+      case "toggle-pressure":
+        this.save.highPressureMode = !this.save.highPressureMode;
+        this.persistSave();
+        this.audio.ui();
+        this.renderMap();
+        return true;
+      case "set-difficulty": {
+        // D1：把难度选择器写入存档，重渲染地图让按钮高亮与说明立即反映所选档位；
+        // 资源缩放由 applyStoryChoice 以 save.difficulty 为准，下个决策即生效。
+        const difficulty = actionTarget.dataset.difficulty;
+        if (difficulty === "normal" || difficulty === "pressure" || difficulty === "extreme") {
+          this.audio.ui();
+          this.save.difficulty = difficulty;
+          this.persistSave();
+          this.showToast(
+            this.language === "en"
+              ? `Difficulty set to ${difficulty === "normal" ? "Normal" : difficulty === "pressure" ? "Pressure" : "Extreme"}.`
+              : `难度已切换为${difficulty === "normal" ? "标准" : difficulty === "pressure" ? "高压" : "极限"}。`
+          );
+          if (this.view === "settings") {
+            this.renderSettings();
+          } else {
+            this.renderMap();
+          }
+        }
+        return true;
+      }
+      case "toggle-achievement-favorite": {
+        const achievementId = actionTarget.dataset.achievement;
+        if (!achievementId) return true;
+        if (this.favoriteAchievements.has(achievementId)) {
+          this.favoriteAchievements.delete(achievementId);
+        } else {
+          this.favoriteAchievements.add(achievementId);
+        }
+        try {
+          localStorage.setItem(
+            ACHIEVEMENT_FAVORITE_KEY,
+            JSON.stringify([...this.favoriteAchievements])
+          );
+        } catch {
+          // ignore storage failures
+        }
+        this.audio.ui();
+        this.renderAchievements();
+        return true;
+      }
+      case "toggle-hint":
+        this.storyHintRevealed = !this.storyHintRevealed;
+        this.audio.ui();
+        this.renderStory();
+        return true;
+      case "energy-restore":
+        if (!this.energyRestoreUsed) {
+          this.save.profile.resources.energy = Math.min(
+            100,
+            this.save.profile.resources.energy + 25
+          );
+          this.energyRestoreUsed = true;
+          this.persistSave();
+          this.audio.expert();
+          this.showToast(
+            this.language === "en"
+              ? "Energy restored +25."
+              : "精力已恢复 +25。"
+          );
+          this.renderStory();
+        }
+        return true;
+      case "choose-option":
+        this.chooseStoryOption(actionTarget);
+        return true;
+      case "open-leadership-games":
+        this.openLeadershipGames();
+        return true;
+      case "organizational-invest":
+        this.organizationalInvest();
+        return true;
+      case "claim-production":
+        this.claimProduction();
+        return true;
+      case "claim-duel-bonus":
+        this.claimDuelBonus();
+        return true;
+      case "dismiss-map-guide":
+        this.markGuideStep("map-intro");
+        this.audio.ui();
+        this.renderMap();
+        return true;
+      case "expedition-explore":
+        this.exploreNodeAction(actionTarget);
+        return true;
+      case "integrity-answer":
+        this.answerIntegrityGate(actionTarget);
         return true;
       default:
         return false;
