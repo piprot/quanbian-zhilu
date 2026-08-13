@@ -5412,6 +5412,7 @@ export class AdaptiveGameApp {
     if (this.handleTrainingClick(action, actionTarget)) return;
     if (this.handleAssessmentClick(action, actionTarget)) return;
     if (this.handleDuelClick(action, actionTarget)) return;
+    if (this.handleTrialClick(action, actionTarget)) return;
 
     switch (action) {
       case "open-node": {
@@ -6513,455 +6514,6 @@ export class AdaptiveGameApp {
           this.show("profile");
         }
         break;
-      case "open-trial":
-        this.audio.ui();
-        this.activeTrialId = undefined;
-        this.trialAnswerResult = undefined;
-        this.lastTrialAnswer = undefined;
-        this.trialObserveRevealed = false;
-        this.trialAllyChoice = undefined;
-        this.trialAllyCorrect = undefined;
-        this.trialSuspectChoice = undefined;
-        this.trialSuspectCorrect = undefined;
-        this.trialIntelChoice = undefined;
-        this.trialIntelCorrect = undefined;
-        this.trialBetrayalChoice = undefined;
-        this.trialBetrayalCorrect = undefined;
-        this.trialFactionTrust = 50;
-        this.trialFactionSuspicion = 50;
-        this.trialFollowUpAnswer = undefined;
-        this.trialFollowUpAnswered = false;
-        this.trialSummaryPending = false;
-        this.trialSummaryKeywordCorrect = undefined;
-        this.trialCalculationAnswer = undefined;
-        this.trialCalculationCorrect = undefined;
-        this.activePracticeTaskId = undefined;
-        this.show("trial");
-        break;
-      case "trial-stage": {
-        const stageId = actionTarget.dataset.stage ?? "";
-        const stage = TRIAL_STAGES.find((item) => item.id === stageId);
-        if (stage && canEnterTrial(this.save, stage)) {
-          this.audio.trainingStart();
-          this.activeTrialId = stage.id;
-          this.trialAnswerResult = undefined;
-          this.lastTrialAnswer = undefined;
-          this.trialObserveRevealed =
-            stage.style === "wolf" &&
-            this.save.trialItems.includes("矛盾镜");
-          this.trialAllyChoice = undefined;
-          this.trialAllyCorrect = undefined;
-          this.trialSuspectChoice = undefined;
-          this.trialSuspectCorrect = undefined;
-          this.trialIntelChoice = undefined;
-          this.trialIntelCorrect = undefined;
-          this.trialBetrayalChoice = undefined;
-          this.trialBetrayalCorrect = undefined;
-          this.trialFactionTrust = 50;
-          this.trialFactionSuspicion = 50;
-          this.trialFollowUpAnswer = undefined;
-          this.trialFollowUpAnswered = false;
-          this.trialSummaryPending = false;
-          this.trialSummaryKeywordCorrect = undefined;
-          this.trialCalculationAnswer = undefined;
-          this.trialCalculationCorrect = undefined;
-          this.show("trialBattle");
-        }
-        break;
-      }
-      case "trial-observe":
-        this.trialObserveRevealed = true;
-        this.trialFactionTrust = Math.min(100, this.trialFactionTrust + 5);
-        this.trialFactionSuspicion = Math.min(
-          100,
-          this.trialFactionSuspicion + 5
-        );
-        this.audio.ui();
-        this.renderTrialBattle();
-        break;
-      case "trial-ally":
-        this.trialAllyChoice = actionTarget.dataset.ally;
-        this.audio.ui();
-        this.renderTrialBattle();
-        break;
-      case "trial-suspect":
-        this.trialSuspectChoice = actionTarget.dataset.suspect;
-        {
-          const stage = TRIAL_STAGES.find(
-            (item) => item.id === this.activeTrialId
-          );
-          if (stage?.correctSuspect) {
-            this.trialSuspectCorrect =
-              this.trialSuspectChoice === stage.correctSuspect;
-            this.trialFactionTrust = Math.max(
-              0,
-              Math.min(
-                100,
-                this.trialFactionTrust +
-                  (this.trialSuspectCorrect ? 15 : -10)
-              )
-            );
-            this.trialFactionSuspicion = Math.max(
-              0,
-              Math.min(
-                100,
-                this.trialFactionSuspicion +
-                  (this.trialSuspectCorrect ? -10 : 15)
-              )
-            );
-          }
-        }
-        this.audio.ui();
-        this.renderTrialBattle();
-        break;
-      case "trial-intel":
-        this.trialIntelChoice = actionTarget.dataset.intel;
-        {
-          const stage = TRIAL_STAGES.find(
-            (item) => item.id === this.activeTrialId
-          );
-          if (stage?.correctIntel) {
-            this.trialIntelCorrect =
-              this.trialIntelChoice === stage.correctIntel;
-            this.trialFactionTrust = Math.max(
-              0,
-              Math.min(
-                100,
-                this.trialFactionTrust +
-                  (this.trialIntelCorrect ? 10 : -5)
-              )
-            );
-          }
-        }
-        this.audio.ui();
-        this.renderTrialBattle();
-        break;
-      case "trial-betrayal":
-        this.trialBetrayalChoice = actionTarget.dataset.betrayal;
-        {
-          const stage = TRIAL_STAGES.find(
-            (item) => item.id === this.activeTrialId
-          );
-          if (stage?.correctBetrayal) {
-            this.trialBetrayalCorrect =
-              this.trialBetrayalChoice === stage.correctBetrayal;
-            this.trialFactionTrust = Math.max(
-              0,
-              Math.min(
-                100,
-                this.trialFactionTrust +
-                  (this.trialBetrayalCorrect ? 10 : -10)
-              )
-            );
-          }
-        }
-        this.audio.ui();
-        this.renderTrialBattle();
-        break;
-      case "trial-submit-summary": {
-        const activeStage = TRIAL_STAGES.find(
-          (item) => item.id === this.activeTrialId
-        );
-        if (!activeStage) break;
-        const question = trialQuestionFor(activeStage);
-        const textarea = this.root.querySelector<HTMLTextAreaElement>(
-          "textarea[data-trial-summary]"
-        );
-        const summary = textarea?.value ?? "";
-        const calculationInput = this.root.querySelector<HTMLInputElement>(
-          "input[data-trial-calculation]"
-        );
-        this.trialCalculationAnswer = calculationInput?.value ?? "";
-        if (question.calculation) {
-          this.trialCalculationCorrect =
-            Number(this.trialCalculationAnswer) ===
-            question.calculation.answer;
-          if (this.trialCalculationCorrect) {
-            this.save.masteryPoints += 1;
-          }
-        }
-        if (!submitTrialSummary(this.save, activeStage.id, summary)) {
-          this.audio.risk();
-          break;
-        }
-        const keywordMap: Record<string, string[]> = {
-          mba_cashflow: ["现金贡献", "现金流", "验证"],
-          mba_supplychain: ["交付", "替代", "双源"],
-          mba_people: ["成果", "陪跑", "梯队"],
-          domain_marketing: ["转化", "验证", "渠道"],
-          domain_finance: ["成本", "口径", "税务"],
-          domain_legal: ["风险", "边界", "协议"],
-          domain_customer: ["补救", "计划", "客户"],
-          domain_employee: ["成长", "底线", "激励"],
-          domain_delivery: ["风险", "关键结果", "资源"]
-        };
-        this.trialSummaryKeywordCorrect =
-          scoreOpenText(
-            summary,
-            keywordMap[activeStage.id] ?? [],
-            40
-          ) >= 60;
-        if (this.trialSummaryKeywordCorrect) {
-          this.save.masteryPoints += 1;
-        }
-        const firstCorrect = question.followUp
-          ? this.trialFollowUpAnswer === question.answer
-          : true;
-        const finalCorrect =
-          this.lastTrialAnswer ===
-          (question.followUp ? question.followUp.answer : question.answer);
-        const correct = firstCorrect && finalCorrect;
-        const abilityId =
-          activeStage.source.kind === "training"
-            ? activeStage.source.abilityId
-            : activeStage.gates[0].abilityId;
-        if (activeStage.allies && activeStage.correctAlly) {
-          this.trialAllyCorrect =
-            this.trialAllyChoice === activeStage.correctAlly;
-          if (this.trialAllyCorrect) this.save.masteryPoints += 1;
-        }
-        if (activeStage.suspects && activeStage.correctSuspect) {
-          this.trialSuspectCorrect =
-            this.trialSuspectChoice === activeStage.correctSuspect;
-          if (this.trialSuspectCorrect) this.save.masteryPoints += 1;
-        }
-        if (activeStage.intelChoices && activeStage.correctIntel) {
-          this.trialIntelCorrect =
-            this.trialIntelChoice === activeStage.correctIntel;
-          if (this.trialIntelCorrect) this.save.masteryPoints += 1;
-        }
-        if (
-          activeStage.betrayalChoices &&
-          activeStage.correctBetrayal
-        ) {
-          this.trialBetrayalCorrect =
-            this.trialBetrayalChoice === activeStage.correctBetrayal;
-          if (this.trialBetrayalCorrect) this.save.masteryPoints += 1;
-        }
-        this.trialAnswerResult = applyTrialAnswer(
-          this.save,
-          activeStage.id,
-          abilityId,
-          correct,
-          trialCostFor(this.save, activeStage),
-          trialRewardExpFor(this.save, activeStage),
-          activeStage.rewardItem,
-          activeStage.resourceCost ?? 0,
-          this.save.trialItems.includes("重启铃") ? 3 : 6,
-          this.save.trialItems.includes("风险边界书") ? 10 : 20,
-          activeStage.dimension
-        );
-        if (correct) {
-          this.audio.trainingMastery();
-        } else {
-          this.audio.risk();
-        }
-        this.renderTrialBattle();
-        break;
-      }
-      case "trial-option": {
-        const activeStage = TRIAL_STAGES.find((item) => item.id === this.activeTrialId);
-        if (!activeStage) break;
-        const question = trialQuestionFor(activeStage);
-        const selected = Number(actionTarget.dataset.option);
-        if (question.followUp && !this.trialFollowUpAnswered) {
-          this.trialFollowUpAnswer = selected;
-          this.trialFollowUpAnswered = true;
-          this.renderTrialBattle();
-          return;
-        }
-        if (
-          activeStage.source.kind === "custom" &&
-          !this.trialSummaryPending
-        ) {
-          this.lastTrialAnswer = selected;
-          this.trialSummaryPending = true;
-          this.renderTrialBattle();
-          return;
-        }
-        const firstCorrect = question.followUp
-          ? this.trialFollowUpAnswer === question.answer
-          : true;
-        const finalCorrect =
-          selected ===
-          (question.followUp ? question.followUp.answer : question.answer);
-        const correct = firstCorrect && finalCorrect;
-        const abilityId =
-          activeStage.source.kind === "training"
-            ? activeStage.source.abilityId
-            : activeStage.gates[0].abilityId;
-        this.lastTrialAnswer = selected;
-        if (activeStage.allies && activeStage.correctAlly) {
-          if (this.save.trialItems.includes("同盟令")) {
-            this.trialAllyChoice = activeStage.correctAlly;
-          }
-          this.trialAllyCorrect =
-            this.trialAllyChoice === activeStage.correctAlly;
-          if (this.trialAllyCorrect) {
-            this.save.masteryPoints += 1;
-          }
-        }
-        if (
-          activeStage.suspects &&
-          activeStage.correctSuspect
-        ) {
-          this.trialSuspectCorrect =
-            this.trialSuspectChoice === activeStage.correctSuspect;
-          if (this.trialSuspectCorrect) {
-            this.save.masteryPoints += 1;
-          }
-        }
-        if (
-          activeStage.intelChoices &&
-          activeStage.correctIntel
-        ) {
-          this.trialIntelCorrect =
-            this.trialIntelChoice === activeStage.correctIntel;
-          if (this.trialIntelCorrect) {
-            this.save.masteryPoints += 1;
-          }
-        }
-        if (
-          activeStage.betrayalChoices &&
-          activeStage.correctBetrayal
-        ) {
-          this.trialBetrayalCorrect =
-            this.trialBetrayalChoice === activeStage.correctBetrayal;
-          if (this.trialBetrayalCorrect) {
-            this.save.masteryPoints += 1;
-          }
-        }
-        this.trialAnswerResult = applyTrialAnswer(
-          this.save,
-          activeStage.id,
-          abilityId,
-          correct,
-          trialCostFor(this.save, activeStage),
-          trialRewardExpFor(this.save, activeStage),
-          activeStage.rewardItem,
-          activeStage.resourceCost ?? 0,
-          this.save.trialItems.includes("重启铃") ? 3 : 6,
-          this.save.trialItems.includes("风险边界书") ? 10 : 20,
-          activeStage.dimension
-        );
-        if (correct) {
-          this.audio.trainingMastery();
-        } else {
-          this.audio.risk();
-        }
-        this.renderTrialBattle();
-        break;
-      }
-      case "trial-next":
-        this.audio.ui();
-        this.activeTrialId = undefined;
-        this.trialAnswerResult = undefined;
-        this.lastTrialAnswer = undefined;
-        this.trialObserveRevealed = false;
-        this.trialAllyChoice = undefined;
-        this.trialAllyCorrect = undefined;
-        this.trialSuspectChoice = undefined;
-        this.trialSuspectCorrect = undefined;
-        this.trialIntelChoice = undefined;
-        this.trialIntelCorrect = undefined;
-        this.trialBetrayalChoice = undefined;
-        this.trialBetrayalCorrect = undefined;
-        this.trialFactionTrust = 50;
-        this.trialFactionSuspicion = 50;
-        this.trialFollowUpAnswer = undefined;
-        this.trialFollowUpAnswered = false;
-        this.trialSummaryPending = false;
-        this.trialSummaryKeywordCorrect = undefined;
-        this.trialCalculationAnswer = undefined;
-        this.trialCalculationCorrect = undefined;
-        this.show("trial");
-        break;
-      case "practice-task": {
-        const taskId = actionTarget.dataset.task ?? "";
-        const task = PRACTICE_TASKS.find((item) => item.id === taskId);
-        if (task && !this.save.completedPracticeTasks.includes(task.id)) {
-          this.activePracticeTaskId = task.id;
-          this.audio.trainingCorrect();
-          this.renderTrial();
-        }
-        break;
-      }
-      case "practice-submit": {
-        const task = PRACTICE_TASKS.find(
-          (item) => item.id === this.activePracticeTaskId
-        );
-        const textarea = this.root.querySelector<HTMLTextAreaElement>(
-          "textarea[data-practice-result]"
-        );
-        const text = textarea?.value.trim() ?? "";
-        if (!task) {
-          break;
-        }
-        const practiceScore = scoreOpenText(text, task.keywords, 20);
-        const matchedKeywords = task.keywords.filter((keyword) =>
-          text.includes(keyword)
-        );
-        const missingKeywords = task.keywords.filter(
-          (keyword) => !text.includes(keyword)
-        );
-        if (
-          practiceScore >= 60 &&
-          completePracticeTask(
-            this.save,
-            task.id,
-            task.rewardAbility,
-            task.rewardEnergy,
-            task.rewardExp
-          )
-        ) {
-          this.activePracticeTaskId = undefined;
-          this.audio.trainingMastery();
-          this.renderTrial();
-          this.showToast(
-            this.language === "en"
-              ? `Practice scored ${practiceScore}/100 · Hit keywords: ${matchedKeywords.join(", ") || "-"} · Rewards: +${task.rewardEnergy} energy, +${task.rewardExp} mastery`
-              : `修炼得分 ${practiceScore}/100 · 命中关键词：${matchedKeywords.join("、") || "无"} · 奖励：+${task.rewardEnergy} 精力、+${task.rewardExp} 修炼点`
-          );
-        } else {
-          this.audio.risk();
-          this.showToast(
-            this.language === "en"
-              ? `Score ${practiceScore}/100 · Missing: ${missingKeywords.join(", ") || "none"} · Add concrete output that covers: ${missingKeywords.join(", ") || "the keywords"}`
-              : `得分 ${practiceScore}/100 · 命中：${matchedKeywords.join("、") || "无"} · 缺少：${missingKeywords.join("、") || "无"} · 请补充具体产出（含以上关键词）`
-          );
-        }
-        break;
-      }
-      case "trial-rest":
-        if (applyDailyTrialRecovery(this.save)) {
-          this.audio.trainingCorrect();
-          this.renderTrial();
-        }
-        break;
-      case "trial-buy-energy":
-        if (buyTrialEnergy(this.save)) {
-          this.audio.trainingCorrect();
-          this.renderTrial();
-        }
-        break;
-      case "trial-buy-energy-influence":
-        if (buyTrialEnergyWithInfluence(this.save)) {
-          this.audio.trainingCorrect();
-          this.renderTrial();
-        }
-        break;
-      case "trial-invest-accelerator":
-        if (investTrialAccelerator(this.save)) {
-          this.audio.trainingCorrect();
-          this.renderTrial();
-        }
-        break;
-      case "trial-hire-ally":
-        if (hireTrialAlly(this.save)) {
-          this.audio.trainingCorrect();
-          this.renderTrial();
-        }
-        break;
       case "claim-challenge": {
         const challengeId = actionTarget.dataset.challenge ?? "";
         const today = todayKey();
@@ -7507,6 +7059,465 @@ export class AdaptiveGameApp {
         this.localPassed = true;
         this.hotSeatTurn = 1;
         this.renderDuel();
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private handleTrialClick(
+    action: string,
+    actionTarget: HTMLElement
+  ): boolean {
+    switch (action) {
+      case "open-trial":
+        this.audio.ui();
+        this.activeTrialId = undefined;
+        this.trialAnswerResult = undefined;
+        this.lastTrialAnswer = undefined;
+        this.trialObserveRevealed = false;
+        this.trialAllyChoice = undefined;
+        this.trialAllyCorrect = undefined;
+        this.trialSuspectChoice = undefined;
+        this.trialSuspectCorrect = undefined;
+        this.trialIntelChoice = undefined;
+        this.trialIntelCorrect = undefined;
+        this.trialBetrayalChoice = undefined;
+        this.trialBetrayalCorrect = undefined;
+        this.trialFactionTrust = 50;
+        this.trialFactionSuspicion = 50;
+        this.trialFollowUpAnswer = undefined;
+        this.trialFollowUpAnswered = false;
+        this.trialSummaryPending = false;
+        this.trialSummaryKeywordCorrect = undefined;
+        this.trialCalculationAnswer = undefined;
+        this.trialCalculationCorrect = undefined;
+        this.activePracticeTaskId = undefined;
+        this.show("trial");
+        return true;
+      case "trial-stage": {
+        const stageId = actionTarget.dataset.stage ?? "";
+        const stage = TRIAL_STAGES.find((item) => item.id === stageId);
+        if (stage && canEnterTrial(this.save, stage)) {
+          this.audio.trainingStart();
+          this.activeTrialId = stage.id;
+          this.trialAnswerResult = undefined;
+          this.lastTrialAnswer = undefined;
+          this.trialObserveRevealed =
+            stage.style === "wolf" &&
+            this.save.trialItems.includes("矛盾镜");
+          this.trialAllyChoice = undefined;
+          this.trialAllyCorrect = undefined;
+          this.trialSuspectChoice = undefined;
+          this.trialSuspectCorrect = undefined;
+          this.trialIntelChoice = undefined;
+          this.trialIntelCorrect = undefined;
+          this.trialBetrayalChoice = undefined;
+          this.trialBetrayalCorrect = undefined;
+          this.trialFactionTrust = 50;
+          this.trialFactionSuspicion = 50;
+          this.trialFollowUpAnswer = undefined;
+          this.trialFollowUpAnswered = false;
+          this.trialSummaryPending = false;
+          this.trialSummaryKeywordCorrect = undefined;
+          this.trialCalculationAnswer = undefined;
+          this.trialCalculationCorrect = undefined;
+          this.show("trialBattle");
+        }
+        return true;
+      }
+      case "trial-observe":
+        this.trialObserveRevealed = true;
+        this.trialFactionTrust = Math.min(100, this.trialFactionTrust + 5);
+        this.trialFactionSuspicion = Math.min(
+          100,
+          this.trialFactionSuspicion + 5
+        );
+        this.audio.ui();
+        this.renderTrialBattle();
+        return true;
+      case "trial-ally":
+        this.trialAllyChoice = actionTarget.dataset.ally;
+        this.audio.ui();
+        this.renderTrialBattle();
+        return true;
+      case "trial-suspect":
+        this.trialSuspectChoice = actionTarget.dataset.suspect;
+        {
+          const stage = TRIAL_STAGES.find(
+            (item) => item.id === this.activeTrialId
+          );
+          if (stage?.correctSuspect) {
+            this.trialSuspectCorrect =
+              this.trialSuspectChoice === stage.correctSuspect;
+            this.trialFactionTrust = Math.max(
+              0,
+              Math.min(
+                100,
+                this.trialFactionTrust +
+                  (this.trialSuspectCorrect ? 15 : -10)
+              )
+            );
+            this.trialFactionSuspicion = Math.max(
+              0,
+              Math.min(
+                100,
+                this.trialFactionSuspicion +
+                  (this.trialSuspectCorrect ? -10 : 15)
+              )
+            );
+          }
+        }
+        this.audio.ui();
+        this.renderTrialBattle();
+        return true;
+      case "trial-intel":
+        this.trialIntelChoice = actionTarget.dataset.intel;
+        {
+          const stage = TRIAL_STAGES.find(
+            (item) => item.id === this.activeTrialId
+          );
+          if (stage?.correctIntel) {
+            this.trialIntelCorrect =
+              this.trialIntelChoice === stage.correctIntel;
+            this.trialFactionTrust = Math.max(
+              0,
+              Math.min(
+                100,
+                this.trialFactionTrust +
+                  (this.trialIntelCorrect ? 10 : -5)
+              )
+            );
+          }
+        }
+        this.audio.ui();
+        this.renderTrialBattle();
+        return true;
+      case "trial-betrayal":
+        this.trialBetrayalChoice = actionTarget.dataset.betrayal;
+        {
+          const stage = TRIAL_STAGES.find(
+            (item) => item.id === this.activeTrialId
+          );
+          if (stage?.correctBetrayal) {
+            this.trialBetrayalCorrect =
+              this.trialBetrayalChoice === stage.correctBetrayal;
+            this.trialFactionTrust = Math.max(
+              0,
+              Math.min(
+                100,
+                this.trialFactionTrust +
+                  (this.trialBetrayalCorrect ? 10 : -10)
+              )
+            );
+          }
+        }
+        this.audio.ui();
+        this.renderTrialBattle();
+        return true;
+      case "trial-submit-summary": {
+        const activeStage = TRIAL_STAGES.find(
+          (item) => item.id === this.activeTrialId
+        );
+        if (!activeStage) return true;
+        const question = trialQuestionFor(activeStage);
+        const textarea = this.root.querySelector<HTMLTextAreaElement>(
+          "textarea[data-trial-summary]"
+        );
+        const summary = textarea?.value ?? "";
+        const calculationInput = this.root.querySelector<HTMLInputElement>(
+          "input[data-trial-calculation]"
+        );
+        this.trialCalculationAnswer = calculationInput?.value ?? "";
+        if (question.calculation) {
+          this.trialCalculationCorrect =
+            Number(this.trialCalculationAnswer) ===
+            question.calculation.answer;
+          if (this.trialCalculationCorrect) {
+            this.save.masteryPoints += 1;
+          }
+        }
+        if (!submitTrialSummary(this.save, activeStage.id, summary)) {
+          this.audio.risk();
+          return true;
+        }
+        const keywordMap: Record<string, string[]> = {
+          mba_cashflow: ["现金贡献", "现金流", "验证"],
+          mba_supplychain: ["交付", "替代", "双源"],
+          mba_people: ["成果", "陪跑", "梯队"],
+          domain_marketing: ["转化", "验证", "渠道"],
+          domain_finance: ["成本", "口径", "税务"],
+          domain_legal: ["风险", "边界", "协议"],
+          domain_customer: ["补救", "计划", "客户"],
+          domain_employee: ["成长", "底线", "激励"],
+          domain_delivery: ["风险", "关键结果", "资源"]
+        };
+        this.trialSummaryKeywordCorrect =
+          scoreOpenText(
+            summary,
+            keywordMap[activeStage.id] ?? [],
+            40
+          ) >= 60;
+        if (this.trialSummaryKeywordCorrect) {
+          this.save.masteryPoints += 1;
+        }
+        const firstCorrect = question.followUp
+          ? this.trialFollowUpAnswer === question.answer
+          : true;
+        const finalCorrect =
+          this.lastTrialAnswer ===
+          (question.followUp ? question.followUp.answer : question.answer);
+        const correct = firstCorrect && finalCorrect;
+        const abilityId =
+          activeStage.source.kind === "training"
+            ? activeStage.source.abilityId
+            : activeStage.gates[0].abilityId;
+        if (activeStage.allies && activeStage.correctAlly) {
+          this.trialAllyCorrect =
+            this.trialAllyChoice === activeStage.correctAlly;
+          if (this.trialAllyCorrect) this.save.masteryPoints += 1;
+        }
+        if (activeStage.suspects && activeStage.correctSuspect) {
+          this.trialSuspectCorrect =
+            this.trialSuspectChoice === activeStage.correctSuspect;
+          if (this.trialSuspectCorrect) this.save.masteryPoints += 1;
+        }
+        if (activeStage.intelChoices && activeStage.correctIntel) {
+          this.trialIntelCorrect =
+            this.trialIntelChoice === activeStage.correctIntel;
+          if (this.trialIntelCorrect) this.save.masteryPoints += 1;
+        }
+        if (
+          activeStage.betrayalChoices &&
+          activeStage.correctBetrayal
+        ) {
+          this.trialBetrayalCorrect =
+            this.trialBetrayalChoice === activeStage.correctBetrayal;
+          if (this.trialBetrayalCorrect) this.save.masteryPoints += 1;
+        }
+        this.trialAnswerResult = applyTrialAnswer(
+          this.save,
+          activeStage.id,
+          abilityId,
+          correct,
+          trialCostFor(this.save, activeStage),
+          trialRewardExpFor(this.save, activeStage),
+          activeStage.rewardItem,
+          activeStage.resourceCost ?? 0,
+          this.save.trialItems.includes("重启铃") ? 3 : 6,
+          this.save.trialItems.includes("风险边界书") ? 10 : 20,
+          activeStage.dimension
+        );
+        if (correct) {
+          this.audio.trainingMastery();
+        } else {
+          this.audio.risk();
+        }
+        this.renderTrialBattle();
+        return true;
+      }
+      case "trial-option": {
+        const activeStage = TRIAL_STAGES.find((item) => item.id === this.activeTrialId);
+        if (!activeStage) return true;
+        const question = trialQuestionFor(activeStage);
+        const selected = Number(actionTarget.dataset.option);
+        if (question.followUp && !this.trialFollowUpAnswered) {
+          this.trialFollowUpAnswer = selected;
+          this.trialFollowUpAnswered = true;
+          this.renderTrialBattle();
+          return true;
+        }
+        if (
+          activeStage.source.kind === "custom" &&
+          !this.trialSummaryPending
+        ) {
+          this.lastTrialAnswer = selected;
+          this.trialSummaryPending = true;
+          this.renderTrialBattle();
+          return true;
+        }
+        const firstCorrect = question.followUp
+          ? this.trialFollowUpAnswer === question.answer
+          : true;
+        const finalCorrect =
+          selected ===
+          (question.followUp ? question.followUp.answer : question.answer);
+        const correct = firstCorrect && finalCorrect;
+        const abilityId =
+          activeStage.source.kind === "training"
+            ? activeStage.source.abilityId
+            : activeStage.gates[0].abilityId;
+        this.lastTrialAnswer = selected;
+        if (activeStage.allies && activeStage.correctAlly) {
+          if (this.save.trialItems.includes("同盟令")) {
+            this.trialAllyChoice = activeStage.correctAlly;
+          }
+          this.trialAllyCorrect =
+            this.trialAllyChoice === activeStage.correctAlly;
+          if (this.trialAllyCorrect) {
+            this.save.masteryPoints += 1;
+          }
+        }
+        if (
+          activeStage.suspects &&
+          activeStage.correctSuspect
+        ) {
+          this.trialSuspectCorrect =
+            this.trialSuspectChoice === activeStage.correctSuspect;
+          if (this.trialSuspectCorrect) {
+            this.save.masteryPoints += 1;
+          }
+        }
+        if (
+          activeStage.intelChoices &&
+          activeStage.correctIntel
+        ) {
+          this.trialIntelCorrect =
+            this.trialIntelChoice === activeStage.correctIntel;
+          if (this.trialIntelCorrect) {
+            this.save.masteryPoints += 1;
+          }
+        }
+        if (
+          activeStage.betrayalChoices &&
+          activeStage.correctBetrayal
+        ) {
+          this.trialBetrayalCorrect =
+            this.trialBetrayalChoice === activeStage.correctBetrayal;
+          if (this.trialBetrayalCorrect) {
+            this.save.masteryPoints += 1;
+          }
+        }
+        this.trialAnswerResult = applyTrialAnswer(
+          this.save,
+          activeStage.id,
+          abilityId,
+          correct,
+          trialCostFor(this.save, activeStage),
+          trialRewardExpFor(this.save, activeStage),
+          activeStage.rewardItem,
+          activeStage.resourceCost ?? 0,
+          this.save.trialItems.includes("重启铃") ? 3 : 6,
+          this.save.trialItems.includes("风险边界书") ? 10 : 20,
+          activeStage.dimension
+        );
+        if (correct) {
+          this.audio.trainingMastery();
+        } else {
+          this.audio.risk();
+        }
+        this.renderTrialBattle();
+        return true;
+      }
+      case "trial-next":
+        this.audio.ui();
+        this.activeTrialId = undefined;
+        this.trialAnswerResult = undefined;
+        this.lastTrialAnswer = undefined;
+        this.trialObserveRevealed = false;
+        this.trialAllyChoice = undefined;
+        this.trialAllyCorrect = undefined;
+        this.trialSuspectChoice = undefined;
+        this.trialSuspectCorrect = undefined;
+        this.trialIntelChoice = undefined;
+        this.trialIntelCorrect = undefined;
+        this.trialBetrayalChoice = undefined;
+        this.trialBetrayalCorrect = undefined;
+        this.trialFactionTrust = 50;
+        this.trialFactionSuspicion = 50;
+        this.trialFollowUpAnswer = undefined;
+        this.trialFollowUpAnswered = false;
+        this.trialSummaryPending = false;
+        this.trialSummaryKeywordCorrect = undefined;
+        this.trialCalculationAnswer = undefined;
+        this.trialCalculationCorrect = undefined;
+        this.show("trial");
+        return true;
+      case "practice-task": {
+        const taskId = actionTarget.dataset.task ?? "";
+        const task = PRACTICE_TASKS.find((item) => item.id === taskId);
+        if (task && !this.save.completedPracticeTasks.includes(task.id)) {
+          this.activePracticeTaskId = task.id;
+          this.audio.trainingCorrect();
+          this.renderTrial();
+        }
+        return true;
+      }
+      case "practice-submit": {
+        const task = PRACTICE_TASKS.find(
+          (item) => item.id === this.activePracticeTaskId
+        );
+        const textarea = this.root.querySelector<HTMLTextAreaElement>(
+          "textarea[data-practice-result]"
+        );
+        const text = textarea?.value.trim() ?? "";
+        if (!task) {
+          return true;
+        }
+        const practiceScore = scoreOpenText(text, task.keywords, 20);
+        const matchedKeywords = task.keywords.filter((keyword) =>
+          text.includes(keyword)
+        );
+        const missingKeywords = task.keywords.filter(
+          (keyword) => !text.includes(keyword)
+        );
+        if (
+          practiceScore >= 60 &&
+          completePracticeTask(
+            this.save,
+            task.id,
+            task.rewardAbility,
+            task.rewardEnergy,
+            task.rewardExp
+          )
+        ) {
+          this.activePracticeTaskId = undefined;
+          this.audio.trainingMastery();
+          this.renderTrial();
+          this.showToast(
+            this.language === "en"
+              ? `Practice scored ${practiceScore}/100 · Hit keywords: ${matchedKeywords.join(", ") || "-"} · Rewards: +${task.rewardEnergy} energy, +${task.rewardExp} mastery`
+              : `修炼得分 ${practiceScore}/100 · 命中关键词：${matchedKeywords.join("、") || "无"} · 奖励：+${task.rewardEnergy} 精力、+${task.rewardExp} 修炼点`
+          );
+        } else {
+          this.audio.risk();
+          this.showToast(
+            this.language === "en"
+              ? `Score ${practiceScore}/100 · Missing: ${missingKeywords.join(", ") || "none"} · Add concrete output that covers: ${missingKeywords.join(", ") || "the keywords"}`
+              : `得分 ${practiceScore}/100 · 命中：${matchedKeywords.join("、") || "无"} · 缺少：${missingKeywords.join("、") || "无"} · 请补充具体产出（含以上关键词）`
+          );
+        }
+        return true;
+      }
+      case "trial-rest":
+        if (applyDailyTrialRecovery(this.save)) {
+          this.audio.trainingCorrect();
+          this.renderTrial();
+        }
+        return true;
+      case "trial-buy-energy":
+        if (buyTrialEnergy(this.save)) {
+          this.audio.trainingCorrect();
+          this.renderTrial();
+        }
+        return true;
+      case "trial-buy-energy-influence":
+        if (buyTrialEnergyWithInfluence(this.save)) {
+          this.audio.trainingCorrect();
+          this.renderTrial();
+        }
+        return true;
+      case "trial-invest-accelerator":
+        if (investTrialAccelerator(this.save)) {
+          this.audio.trainingCorrect();
+          this.renderTrial();
+        }
+        return true;
+      case "trial-hire-ally":
+        if (hireTrialAlly(this.save)) {
+          this.audio.trainingCorrect();
+          this.renderTrial();
+        }
         return true;
       default:
         return false;
