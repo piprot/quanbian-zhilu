@@ -5416,6 +5416,7 @@ export class AdaptiveGameApp {
     if (this.handleSettingsClick(action, actionTarget)) return;
     if (this.handleCloudClick(action, actionTarget)) return;
     if (this.handleExportClick(action, actionTarget)) return;
+    if (this.handleLiveClick(action, actionTarget)) return;
 
     switch (action) {
       case "open-node": {
@@ -5880,90 +5881,6 @@ export class AdaptiveGameApp {
         this.customPlayResult = undefined;
         this.audio.ui();
         this.show("customScenarios");
-        break;
-      case "live-create": {
-        const select = this.root.querySelector<HTMLSelectElement>(
-          "[data-live-scenario]"
-        );
-        const id = select?.value;
-        let node: StoryNode | undefined;
-        if (id?.startsWith("custom-")) {
-          const scenario = this.customScenarios.find(
-            (item) => item.id === id
-          );
-          if (scenario) node = customScenarioToNode(scenario);
-        } else if (id) {
-          try {
-            node = getNode(id);
-          } catch {
-            node = undefined;
-          }
-        }
-        if (!node) {
-          this.showToast(
-            this.language === "en"
-              ? "Choose a scenario first."
-              : "请先选择一个情境。"
-          );
-          break;
-        }
-        this.liveNode = node;
-        this.liveSessionId = this.liveRunner.createSession("coach", node).sessionId;
-        this.livePendingOption = 0;
-        this.liveName = "";
-        this.liveRevealed = false;
-        this.liveDistribution = undefined;
-        this.audio.ui();
-        this.renderCoach();
-        break;
-      }
-      case "live-pick":
-        this.liveName =
-          this.root.querySelector<HTMLInputElement>('input[name="live-name"]')
-            ?.value.trim() ?? "";
-        this.livePendingOption = Number(actionTarget.dataset.option) || 0;
-        this.audio.ui();
-        this.renderCoach();
-        break;
-      case "live-add": {
-        const name = this.liveName;
-        if (!name || !this.liveSessionId || !this.liveNode) {
-          this.showToast(
-            this.language === "en"
-              ? "Enter a participant name first."
-              : "请先输入学员姓名。"
-          );
-          break;
-        }
-        this.liveRunner.submitPick(
-          this.liveSessionId,
-          name,
-          this.livePendingOption
-        );
-        this.liveName = "";
-        this.audio.ui();
-        this.renderCoach();
-        break;
-      }
-      case "live-reveal": {
-        if (!this.liveSessionId) break;
-        this.liveDistribution = this.liveRunner.reveal(
-          this.liveSessionId
-        ).distribution;
-        this.liveRevealed = true;
-        this.audio.expert();
-        this.renderCoach();
-        break;
-      }
-      case "live-reset":
-        this.liveSessionId = undefined;
-        this.liveNode = undefined;
-        this.liveRevealed = false;
-        this.liveDistribution = undefined;
-        this.livePendingOption = 0;
-        this.liveName = "";
-        this.audio.ui();
-        this.renderCoach();
         break;
       case "open-wrong-review": {
         const wrongIds = [
@@ -7552,6 +7469,100 @@ export class AdaptiveGameApp {
         this.audio.ui();
         return true;
       }
+      default:
+        return false;
+    }
+  }
+
+  private handleLiveClick(
+    action: string,
+    actionTarget: HTMLElement
+  ): boolean {
+    switch (action) {
+      case "live-create": {
+        const select = this.root.querySelector<HTMLSelectElement>(
+          "[data-live-scenario]"
+        );
+        const id = select?.value;
+        let node: StoryNode | undefined;
+        if (id?.startsWith("custom-")) {
+          const scenario = this.customScenarios.find(
+            (item) => item.id === id
+          );
+          if (scenario) node = customScenarioToNode(scenario);
+        } else if (id) {
+          try {
+            node = getNode(id);
+          } catch {
+            node = undefined;
+          }
+        }
+        if (!node) {
+          this.showToast(
+            this.language === "en"
+              ? "Choose a scenario first."
+              : "请先选择一个情境。"
+          );
+          return true;
+        }
+        this.liveNode = node;
+        this.liveSessionId = this.liveRunner.createSession("coach", node).sessionId;
+        this.livePendingOption = 0;
+        this.liveName = "";
+        this.liveRevealed = false;
+        this.liveDistribution = undefined;
+        this.audio.ui();
+        this.renderCoach();
+        return true;
+      }
+      case "live-pick":
+        this.liveName =
+          this.root.querySelector<HTMLInputElement>('input[name="live-name"]')
+            ?.value.trim() ?? "";
+        this.livePendingOption = Number(actionTarget.dataset.option) || 0;
+        this.audio.ui();
+        this.renderCoach();
+        return true;
+      case "live-add": {
+        const name = this.liveName;
+        if (!name || !this.liveSessionId || !this.liveNode) {
+          this.showToast(
+            this.language === "en"
+              ? "Enter a participant name first."
+              : "请先输入学员姓名。"
+          );
+          return true;
+        }
+        this.liveRunner.submitPick(
+          this.liveSessionId,
+          name,
+          this.livePendingOption
+        );
+        this.liveName = "";
+        this.audio.ui();
+        this.renderCoach();
+        return true;
+      }
+      case "live-reveal": {
+        if (!this.liveSessionId) return true;
+        this.liveDistribution = this.liveRunner.reveal(
+          this.liveSessionId
+        ).distribution;
+        this.liveRevealed = true;
+        this.audio.expert();
+        this.renderCoach();
+        return true;
+      }
+      case "live-reset":
+        this.liveSessionId = undefined;
+        this.liveNode = undefined;
+        this.liveRevealed = false;
+        this.liveDistribution = undefined;
+        this.livePendingOption = 0;
+        this.liveName = "";
+        this.audio.ui();
+        this.renderCoach();
+        return true;
       default:
         return false;
     }
