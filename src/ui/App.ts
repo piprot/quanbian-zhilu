@@ -149,7 +149,7 @@ import { hiddenRouteSteps } from "../core/hiddenRoutes";
 import { uiString, type Language } from "../core/i18n";
 import { readAnalyticsEvents, trackEvent } from "../core/analytics";
 import { ROLE_EN } from "../core/translations";
-import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, relationStatusText, sideArcDisplay, npcAvatarColor, achievementDisplay, challengeDisplay, challengeCategoryLabel, assessmentDisplay, chapterReflectionText, aiArchetypeLabel, leadershipLensText, roleMove, nodeIntel, relationNoteText, resourceChips, chapterBadge, dimensionMarkup } from "./display";
+import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, sideArcDisplay, npcAvatarColor, achievementDisplay, challengeDisplay, challengeCategoryLabel, assessmentDisplay, chapterReflectionText, aiArchetypeLabel, leadershipLensText, roleMove, nodeIntel, resourceChips, chapterBadge, dimensionMarkup } from "./display";
 import { buildReportMarkdown, downloadText, encodeSaveLink } from "./export";
 import { artAsset, chapterArtStyle } from "./assets";
 import { storyNodeDisplay } from "./nodeView";
@@ -158,11 +158,11 @@ import { abilityView, endingView, reportView } from "./reportView";
 import { difficultySelector, settingsView } from "./settingsView";
 import { achievementsView } from "./achievementsView";
 import { profileView } from "./profileView";
+import { relationsView } from "./relationsView";
 import {
   chapterTrainingMarkup,
   expeditionHeroMarkup,
   npcCameoMarkup,
-  npcStoryMarkup,
   optionCostSummary,
   primaryAbilityForOption,
   storyOptionOrder
@@ -1281,47 +1281,7 @@ export class AdaptiveGameApp {
   }
 
   private renderRelations(): void {
-    const related = NPCS.filter(
-      (npc) => npcRelation(this.save, npc).status !== "尚未接触"
-    ).length;
-    this.root.innerHTML = `
-      <header class="topbar">
-        <div class="brand">${this.t("brand")}</div>
-        <button class="link" data-action="open-menu">${this.t("returnHome")}</button>
-      </header>
-      <main class="relation-shell" aria-label="${this.language === "en" ? "Relationships" : "人物关系图"}">
-        <section class="relation-hero">
-          <div>
-            <p class="eyebrow">${this.t("relationsTitle")}</p>
-            <h1>${related} / ${NPCS.length} ${this.language === "en" ? "people in your network" : "人已进入你的关系网络"}</h1>
-            <p class="muted">${this.language === "en" ? "NPCs you faced directly in side quests evolve from leads into lasting organizational relationships." : "支线中真正面对过的 NPC，会从线索变成可延续的组织关系。"}</p>
-          </div>
-        </section>
-        <canvas class="relation-graph" id="relation-graph"></canvas>
-        <section class="relation-grid">
-          ${NPCS.map((npc) => {
-            const relation = npcRelation(this.save, npc);
-            const view = npcDisplay(this.language, npc);
-            return `
-              <div class="npc-card ${relation.status === "已建立关系" ? "trusted" : relation.status === "存在线索" ? "known" : "hidden"}">
-                <div class="npc-avatar-wrap">
-                  <span class="npc-avatar npc-avatar-fallback">${view.name.slice(0, 1)}</span>
-                  <img class="npc-portrait npc-avatar" src="./npc/${npc.id}.jpg" alt="${escapeHtml(view.name)}" loading="lazy">
-                </div>
-                <div>
-                  <h2>${view.name}</h2>
-                  <small>${view.title}</small>
-                  <p>${view.description}</p>
-                </div>
-                <span class="npc-status">${relationStatusText(this.language, relation.status)}</span>
-                <em>${relationNoteText(this.language, this.save, npc)}</em>
-                ${relation.status !== "尚未接触" ? npcStoryMarkup(this.language,npc) : ""}
-              </div>
-            `;
-          }).join("")}
-        </section>
-      </main>
-    `;
+    this.root.innerHTML = relationsView(this.save, this.language);
     this.root.querySelectorAll("img.npc-portrait").forEach((element) => {
       const image = element as HTMLImageElement;
       const fallback = image.previousElementSibling as HTMLElement | null;
