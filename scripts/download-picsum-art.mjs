@@ -48,15 +48,15 @@ const MANIFEST = [
   // ── NPC 头像（方形 400×400，替代原 1920×1920 AI 生图）──
   // 性别仅按姓名/作者猜测；picsum 无性别元数据，进游戏后请人工核对并按需改 id。
   // 女（她）：
-  { name: "npc-assistant", id: 1027, dir: "npc", w: 400, h: 400 }, // 行政主管
+  { name: "npc-assistant", id: 1015, dir: "npc", w: 400, h: 400 }, // 行政主管
   { name: "npc-finance", id: 91, dir: "npc", w: 400, h: 400 }, // 财务经理
-  { name: "npc-xu", id: 1011, dir: "npc", w: 400, h: 400 }, // 小许
-  { name: "npc-tang", id: 1012, dir: "npc", w: 400, h: 400 }, // 唐岚
+  { name: "npc-xu", id: 1022, dir: "npc", w: 400, h: 400 }, // 小许
+  { name: "npc-tang", id: 823, dir: "npc", w: 400, h: 400 }, // 唐岚
   // 男（他）：
-  { name: "npc-ops", id: 1005, dir: "npc", w: 400, h: 400 }, // 运营负责人
+  { name: "npc-ops", id: 1009, dir: "npc", w: 400, h: 400 }, // 运营负责人
   { name: "npc-young", id: 338, dir: "npc", w: 400, h: 400 }, // 年轻骨干
   { name: "npc-veteran", id: 447, dir: "npc", w: 400, h: 400 }, // 老将
-  { name: "npc-chen", id: 823, dir: "npc", w: 400, h: 400 }, // 陈屿
+  { name: "npc-chen", id: 1012, dir: "npc", w: 400, h: 400 }, // 陈屿
   { name: "npc-shen", id: 660, dir: "npc", w: 400, h: 400 }, // 沈捷
   { name: "npc-he", id: 1006, dir: "npc", w: 400, h: 400 }, // 何川
   { name: "npc-fang", id: 1013, dir: "npc", w: 400, h: 400 }, // 方然
