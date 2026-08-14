@@ -294,14 +294,14 @@ export const NPC_STORIES: Record<string, NpcStory> = {
   },
   "npc-fang": {
     zh: [
-      "连续失败后，方然既想离开，也不愿意看到团队解散。他是团队的情绪中心，也是最先替所有人感到累的人。",
-      "他把失败都当成自己的责任，因此每一次复盘都会让他更沉默。他需要有人告诉他：失败是系统的信号，不是一个人的罪名。",
-      "他说：“我不是怕重来，我是怕重来以后，还是我一个人背着全队的失望。”"
+      "连续失败后，方然既想离开，也不愿意看到团队解散。她是团队的情绪中心，也是最先替所有人感到累的人。",
+      "她把失败都当成自己的责任，因此每一次复盘都会让她更沉默。她需要有人告诉她：失败是系统的信号，不是一个人的罪名。",
+      "她说：“我不是怕重来，我是怕重来以后，还是我一个人背着全队的失望。”"
     ],
     en: [
-      "After consecutive failures, Fang Ran wants to leave yet cannot bear watching the team disband. He is the emotional center of the team and the first person to feel everyone's exhaustion.",
-      "He takes every failure as his own fault, so each review makes him quieter. He needs someone to say that failure is a signal from the system, not a charge against one person.",
-      "He says: “I am not afraid of starting over. I am afraid that when we do, I will still be carrying the whole team's disappointment alone.”"
+      "After consecutive failures, Fang Ran wants to leave yet cannot bear watching the team disband. She is the emotional center of the team and the first person to feel everyone's exhaustion.",
+      "She takes every failure as her own fault, so each review makes her quieter. She needs someone to say that failure is a signal from the system, not a charge against one person.",
+      "She says: “I am not afraid of starting over. I am afraid that when we do, I will still be carrying the whole team's disappointment alone.”"
     ],
     dialogue: [
       {

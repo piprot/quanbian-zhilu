@@ -91,7 +91,7 @@ export const NPCS: NpcDef[] = [
     title: "团队情绪中心",
     nodeId: "s6",
     arcId: "resilience",
-    description: "连续失败后，他既想离开，也不愿意看到团队解散。"
+    description: "连续失败后，她既想离开，也不愿意看到团队解散。"
   }
 ];
 

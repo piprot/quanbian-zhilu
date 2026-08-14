@@ -194,12 +194,12 @@ export const NPC_ARCS: Record<string, NpcArc> = {
   },
   "npc-fang": {
     zh: [
-      "方然在连续失败后选择留下，并提出由他带队打下一个「小胜」：一个 7 天内可完成的客户回访，目标是让团队重新听到一次感谢。",
-      "他说，士气不是开会喊出来的，而是从一次能赢的小事里长回来的。他要的就是那件小事。"
+      "方然在连续失败后选择留下，并提出由她带队打下一个「小胜」：一个 7 天内可完成的客户回访，目标是让团队重新听到一次感谢。",
+      "她说，士气不是开会喊出来的，而是从一次能赢的小事里长回来的。她要的就是那件小事。"
     ],
     en: [
       "After consecutive losses, Fang Ran chooses to stay and offers to lead one 'small win': a 7-day client follow-up designed to let the team hear one thank-you again.",
-      "Morale, he says, is not created by rally speeches; it grows back from one winnable small thing. That small thing is what he wants."
+      "Morale, she says, is not created by rally speeches; it grows back from one winnable small thing. That small thing is what she wants."
     ],
     dialogue: {
       questionZh: "这次小胜你希望团队看到什么？",
