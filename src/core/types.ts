@@ -112,6 +112,13 @@ export interface DecisionRecord {
   quality: OptionQuality;
   qualityScore: number;
   chapterId: number;
+  /** 本次决策实际产生的增量，供「重试章节」回滚使用。旧存档可能缺失。 */
+  delta?: {
+    abilities: Partial<Record<AbilityId, number>>;
+    resources: Partial<Record<ResourceKey, number>>;
+    masteryPoints: number;
+    trialEnergy: number;
+  };
 }
 
 export interface DuelHistoryEntry {

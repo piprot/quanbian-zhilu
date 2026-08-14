@@ -268,6 +268,11 @@ function loadLegacySave(): SaveState {
   return structuredClone(DEFAULT_SAVE);
 }
 
+function finiteOr(value: unknown, fallback: number): number {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 function normalizeSave(save: SaveState): SaveState {
   const profile = save.profile;
   const abilities = createDefaultAbilities();
@@ -275,10 +280,10 @@ function normalizeSave(save: SaveState): SaveState {
     abilities[id] = Math.max(0, Number(profile.abilities[id]) || 0);
   }
   const resources: PlayerProfile["resources"] = {
-    energy: clamp(Number(profile.resources.energy) || 75, 0, 100),
-    trust: clamp(Number(profile.resources.trust) || 60, 0, 100),
-    influence: clamp(Number(profile.resources.influence) || 40, 0, 100),
-    capital: clamp(Number(profile.resources.capital) || 45, 0, 100)
+    energy: clamp(finiteOr(profile.resources.energy, 75), 0, 100),
+    trust: clamp(finiteOr(profile.resources.trust, 60), 0, 100),
+    influence: clamp(finiteOr(profile.resources.influence, 40), 0, 100),
+    capital: clamp(finiteOr(profile.resources.capital, 45), 0, 100)
   };
   const normalized: SaveState = {
     version: DEFAULT_SAVE.version,
@@ -339,8 +344,8 @@ function normalizeSave(save: SaveState): SaveState {
       save.trainingScores && typeof save.trainingScores === "object"
         ? { ...save.trainingScores }
         : {},
-    trialEnergy: clamp(Number(save.trialEnergy) || 100, 0, 100),
-    trialHp: clamp(Number(save.trialHp) || 100, 0, 100),
+    trialEnergy: clamp(finiteOr(save.trialEnergy, 100), 0, 100),
+    trialHp: clamp(finiteOr(save.trialHp, 100), 0, 100),
     trialCleared: Array.isArray(save.trialCleared) ? save.trialCleared : [],
     trialItems: Array.isArray(save.trialItems) ? save.trialItems : [],
     completedPracticeTasks: Array.isArray(save.completedPracticeTasks)
@@ -433,7 +438,7 @@ function normalizeSave(save: SaveState): SaveState {
       vision: clamp(Number(save.dimensionExp?.vision) || 0, 0, 100),
       resilience: clamp(Number(save.dimensionExp?.resilience) || 0, 0, 100)
     },
-    morale: clamp(Number(save.morale) || 75, 0, 100),
+    morale: clamp(finiteOr(save.morale, 75), 0, 100),
     recentPickPositions: Array.isArray(save.recentPickPositions)
       ? save.recentPickPositions.slice(-5)
       : [],
@@ -698,10 +703,10 @@ export function deleteRoleSlot(role: RoleId): void {
   }
 }
 
-function boostLowestFocusAbility(save: SaveState): void {
+function boostLowestFocusAbility(save: SaveState): AbilityId | undefined {
   const focus = ROLES[save.profile.role].focusAbilities;
   if (focus.length === 0) {
-    return;
+    return undefined;
   }
   const lowest = focus.reduce((a, b) =>
     save.profile.abilities[a] <= save.profile.abilities[b] ? a : b
@@ -711,6 +716,7 @@ function boostLowestFocusAbility(save: SaveState): void {
     0,
     40
   );
+  return lowest;
 }
 
 export function applyStoryChoice(
@@ -726,24 +732,23 @@ export function applyStoryChoice(
   const option = node.options[optionIndex];
   const outcome = buildOutcome(save, option, optionIndex);
 
-  const decisionRecord: DecisionRecord = {
-    nodeId,
-    optionIndex,
-    quality: option.quality,
-    qualityScore: outcome.qualityScore,
-    chapterId: node.chapterId
+  const delta: NonNullable<DecisionRecord["delta"]> = {
+    abilities: {},
+    resources: {},
+    masteryPoints: 0,
+    trialEnergy: 0
   };
-  save.decisionHistory.push(decisionRecord);
-  if (save.decisionHistory.length > MAX_HISTORY_LENGTH) {
-    save.decisionHistory = save.decisionHistory.slice(-MAX_HISTORY_LENGTH);
-  }
 
   for (const [abilityId, gained] of Object.entries(option.effects) as Array<
     [AbilityId, number]
   >) {
-    save.profile.abilities[abilityId] += gained;
+    save.profile.abilities[abilityId] = Math.max(
+      0,
+      save.profile.abilities[abilityId] + gained
+    );
+    delta.abilities[abilityId] = (delta.abilities[abilityId] ?? 0) + gained;
   }
-  for (const [resource, delta] of Object.entries(option.resources) as Array<
+  for (const [resource, resourceDelta] of Object.entries(option.resources) as Array<
     [ResourceKey, number]
   >) {
     const effectiveDifficulty =
@@ -754,14 +759,16 @@ export function applyStoryChoice(
           : "normal";
     const factor = PRESSURE_FACTORS[effectiveDifficulty];
     const adjustedDelta =
-      delta < 0
-        ? Math.round(delta * factor.neg)
-        : Math.round(delta * factor.pos);
+      resourceDelta < 0
+        ? Math.round(resourceDelta * factor.neg)
+        : Math.round(resourceDelta * factor.pos);
     save.profile.resources[resource] = clamp(
       save.profile.resources[resource] + adjustedDelta,
       0,
       100
     );
+    delta.resources[resource] =
+      (delta.resources[resource] ?? 0) + adjustedDelta;
   }
   if (option.quality === "expert") {
     save.profile.resources.trust = clamp(
@@ -774,18 +781,22 @@ export function applyStoryChoice(
       0,
       100
     );
+    delta.resources.trust = (delta.resources.trust ?? 0) + 1;
+    delta.resources.influence = (delta.resources.influence ?? 0) + 1;
   } else if (option.quality === "partial") {
     save.profile.resources.influence = clamp(
       save.profile.resources.influence + 1,
       0,
       100
     );
+    delta.resources.influence = (delta.resources.influence ?? 0) + 1;
   } else {
     save.profile.resources.capital = clamp(
       save.profile.resources.capital - 1,
       0,
       100
     );
+    delta.resources.capital = (delta.resources.capital ?? 0) - 1;
   }
 
   save.playCount += 1;
@@ -794,17 +805,23 @@ export function applyStoryChoice(
     if (!save.completedSideQuests.includes(nodeId)) {
       save.completedSideQuests.push(nodeId);
       save.masteryPoints += 5;
-      boostLowestFocusAbility(save);
+      delta.masteryPoints += 5;
+      const boosted = boostLowestFocusAbility(save);
+      if (boosted) {
+        delta.abilities[boosted] = (delta.abilities[boosted] ?? 0) + 1;
+      }
     }
   } else if (node.kind === "branch") {
     if (!save.completedBranchNodes.includes(nodeId)) {
       save.completedBranchNodes.push(nodeId);
       save.masteryPoints += 5;
+      delta.masteryPoints += 5;
     }
   } else if (node.kind === "random") {
     if (!save.completedRandomEvents.includes(nodeId)) {
       save.completedRandomEvents.push(nodeId);
       save.masteryPoints += 5;
+      delta.masteryPoints += 5;
     }
   } else {
     const record =
@@ -827,6 +844,7 @@ export function applyStoryChoice(
       const passed = record.stars >= CHAPTER_PASS_STARS;
       if (firstComplete && passed) {
         save.masteryPoints += 10;
+        delta.masteryPoints += 10;
         save.achievements.push(chapterAchievement);
         if (node.chapterId === 9) {
           save.campaignCompletions = (save.campaignCompletions ?? 0) + 1;
@@ -843,12 +861,27 @@ export function applyStoryChoice(
     }
   }
 
+  const trialEnergyGain = node.kind === "main" ? 5 : 3;
   save.trialEnergy = clamp(
-    save.trialEnergy + (node.kind === "main" ? 5 : 3),
+    save.trialEnergy + trialEnergyGain,
     0,
     100
   );
+  delta.trialEnergy += trialEnergyGain;
+
   save.achievements = [...new Set(save.achievements)];
+  const decisionRecord: DecisionRecord = {
+    nodeId,
+    optionIndex,
+    quality: option.quality,
+    qualityScore: outcome.qualityScore,
+    chapterId: node.chapterId,
+    delta
+  };
+  save.decisionHistory.push(decisionRecord);
+  if (save.decisionHistory.length > MAX_HISTORY_LENGTH) {
+    save.decisionHistory = save.decisionHistory.slice(-MAX_HISTORY_LENGTH);
+  }
   saveState(save);
   return outcome;
 }
@@ -1039,6 +1072,46 @@ export function isChapterPassed(save: SaveState, chapterId: number): boolean {
 
 /** 已构成但未达一星的章节可重新冒险，清除该章节记录与决策历史后重新结算。 */
 export function retryChapter(save: SaveState, chapterId: number): void {
+  // 先回滚该章已结算的增量，避免重打时无限刷取能力/资源/修炼点。
+  const decisions = save.decisionHistory.filter(
+    (record) => record.chapterId === chapterId
+  );
+  for (const decision of decisions) {
+    const rollback = decision.delta;
+    if (!rollback) continue;
+    for (const [abilityId, gained] of Object.entries(
+      rollback.abilities ?? {}
+    ) as Array<[AbilityId, number]>) {
+      save.profile.abilities[abilityId] = Math.max(
+        0,
+        save.profile.abilities[abilityId] - gained
+      );
+    }
+    for (const [resource, gained] of Object.entries(
+      rollback.resources ?? {}
+    ) as Array<[ResourceKey, number]>) {
+      save.profile.resources[resource] = clamp(
+        save.profile.resources[resource] - gained,
+        0,
+        100
+      );
+    }
+    save.masteryPoints = Math.max(
+      0,
+      save.masteryPoints - rollback.masteryPoints
+    );
+    save.trialEnergy = clamp(save.trialEnergy - rollback.trialEnergy, 0, 100);
+  }
+  // 清空该章相关的三类完成列表，让支线/分支/随机事件可重新完成。
+  save.completedSideQuests = save.completedSideQuests.filter(
+    (id) => getNode(id).chapterId !== chapterId
+  );
+  save.completedBranchNodes = save.completedBranchNodes.filter(
+    (id) => getNode(id).chapterId !== chapterId
+  );
+  save.completedRandomEvents = save.completedRandomEvents.filter(
+    (id) => getNode(id).chapterId !== chapterId
+  );
   save.chapterRecords = save.chapterRecords.filter(
     (record) => record.chapterId !== chapterId
   );

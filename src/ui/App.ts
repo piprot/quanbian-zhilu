@@ -4602,13 +4602,18 @@ export class AdaptiveGameApp {
       Object.keys(outcome.option.effects) as AbilityId[]
     ).find((id) => abilityLevel(this.save.profile.abilities[id]) >= 3);
     const isForkNode = this.pendingForkNodeId === baseNode.id;
-    if (!isForkNode && outcome.option.quality === "expert" && highAbility) {
+    const roleBranch = outcome.option.branchTo?.[this.save.profile.role];
+    if (
+      !isForkNode &&
+      outcome.option.quality === "expert" &&
+      highAbility &&
+      !roleBranch
+    ) {
       this.hiddenBranchAbilityId = highAbility;
       this.pendingBranchNodeId = `ability-${highAbility}`;
     } else {
       this.hiddenBranchAbilityId = undefined;
-      this.pendingBranchNodeId =
-        outcome.option.branchTo?.[this.save.profile.role];
+      this.pendingBranchNodeId = roleBranch;
     }
     if (outcome.option.quality === "expert") {
       this.audio.expert();
