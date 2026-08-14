@@ -2384,7 +2384,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -8, trust: 2, influence: 2 },
-        feedback: "客户安心了，但团队被临时承诺拖入疲劳，精力被透支，交付质量下滑。",
+        feedback: "客户安心了，但团队被临时承诺拖入疲劳，精力被透支，交付质量与士气一起下滑。",
         theory: "《孙子兵法》：兵贵胜，不贵久。"
       },
       {
@@ -2773,7 +2773,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 1 },
         resources: { energy: -4, trust: -5, influence: -4 },
-        feedback: "你避免了乱做，但高层可能认为你缺少在约束下推进的能力，机会减少。",
+        feedback: "你避免了乱做，但高层可能认为你缺少在约束下推进的能力，能扛的事越来越少。",
         theory: "《权经》：权惟用，不为大也。"
       }
     ]
@@ -2831,7 +2831,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { communication: 3, authority: 1 },
         resources: { energy: -4, trust: 6, influence: 5 },
-        feedback: "客户得到了便利，团队也没有被绕开，边界反而更清晰，协作更有章法。",
+        feedback: "客户得到了便利，团队也没有被绕开，边界反而更清晰，协作更有章法，响应也更稳。",
         theory: "《韩非子》：使事不相干，使士不兼官。"
       },
       {
@@ -2887,7 +2887,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { communication: 1 },
         resources: { energy: -3, trust: -2, influence: -2 },
-        feedback: "通知越多，团队越觉得这是形式主义，执行意愿更低，流程被架空。",
+        feedback: "通知发得越多，团队越觉得这是形式主义，执行意愿不升反降，新流程被彻底架空。",
         theory: "《论语》：不患人之不己知，患不知人也。"
       }
     ]
@@ -3039,7 +3039,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 2 },
         resources: { energy: -3, trust: -6, influence: -4 },
-        feedback: "你保护了自己，但高层可能认为你缺乏承担更大责任的意愿，晋升受阻。",
+        feedback: "你保护了自己，但高层可能认为你缺乏承担更大责任的意愿，晋升之路就此受阻。",
         theory: "《论语》：君子求诸己，小人求诸人。"
       }
     ]
@@ -3182,7 +3182,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 3 },
         resources: { energy: -5, trust: -6, influence: 3 },
-        feedback: "方案落地了，但团队开始用最低标准应付考核，执行走样，激励失效。",
+        feedback: "方案落地了，但团队开始用最低标准应付考核，执行走样，激励也彻底失去了作用。",
         theory: "《孙子兵法》：齐之以武，也要令之以文。"
       },
       {
@@ -3229,7 +3229,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { execution: 2 },
         resources: { energy: -5, trust: -3, influence: -5 },
-        feedback: "数字暂时对齐，但系统性问题被掩盖了，风险还在积累，下次更猛烈。",
+        feedback: "数字暂时对齐，但系统性问题被掩盖了，风险还在暗处积累，下一次会来得更猛烈。",
         theory: "《孙子兵法》：先为不可胜。"
       }
     ]
