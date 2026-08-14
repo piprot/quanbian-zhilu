@@ -91,10 +91,6 @@ import { npcStoryFor } from "../core/npcStories";
 import type { LeadershipGamesApp, LeadershipGameId } from "./leadership-games";
 import type { TeamAcademyApp } from "./team-academy";
 import {
-  LEADERSHIP_DIMENSIONS,
-  dimensionLevel
-} from "../core/leadership-model";
-import {
   CoachWorkshopEngine,
   LiveScenarioRunner,
   type WorkshopReport
@@ -168,6 +164,7 @@ import { chapterTransitionView } from "./transitionView";
 import { coachView } from "./coachView";
 import { mapView } from "./mapView";
 import { trialView } from "./trialView";
+import { trialBattleView } from "./trialBattleView";
 import {
   optionCostSummary,
   primaryAbilityForOption,
@@ -2230,259 +2227,29 @@ export class AdaptiveGameApp {
       this.show("trial");
       return;
     }
-    const en = this.language === "en";
-    const question = trialQuestionFor(stage);
-    const result = this.trialAnswerResult;
-    const followUp = question.followUp;
-    const followUpPending = Boolean(followUp) && !this.trialFollowUpAnswered;
-    const referenceAnswer = followUp
-      ? followUp.referenceAnswer
-      : question.referenceAnswer;
-    const explanation = followUp
-      ? followUp.explanation
-      : question.explanation;
-    const wolfPending =
-      stage.style === "wolf" && !this.trialObserveRevealed;
-    const suspectPending =
-      stage.style === "wolf" &&
-      this.trialObserveRevealed &&
-      !this.trialSuspectChoice;
-    const allyPending =
-      Boolean(stage.allies?.length) && !this.trialAllyChoice;
-    const intelPending =
-      Boolean(stage.intelChoices?.length) &&
-      Boolean(this.trialAllyChoice) &&
-      !this.trialIntelChoice;
-    const betrayalPending =
-      Boolean(stage.betrayalChoices?.length) &&
-      Boolean(this.trialIntelChoice) &&
-      !this.trialBetrayalChoice;
-    const phaseReady =
-      !wolfPending &&
-      !suspectPending &&
-      !allyPending &&
-      !intelPending &&
-      !betrayalPending;
-    this.root.innerHTML = `
-      <header class="topbar">
-        <div class="brand">${this.t("brand")}</div>
-        <button class="link" data-action="trial-next">${this.t("trialNext")}</button>
-      </header>
-      <main class="trial-battle-shell" aria-label="${this.t("trialTitle")}">
-        <section class="trial-boss-panel">
-          <div>
-            <p class="eyebrow">${trialStageLabel(stage)}</p>
-            <h1>${escapeHtml(stage.boss)}</h1>
-            <p class="muted">${escapeHtml(stage.name)}</p>
-          </div>
-          <div class="trial-boss-stats">
-            <span>${this.t("trialEnergyCost")} ${trialCostFor(this.save, stage)}</span>
-            <span>${this.t("trialHp")} ${this.save.trialHp} / 100</span>
-            <span>${stage.gates.map((gate) => `${abilityDisplay(this.language, gate.abilityId).name} Lv.${gate.level}`).join(" + ")}</span>
-            ${stage.dimension ? `<span>${en ? LEADERSHIP_DIMENSIONS[stage.dimension].en : LEADERSHIP_DIMENSIONS[stage.dimension].zh} · ${en ? `Tier ${dimensionLevel(this.save.dimensionExp?.[stage.dimension] ?? 0)}` : `第 ${dimensionLevel(this.save.dimensionExp?.[stage.dimension] ?? 0)} 档`}</span>` : ""}
-          </div>
-          <div class="trial-faction-bars">
-            <span>${this.t("trialTrust")} ${this.trialFactionTrust}</span>
-            <span>${this.t("trialSuspicion")} ${this.trialFactionSuspicion}</span>
-          </div>
-        </section>
-        ${
-          !result && stage.scene
-            ? `
-              <section class="trial-scene-panel">
-                <p class="eyebrow">${en ? "Scene" : "试炼场景"}</p>
-                <p>${escapeHtml(stage.scene)}</p>
-              </section>
-            `
-            : ""
-        }
-        ${
-          result
-            ? `
-              <section class="trial-battle-result ${result.correct ? "win" : "lose"}">
-                <h2>${result.correct ? this.t("trialCorrect") : this.t("trialWrong")}</h2>
-                <p class="trial-branch-label">${this.trialResultBranch()}</p>
-                <p>${this.t("trialEnergy")} ${result.energyChange > 0 ? "+" : ""}${result.energyChange}</p>
-                ${
-                  result.cleared
-                    ? `<p>${this.t("trialReward")}：${abilityDisplay(this.language, stage.source.kind === "training" ? stage.source.abilityId : stage.gates[0].abilityId).name} +${result.gainedExp}${result.item ? ` · ${escapeHtml(result.item)}` : ""}</p>`
-                    : ""
-                }
-                ${
-                  this.trialAllyCorrect === true
-                    ? `<p>${this.t("trialAllyCorrect")}</p>`
-                    : this.trialAllyCorrect === false
-                      ? `<p>${this.t("trialAllyWrong")}</p>`
-                      : ""
-                }
-                ${
-                  this.trialSuspectCorrect === true
-                    ? `<p>${this.t("trialSuspectCorrect")}</p>`
-                    : this.trialSuspectCorrect === false
-                      ? `<p>${this.t("trialSuspectWrong")}</p>`
-                      : ""
-                }
-                ${
-                  this.trialIntelCorrect === true
-                    ? `<p>${this.t("trialIntelCorrect")}</p>`
-                    : this.trialIntelCorrect === false
-                      ? `<p>${this.t("trialIntelWrong")}</p>`
-                      : ""
-                }
-                ${
-                  this.trialBetrayalCorrect === true
-                    ? `<p>${this.t("trialBetrayalCorrect")}</p>`
-                    : this.trialBetrayalCorrect === false
-                      ? `<p>${this.t("trialBetrayalWrong")}</p>`
-                      : ""
-                }
-                ${
-                  this.trialSummaryKeywordCorrect === true
-                    ? `<p>${this.t("trialSummaryKeyword")}</p>`
-                    : this.trialSummaryKeywordCorrect === false
-                      ? `<p>${this.t("trialSummaryKeywordMiss")}</p>`
-                      : ""
-                }
-                ${
-                  this.trialCalculationCorrect === true
-                    ? `<p>${this.t("trialCalculationCorrect")}</p>`
-                    : this.trialCalculationCorrect === false
-                      ? `<p>${this.t("trialCalculationWrong")}</p>`
-                      : ""
-                }
-                <div class="trial-answer-review">
-                  ${
-                    followUp && this.trialFollowUpAnswer !== undefined
-                      ? `
-                        <strong>${this.t("trialStageDecision")}</strong>
-                        <p>${escapeHtml(question.options[this.trialFollowUpAnswer] ?? "")}</p>
-                      `
-                      : ""
-                  }
-                  <strong>${this.t("trialAnswer")}</strong>
-                  <p>${escapeHtml(question.options[this.lastTrialAnswer ?? 0])}</p>
-                  <strong>${this.t("trialReference")}</strong>
-                  <p>${escapeHtml(referenceAnswer)}</p>
-                  <strong>${this.t("trialExplanation")}</strong>
-                  <p>${escapeHtml(explanation)}</p>
-                </div>
-                ${
-                  stage.resolution
-                    ? `
-                      <section class="trial-resolution-panel">
-                        <p class="eyebrow">${en ? "Truth Revealed" : "真相揭晓"}</p>
-                        <p>${escapeHtml(stage.resolution)}</p>
-                        ${this.trialSuspectImpactMarkup(stage)}
-                      </section>
-                    `
-                    : ""
-                }
-                <button class="primary" data-action="trial-next">${this.t("trialNext")}</button>
-              </section>
-            `
-            : `
-              ${
-                wolfPending
-                  ? `
-                    <section class="trial-phase-panel">
-                      <p class="eyebrow">${this.t("trialClue")}</p>
-                      <p>${escapeHtml(stage.clue ?? "")}</p>
-                      <button class="primary" data-action="trial-observe">${this.t("trialObserve")}</button>
-                    </section>
-                  `
-                  : ""
-              }
-              ${
-                suspectPending
-                  ? `
-                    <section class="trial-phase-panel">
-                      <p class="eyebrow">${this.t("trialSuspect")}</p>
-                      <div class="trial-ally-options">
-                        ${(stage.suspects ?? []).map((suspect) => `<button data-action="trial-suspect" data-suspect="${escapeAttr(suspect)}">${escapeHtml(suspect)}</button>`).join("")}
-                      </div>
-                    </section>
-                  `
-                  : ""
-              }
-              ${
-                allyPending
-                  ? `
-                    <section class="trial-phase-panel">
-                      <p class="eyebrow">${this.t("trialAlly")}</p>
-                      <div class="trial-ally-options">
-                        ${(stage.allies ?? []).map((ally) => `<button data-action="trial-ally" data-ally="${escapeAttr(ally)}">${escapeHtml(ally)}</button>`).join("")}
-                      </div>
-                    </section>
-                  `
-                  : ""
-              }
-              ${
-                intelPending
-                  ? `
-                    <section class="trial-phase-panel">
-                      <p class="eyebrow">${this.t("trialIntel")}</p>
-                      <div class="trial-ally-options">
-                        ${(stage.intelChoices ?? []).map((intel) => `<button data-action="trial-intel" data-intel="${escapeAttr(intel)}">${escapeHtml(intel)}</button>`).join("")}
-                      </div>
-                    </section>
-                  `
-                  : ""
-              }
-              ${
-                betrayalPending
-                  ? `
-                    <section class="trial-phase-panel">
-                      <p class="eyebrow">${this.t("trialBetrayal")}</p>
-                      <div class="trial-ally-options">
-                        ${(stage.betrayalChoices ?? []).map((choice) => `<button data-action="trial-betrayal" data-betrayal="${escapeAttr(choice)}">${escapeHtml(choice)}</button>`).join("")}
-                      </div>
-                    </section>
-                  `
-                  : ""
-              }
-              ${
-                this.trialSummaryPending
-                  ? `
-                    <section class="trial-summary-panel">
-                      <h2>${this.t("trialSummary")}</h2>
-                      <p>${escapeHtml(referenceAnswer)}</p>
-                      ${
-                        question.calculation
-                          ? `
-                            <label class="field">
-                              <span>${escapeHtml(question.calculation.prompt)}</span>
-                              <input data-trial-calculation type="number" value="${escapeAttr(this.trialCalculationAnswer ?? "")}" placeholder="${escapeHtml(question.calculation.unit)}" />
-                            </label>
-                          `
-                          : ""
-                      }
-                      <textarea data-trial-summary rows="5" placeholder="${en ? "Write your one-page decision summary with evidence, owner, and checkpoint." : "写出你的决策摘要：依据、负责人、检查节点。"}"></textarea>
-                      <button class="primary" data-action="trial-submit-summary">${this.t("trialSummarySubmit")}</button>
-                    </section>
-                  `
-                  : `
-                    <section class="trial-question-panel">
-                ${
-                  followUpPending && followUp
-                    ? `
-                      <section class="trial-new-info">
-                        <h3>${this.t("trialNewInfo")}</h3>
-                        <p>${escapeHtml(followUp.prompt)}</p>
-                      </section>
-                    `
-                    : ""
-                }
-                <h2>${escapeHtml(followUpPending && followUp ? followUp.prompt : question.prompt)}</h2>
-                <div class="trial-options">
-                  ${(followUpPending && followUp ? followUp.options : question.options).map((option, index) => `<button class="trial-option" data-action="trial-option" data-option="${index}" ${phaseReady ? "" : "disabled"}>${escapeHtml(option)}</button>`).join("")}
-                </div>
-              </section>
-                  `
-              }
-            `
-        }
-      </main>
-    `;
+    this.root.innerHTML = trialBattleView(this.save, this.language, stage, {
+      result: this.trialAnswerResult,
+      observeRevealed: this.trialObserveRevealed,
+      allyChoice: this.trialAllyChoice,
+      allyCorrect: this.trialAllyCorrect,
+      suspectChoice: this.trialSuspectChoice,
+      suspectCorrect: this.trialSuspectCorrect,
+      intelChoice: this.trialIntelChoice,
+      intelCorrect: this.trialIntelCorrect,
+      betrayalChoice: this.trialBetrayalChoice,
+      betrayalCorrect: this.trialBetrayalCorrect,
+      factionTrust: this.trialFactionTrust,
+      factionSuspicion: this.trialFactionSuspicion,
+      followUpAnswer: this.trialFollowUpAnswer,
+      followUpAnswered: this.trialFollowUpAnswered,
+      summaryPending: this.trialSummaryPending,
+      summaryKeywordCorrect: this.trialSummaryKeywordCorrect,
+      calculationAnswer: this.trialCalculationAnswer,
+      calculationCorrect: this.trialCalculationCorrect,
+      lastAnswer: this.lastTrialAnswer,
+      resultBranch: this.trialResultBranch(),
+      suspectImpactMarkup: this.trialSuspectImpactMarkup(stage)
+    });
   }
 
 
