@@ -15,6 +15,7 @@
     "test:academy": "node --experimental-strip-types scripts/team-academy-audit.mjs",
     "audit": "node scripts/audit.mjs",
     "content-audit": "node --experimental-strip-types scripts/content-audit.mjs",
+    "depth-audit": "node --experimental-strip-types scripts/depth-audit.mjs",
     "leadership-audit": "node --experimental-strip-types scripts/leadership-audit.mjs",
     "role-audit": "node --experimental-strip-types scripts/role-audit.mjs",
     "ability-balance": "node --experimental-strip-types scripts/ability-balance.mjs",
