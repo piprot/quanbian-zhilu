@@ -232,7 +232,7 @@ function buildOptions(
       quality: "expert",
       effects: { [ability]: 2, [secondary]: 1 },
       resources: { energy: -6, trust: 5, influence: 2 },
-      feedback: `你用${abilityName}把模糊局面拆成了可执行的流程，团队开始相信判断可以复制。`,
+      feedback: `你没有停在直觉判断上，而是把模糊局面拆成一套可检查、可复制的流程，让${abilityName}第一次能被团队学走。`,
       theory: ABILITIES[ability].sources[0]
     },
     {
@@ -241,7 +241,7 @@ function buildOptions(
       quality: "partial",
       effects: { [ability]: 1 },
       resources: { influence: 1 },
-      feedback: `你缓解了眼前的紧张，但${abilityName}背后的核心张力还没有真正打开。`,
+      feedback: `你暂时稳住了局面、让紧张缓了下来，但${abilityName}背后的核心张力仍没有打开，问题只是被推迟了。`,
       theory: ABILITIES[ability].sources[1] ?? ABILITIES[ability].sources[0]
     },
     {
@@ -250,7 +250,7 @@ function buildOptions(
       quality: "risk",
       effects: { [ability]: 1, authority: ability === "authority" ? 2 : 1 },
       resources: { energy: -9, trust: -6, influence: 4, capital: -2 },
-      feedback: `你用强信号推进了局面，也付出了信任和资源的代价。`,
+      feedback: `你用一次强信号硬推局面转向，短期见效，却也消耗了信任、资源与团队的耐心，代价会在之后显现。`,
       theory: "《权经》：用权有度，过刚则折。"
     }
   ];

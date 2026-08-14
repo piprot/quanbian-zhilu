@@ -162,7 +162,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { insight: 3, communication: 2, structure: 1 },
         resources: { energy: -8, trust: 8, influence: 4 },
         feedback:
-          "你通过非正式访谈摸清了真实权力地图，也给了对方表达的空间。数据缺口背后不是流程问题，而是信任问题。",
+          "你通过非正式访谈摸清了真实的权力地图，也给了对方表达的空间。你逐渐看清：数据缺口背后不是流程问题，而是信任问题——谁愿意对你开口，谁就会先帮你把信息补上。",
         theory: "《人物志》八观：观察人在不同情境中的取舍，才能看见真实动机。",
         branchTo: {
           parachute: "c1b-parachute",
@@ -177,7 +177,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { authority: 3, execution: 1 },
         resources: { energy: -5, trust: -8, influence: 5 },
         feedback:
-          "你拿到了部分数据，也消耗了第一波信任。权力不是靠要求得到的，先诊断再施压会更稳。",
+          "你以权威压出了部分数据，却也消耗了第一波信任。权力从来不是靠要求得来的，先诊断清楚再精准施压，才不会让对方用一份不完整的报表反将你一军。",
         theory: "《孙子兵法》：先为不可胜，以待敌之可胜。"
       },
       {
@@ -187,7 +187,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { strategy: 3, structure: 1 },
         resources: { energy: -6, trust: 2, influence: 7 },
         feedback:
-          "向上对齐是对的，但你忽略了团队的真实阻力。高层支持不能替代一线信息。",
+          "向上对齐方向是对的，但你忽略了团队里真实的阻力。高层的支持不能替代一线的信息，等你从 CEO 办公室回来，团队可能已经把你归为“上面的人”，更难开口。",
         theory: "《权经》：权乃人授，授为大焉。"
       }
     ]
@@ -208,7 +208,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { structure: 3, insight: 2 },
         resources: { energy: -9, trust: 1, influence: 4 },
         feedback:
-          "你没有被八卦带走，而是把零散信息结构化成证据链。这个判断让财务经理主动交出了更多历史问题。",
+          "你没有被一句八卦带走，而是把零散信息结构化成一条完整的证据链。这个克制的判断让财务经理主动交出了更多历史问题，因为你证明了自己会查、也查得动。",
         theory: "《实践论》：从感性材料上升到理性认识，才能抓住本质。"
       },
       {
@@ -218,7 +218,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { authority: 2, communication: -1 },
         resources: { energy: -6, trust: -10, influence: 3 },
         feedback:
-          "你赢得了“强硬”的标签，却让整个团队进入防御状态。线索还没查清，你已经把调查变成了站队。",
+          "你赢得了“眼里不揉沙”的强硬标签，却让整个团队进入了防御状态。线索还没查清，你已经把一次调查变成了公开站队，真正的问题反而更难浮出水面。",
         theory: "《论语》：不患人之不己知，患不知人也。"
       },
       {
@@ -228,7 +228,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { recovery: 2, insight: 1 },
         resources: { energy: -3, trust: 2, influence: 0 },
         feedback:
-          "你稳住了情绪，但如果没有后续动作，这条线索可能被遗忘。观察必须搭配明确的验证节点。",
+          "你稳住了情绪、没有打草惊蛇，但观察如果不配上明确的验证节点，这条线索迟早会被日常琐事淹没。存档只是第一步，关键是你打算在什么条件下重新翻开它。",
         theory: "《鬼谷子》：审时度势，谋定后动。"
       }
     ]
@@ -249,7 +249,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { execution: 3, strategy: 2, communication: 1 },
         resources: { energy: -8, trust: 5, influence: 7 },
         feedback:
-          "你没有停在“权力不够”的抱怨里，而是用可验证的成果换授权。这正是《权经》所说的“携为上，功次之”。",
+          "你没有停在“权力不够”的抱怨里，而是先用一个可验证的小胜利证明自己，再顺势谈资源授权。这正是《权经》所说的“携为上，功次之”——先给结果，再要名分。",
         theory: "《权经》：携为上，功次之；权乃人授，授为大焉。"
       },
       {
@@ -259,7 +259,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { strategy: 3, authority: 1 },
         resources: { energy: -6, trust: -3, influence: 5 },
         feedback:
-          "你推动了授权，但代价是让临时上级感到被绕开。权力拿到了，盟友少了。",
+          "你确实推动了授权落地，但代价是让临时上级感到被绕开。权力拿到手了，盟友却少了；在名分未定的窗口期，每一次越级都在重新划分谁是你的朋友、谁在观望。",
         theory: "马基雅维利：权力来自他人对你的依赖。"
       },
       {
@@ -269,7 +269,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { recovery: 2 },
         resources: { energy: -3, trust: -4, influence: -4 },
         feedback:
-          "谨慎本身没有错，但观望太久会让团队失去方向，也让 CEO 认为你无法在模糊中推进。",
+          "谨慎本身没有错，但观望太久会让团队失去方向，也让 CEO 认定你无法在模糊中推进。名分不会自己长出来，它往往是你先动手做出结果、再补授的那一部分。",
         theory: "《孙子兵法》：善战者，先为不可胜，以待敌之可胜。"
       }
     ]
@@ -290,7 +290,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { communication: 3, mobilize: 2, strategy: 1 },
         resources: { energy: -7, trust: 7, influence: 5 },
         feedback:
-          "你没有被质疑激怒，反而把质疑变成了公共议题。沉默者开始说话，反对者也愿意把真实顾虑摆上台面。",
+          "你没有被那句公开质疑激怒，反而把它变成了一个公共议题。沉默者开始说话，反对者也愿意把真实顾虑摆上台面——你让团队看见，分歧可以被讨论，而不是被记仇。",
         theory: "毛泽东《党委会的工作方法》：先当学生，再当先生。"
       },
       {
@@ -300,7 +300,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { authority: 3, mobilize: -1 },
         resources: { energy: -5, trust: -5, influence: 6 },
         feedback:
-          "场面安静了，但只是暂时。你用权威换来了服从，没有换来承诺。",
+          "场面安静了，但那只是暂时的服从。你用权威换来了安静，却没有换来承诺；散会之后，真正的讨论会转到你看不见的地方，下一次你想再听真话，就没人愿意开口了。",
         theory: "《孙子兵法》：令之以文，齐之以武。"
       },
       {
@@ -310,7 +310,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { strategy: 3 },
         resources: { energy: -6, trust: -6, influence: 2 },
         feedback:
-          "私下结盟让少数人站到了你这边，但公开场合的沉默会变成更大的不透明。",
+          "私下结盟让少数人站到了你这边，但公开场合的沉默会发酵成更大的不透明。你赢得了几张私下的票，却可能在众人面前输掉整场信任，因为没人知道你和谁谈了什么。",
         theory: "《韩非子》：事以密成，语以泄败。"
       }
     ]
@@ -331,7 +331,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { deploy: 3, structure: 2, insight: 1 },
         resources: { energy: -9, trust: 3, influence: 6 },
         feedback:
-          "你没有被资历和亲疏绑架，而是先定义组织需要什么，再决定谁留下。名单里有争议，但逻辑清晰。",
+          "你没有被资历和亲疏绑架，而是先定义组织未来六个月真正需要什么，再决定谁留下。名单里难免有争议，但逻辑清晰、可以解释，明眼人一眼就能看出你的标准是什么。",
         theory: "《贞观政要》：用非其才，必难致治；舍短取长，各尽其能。"
       },
       {
@@ -341,7 +341,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { strategy: 3, authority: 1 },
         resources: { energy: -5, trust: -8, influence: 3 },
         feedback:
-          "你获得了短期安全感，却把组织推向了裙带化。明眼人很快会看到名单背后的逻辑。",
+          "你获得了短期安全感，却把组织慢慢推向裙带化。明眼人很快会看穿名单背后的亲疏逻辑，真正能干活的人会开始用脚投票，留下来的反而都是围着你转的人。",
         theory: "《资治通鉴》：才者，德之资也；德者，才之帅也。"
       },
       {
@@ -351,7 +351,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { communication: 2, recovery: 1 },
         resources: { energy: -6, trust: 5, influence: -3 },
         feedback:
-          "你避开了短期冲突，却让组织继续背着过剩结构和模糊职责。善意不能替代配置决策。",
+          "你避开了短期的冲突，却让组织继续背着过剩的结构和模糊的职责。善意不能替代配置决策，不裁员的温柔，最终会以所有人一起被拖垮的方式，让整个团队为你买单。",
         theory: "《韩非子·用人》：使事不相干，使士不兼官。"
       }
     ]
@@ -372,7 +372,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { deploy: 3, authority: 2, insight: 1 },
         resources: { energy: -5, trust: 8, influence: 5 },
         feedback:
-          "你第一次把责任完整交给别人。他做砸了一件事，但学会了自主判断；你从救火队长变成了组织者。",
+          "你第一次把责任完整地交到另一个人手上。他做砸了一件事，却学会了自主判断；你从那个天天救火的队长，变成了站在后面搭规则、盯结果的组织者。",
         theory: "《权经》：授能干者，授忠诚者，权惟用，不为大也。"
       },
       {
@@ -382,7 +382,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { execution: 2 },
         resources: { energy: -12, trust: 2, influence: -2 },
         feedback:
-          "短期项目稳住了，但你的精力被彻底锁死。团队越来越依赖你，组织能力没有增长。",
+          "短期项目稳住了，但你的精力被彻底锁死。团队越来越依赖你拍板，组织能力却没有增长；等你终于想脱身时，会发现每个人都习惯了把问题原样丢回你的桌上。",
         theory: "《卓有成效的管理者》：管理者必须把时间投入真正重要的决策。"
       },
       {
@@ -392,7 +392,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { structure: 2, communication: 1 },
         resources: { energy: -7, trust: 4, influence: 1 },
         feedback:
-          "你给了他试错空间，但暗中监控让他很快察觉，信任打了折扣。授权要么完整，要么说清楚是联合管理。",
+          "你给了他试错空间，可暗中的监控很快被他察觉，信任反而打了折扣。授权要么完整地放，要么说清楚这是联合管理；半明半暗的放权，两头的好处都拿不到。",
         theory: "《论语》：君子信而后劳其民。"
       }
     ]
@@ -413,7 +413,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { mobilize: 3, communication: 2 },
         resources: { energy: -8, trust: 8, influence: 7 },
         feedback:
-          "你没有把反对者当敌人，而是把他变成共同责任人。当他的利益被写进方案，反对声变成了推动力。",
+          "你没有把反对者当成敌人，而是把他的顾虑补进方案前提，再邀请他担任试点负责人。当他的利益被写进方案里，反对声就变成了推动力，阻力成了你的共同责任人。",
         theory: "《孙子兵法》：上下同欲者胜；《论语》：举直错诸枉，则民服。"
       },
       {
@@ -423,7 +423,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { authority: 3, strategy: 1 },
         resources: { energy: -6, trust: -8, influence: 5 },
         feedback:
-          "方案落地了，但运营团队在暗处执行走样。你赢了命令，输了协同。",
+          "方案确实落地了，但运营团队在暗处执行走样。你赢了这一纸命令，却输了真正的协同；下一次再遇到阻力，你连一个愿意在明面上告诉你哪里出问题的人都没有了。",
         theory: "《韩非子》：法势术并用，但不能代替人心。"
       },
       {
@@ -433,7 +433,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { recovery: 2, structure: 1 },
         resources: { energy: -4, trust: 3, influence: -6 },
         feedback:
-          "你避免了冲突，却把领导权让给了阻力。下一次再提变革，所有人都会知道你可以被拖住。",
+          "你避免了冲突，却把领导权让给了阻力。下一次再提变革，所有人都会记得你可以被反对声拖住，于是每一次推进都会变得更难，而反对的成本反而更低。",
         theory: "《孙子兵法》：不可胜在己，可胜在敌。"
       }
     ]
@@ -782,7 +782,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { structure: 3, mobilize: 2, recovery: 1 },
         resources: { energy: -9, trust: 6, influence: 5 },
         feedback:
-          "你让团队看到，问题不是一个人的背叛，而是一整套服务机制的失败。猜疑被复盘替代。",
+          "你让团队看见，问题不是某一个人的背叛，而是一整套服务机制的失败。猜疑被复盘替代，大家从互相指责转向一起找漏洞，这才是把一次流失变成组织免疫力的起点。",
         theory: "《实践论》：错误常常是正确的先导，关键是从失败中找出规律。"
       },
       {
@@ -792,7 +792,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { authority: 3, execution: 1 },
         resources: { energy: -6, trust: -6, influence: 3 },
         feedback:
-          "你给了外界交代，但内部开始人人自危。真正的问题可能被问责仪式掩盖了。",
+          "你给了外界一个交代，内部却开始人人自危。真正的问题可能被这场问责仪式掩盖了，罚掉一个人很简单，但服务的系统漏洞还在，下一个客户流失只是时间问题。",
         theory: "《韩非子》：明赏罚，但罚不中则众不惧。"
       },
       {
@@ -802,7 +802,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { execution: 2, communication: 2 },
         resources: { energy: -10, trust: 2, influence: 2 },
         feedback:
-          "诚意很重要，但如果你一个人能挽回客户，系统漏洞依然存在。下一次流失只是时间问题。",
+          "诚意很重要，但如果你一个人就能把客户挽回，系统的漏洞依然原地不动。客户真正想离开的不是某个销售，而是那套没人愿意修复的服务体验，下一次流失只是时间问题。",
         theory: "《孙子兵法》：善战者，先为不可胜。"
       }
     ]
@@ -823,7 +823,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { stability: 3, deploy: 2, strategy: 1 },
         resources: { energy: -7, trust: 8, influence: 8 },
         feedback:
-          "你没有把晋升当终点，而是把组织延续当责任。你的权力在交接中反而变得更加可靠。",
+          "你没有把晋升当成终点，而是把组织的延续当成责任。接班人、知识库和风险预案一样样落地之后，你的权力在交接中反而变得更加可靠，因为你证明了自己离得开，也留得住。",
         theory: "《资治通鉴》：谦退是一种气量；《贞观政要》：善始慎终。"
       },
       {
@@ -833,7 +833,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { authority: 2, execution: 2 },
         resources: { energy: -5, trust: -4, influence: 5 },
         feedback:
-          "你抓住了个人机会，但组织可能因交接断层而退回原样。高层的信任也会打折扣。",
+          "你抓住了个人的机会，但组织可能因为交接断层而退回原样。高层的信任也会因此打折，因为一个只顾自己向上、不留后手的人，很难被放心地托付更大的平台。",
         theory: "《孙子兵法》：将能而君不御者胜。"
       },
       {
@@ -843,7 +843,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { stability: 2, recovery: 1 },
         resources: { energy: -3, trust: -2, influence: -6 },
         feedback:
-          "你把安全感当成了目标，却限制了组织的人才流动。固权不等于把所有人留在原地。",
+          "你把安全感当成了目标，却限制了组织的人才流动。固权不等于把所有人留在原地，你越是不肯让路，就越堵死了后来者的上升通道，最终连你自己也被钉在这个位置上。",
         theory: "《权经》：权惟用，不为大也。"
       }
     ]
