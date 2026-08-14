@@ -49,7 +49,7 @@ const MANIFEST = [
   // 全部改用 randomuser.me 正面大头照（能看到完整头部）；性别按角色设定锁定（方然为女）。
   // 女（她）：
   { name: "npc-assistant", url: "https://randomuser.me/api/portraits/women/44.jpg", dir: "npc", w: 400, h: 400 }, // 行政主管
-  { name: "npc-finance", url: "https://randomuser.me/api/portraits/women/28.jpg", dir: "npc", w: 400, h: 400 }, // 财务经理
+  { name: "npc-finance", url: "https://randomuser.me/api/portraits/women/48.jpg", dir: "npc", w: 400, h: 400 }, // 财务经理
   { name: "npc-xu", url: "https://randomuser.me/api/portraits/women/65.jpg", dir: "npc", w: 400, h: 400 }, // 小许
   { name: "npc-tang", url: "https://randomuser.me/api/portraits/women/79.jpg", dir: "npc", w: 400, h: 400 }, // 唐岚
   { name: "npc-fang", url: "https://randomuser.me/api/portraits/women/31.jpg", dir: "npc", w: 400, h: 400 }, // 方然
