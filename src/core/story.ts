@@ -454,7 +454,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { communication: 3, execution: 2 },
         resources: { energy: -9, trust: 6, influence: 8 },
         feedback:
-          "你没有去争谁对谁错，而是重新定义了共同目标和协作机制。僵局变成了一个可管理的项目。",
+          "你没有去争谁对谁错，而是把三个部门重新放进同一个目标、同一块看板和同一个例会节奏里。僵局不再是谁的责任，而变成了一个可以被拆解、被跟进、被关闭的项目。",
         theory: "德鲁克：管理就是让平凡的人做出不平凡的事。"
       },
       {
@@ -464,7 +464,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { execution: 3 },
         resources: { energy: -6, trust: -5, influence: 4 },
         feedback:
-          "问题暂时解决了，但互相指责的剧本没有变。下次危机仍然会重演。",
+          "问题暂时解决了，但互相指责的剧本没有变。你靠外部压力逼出了行动，却没有建立三方共担的机制，等下一次危机来临，同样的推诿还会原样重演。",
         theory: "《孙子兵法》：致人而不致于人。"
       },
       {
@@ -474,7 +474,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { strategy: 2 },
         resources: { energy: -4, trust: -6, influence: -5 },
         feedback:
-          "你把协调难题上交了，短期内安全，但 CEO 会把“不会横向推动”记在心里。",
+          "你把协调难题上交，短期内保全了自己，却也放弃了横向推动的机会。CEO 会记住这件事本该由你收口，而三部门也会默认——凡是跨部门的事，最后都可以往上扔。",
         theory: "《资治通鉴》：推功于贤智之人，以维持团结。"
       }
     ]
@@ -495,7 +495,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { structure: 3, execution: 2, authority: 1 },
         resources: { energy: -8, trust: 4, influence: 6 },
         feedback:
-          "你给团队的不是口号，而是一张能每天检查的作战图。目标开始变得真实。",
+          "你给团队的不是一句口号，而是一张每天都能检查、每周都能校准的作战图。三个关键结果各有人负责、各有里程碑，目标从老板拍脑袋的数字，变成了每个人手里看得见摸得着的活。",
         theory: "《卓有成效的管理者》：要事优先，把资源集中在少数真正重要的任务上。"
       },
       {
@@ -505,7 +505,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { execution: 3, strategy: 1 },
         resources: { energy: -7, trust: 2, influence: 2 },
         feedback:
-          "短期数字可能好看，但组织会陷入“谁有客户谁说了算”，目标拆解缺位迟早反噬。",
+          "短期数字可能好看，但组织会慢慢形成“谁有客户谁说了算”的潜规则。目标拆解的缺口被营收掩盖，等增长一停，没有作战图的团队会立刻陷入混乱。",
         theory: "《孙子兵法》：兵贵胜，不贵久。"
       },
       {
@@ -515,7 +515,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { communication: 2 },
         resources: { energy: -5, trust: 5, influence: -4 },
         feedback:
-          "你尊重了各部门，却没有建立共同逻辑。汇总出来的目标互相冲突，执行必然脱节。",
+          "你尊重了各部门，却没有建立一套共同的目标逻辑。汇总出来的数字互相冲突、口径不一，执行时必然脱节，最后只会让“收入翻倍”变成一句谁都不信的空话。",
         theory: "毛泽东《矛盾论》：抓主要矛盾，其他问题才能迎刃而解。"
       }
     ]
@@ -536,7 +536,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { execution: 3, structure: 2, authority: 1 },
         resources: { energy: -6, trust: 5, influence: 6 },
         feedback:
-          "你没有靠更多加班解决问题，而是靠取舍。团队第一次感到目标是可以被管理的。",
+          "你没有靠更多加班去硬拼数字，而是用取舍把火力集中到最大的机会上。停掉三个低价值项目后，团队第一次感到目标是可以被管理的，而不是只能被命运拖着走。",
         theory: "德鲁克：管理者的成果不是做了多少事，而是做对了多少重要的事。"
       },
       {
@@ -546,7 +546,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { authority: 2, execution: 2 },
         resources: { energy: -12, trust: -8, influence: 2 },
         feedback:
-          "你可能完成了这个季度，但下个季度会有人离职。精力透支不是可持续的执行力。",
+          "你可能勉强完成了这个季度，但下个季度会有人用离职来投票。精力透支换来的数字不可持续，你留下的是一个已经被榨干、随时会崩盘的团队。",
         theory: "《高效能人士的七个习惯》：关注你的影响圈，而不是耗尽自己。"
       },
       {
@@ -556,7 +556,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { communication: 2, recovery: 1 },
         resources: { energy: -5, trust: 2, influence: -6 },
         feedback:
-          "你把现实风险讲清楚了，但在老板眼里，你还没打就认输了。修目标必须建立在新机会之上。",
+          "你把现实风险讲得很清楚，但在老板眼里，你还没开打就举了白旗。修目标必须建立在新机会之上，否则你保住的只是一个更小、却同样完不成的数字。",
         theory: "《权经》：权惟用，不为大也。"
       }
     ]
@@ -577,7 +577,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { authority: 3, structure: 2 },
         resources: { energy: -8, trust: 2, influence: 7 },
         feedback:
-          "你没有公开对抗，而是用流程让绕过你变成“不合规”。制度比个人更能守权。",
+          "你没有公开对抗，而是用联签机制让“绕过你”变成“不合规”。制度比个人更能守权，从此重大事项必须进入闭环，CFO 和销售副总再想绕路，就绕不开流程本身。",
         theory: "《韩非子》：法度既立，虽庸主可治。"
       },
       {
@@ -587,7 +587,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { strategy: 3 },
         resources: { energy: -6, trust: -4, influence: 4 },
         feedback:
-          "你争取到了表态，但也让 CFO 和销售副总形成了更紧密的联盟。摊牌必须有后手。",
+          "你争取到了表态，但也让 CFO 和销售副总看清了你的底牌，进而结成更紧密的联盟。摊牌必须配上后手，否则一次赢了面子，却输掉了接下来的每一次博弈。",
         theory: "《权经》：权乃人授，授为大焉。"
       },
       {
@@ -597,7 +597,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { recovery: 3 },
         resources: { energy: -4, trust: -3, influence: -4 },
         feedback:
-          "忍耐会给你时间，但也会让组织形成“你不需要被尊重”的默认规则。",
+          "忍耐给你争取了时间，但也会让组织慢慢形成“你不需要被尊重”的默认规则。等你想再立边界时，会发现绕过你已经成了所有人的习惯。",
         theory: "《孙子兵法》：先为不可胜，以待敌之可胜。"
       }
     ]
@@ -618,7 +618,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { authority: 3, structure: 2 },
         resources: { energy: -7, trust: 6, influence: 5 },
         feedback:
-          "你把个人矛盾转化为团队机制，既守住了边界，又没有把下属逼成敌人。",
+          "你把个人矛盾转化为一套团队机制，既守住了边界，又没有把下属逼成敌人。信息同步的规则公开之后，越级汇报不再是对你个人的挑战，而是对大家共同约定的违反。",
         theory: "毛泽东《党委会的工作方法》：互通情报，取得共同语言。"
       },
       {
@@ -628,7 +628,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { authority: 3, mobilize: -1 },
         resources: { energy: -5, trust: -7, influence: 4 },
         feedback:
-          "边界立住了，但代价是他和 CEO 的关系更深。强硬管理换不来忠诚。",
+          "边界立住了，但代价是他和 CEO 的关系反而更深。强硬管理换不来忠诚，你赢下了这一场的秩序，却可能把他彻底推向另一条权力通道。",
         theory: "《孙子兵法》：齐之以武，但也要令之以文。"
       },
       {
@@ -638,7 +638,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { recovery: 2 },
         resources: { energy: -3, trust: -4, influence: -5 },
         feedback:
-          "你避免了冲突，却默许了另一条权力通道。团队开始猜测谁才是真正做主的人。",
+          "你避免了冲突，却默许了另一条权力通道。团队开始猜测到底谁才是真正做主的人，等你意识到问题严重时，指令早已发不出去、收不回来。",
         theory: "《资治通鉴》：防微杜渐，不塞隙穴则暴雨疾风必坏。"
       }
     ]
@@ -659,7 +659,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { stability: 3, deploy: 2 },
         resources: { energy: -8, trust: 8, influence: 7 },
         feedback:
-          "你没有把接班当成私事。组织形成了双梯队，你的影响力也从个人依赖变成了制度安排。",
+          "你没有把接班当成私事，而是用能力匹配岗位，同时给年轻人配了陪跑期。组织形成了双梯队，你的影响力也从个人的临场判断，变成了可以传承的制度安排。",
         theory: "司马光：谦退也是一种气量和器识；推功于贤智之人。"
       },
       {
@@ -669,7 +669,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { strategy: 3, stability: -1 },
         resources: { energy: -5, trust: -6, influence: 3 },
         feedback:
-          "短期看权力没有旁落，但组织很快会失去最优秀的人才。接班不是忠诚测试。",
+          "短期看权力没有旁落，但组织很快会因为错配而流失最优秀的人才。接班从来不是忠诚测试，用亲疏代替能力，最终接住的不是你的基业，而是你的包袱。",
         theory: "《贞观政要》：用非其才，必难致治。"
       },
       {
@@ -679,7 +679,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { structure: 2, communication: 1 },
         resources: { energy: -6, trust: 1, influence: -4 },
         feedback:
-          "外部人带来新经验，但组织内部成长通道被堵住了。你回避了培养责任。",
+          "外部人带来了新经验，却堵住了组织内部向上的成长通道。你回避了培养责任，等于向所有人释放了一个信号：在这里，往上走不如跳槽进来快，留下来认真做事反而吃亏。",
         theory: "《韩非子·用人》：明主之道，使智者尽其虑。"
       }
     ]
@@ -700,7 +700,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { stability: 3, structure: 2, deploy: 1 },
         resources: { energy: -9, trust: 4, influence: 6 },
         feedback:
-          "你开始把个人经验产品化。即使你不在场，组织也能稳定运行，这是固权的最高形态。",
+          "你开始把个人经验产品化，高频决策变成检查清单和案例库。即使你不在场，组织也能稳定复现你的判断，这是固权的最高形态——让别人离不开你，是因为系统离不开你，而不是因为你守在位置上。",
         theory: "毛泽东《党委会的工作方法》：制度建党，民主集中，不依赖个人。"
       },
       {
@@ -710,7 +710,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { deploy: 2, strategy: 1 },
         resources: { energy: -5, trust: 4, influence: 2 },
         feedback:
-          "你降低了短期风险，却把组织能力绑定在另一个人身上。个人依赖换了一种形式。",
+          "你降低了短期风险，却把组织能力绑定在另一个人身上。个人依赖只是换了一种形式，徒弟一旦离开或出错，你辛苦攒下的判断力就会随之蒸发。",
         theory: "《权经》：授能干者，授忠诚者。"
       },
       {
@@ -720,7 +720,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { authority: 2 },
         resources: { energy: -4, trust: -5, influence: -5 },
         feedback:
-          "你暂时保住了地位，却让组织无法放大你的价值。不可替代的下场是不可晋升。",
+          "你暂时保住了地位，却让组织无法放大你的价值。不可替代的下场往往不是被重用，而是被永远钉在原地，因为你一旦离开，就没人能接得住。",
         theory: "《贞观政要》：善始慎终，创业难守成更难。"
       }
     ]
@@ -741,7 +741,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { structure: 3, execution: 2, recovery: 1 },
         resources: { energy: -8, trust: 5, influence: 6 },
         feedback:
-          "你没有让恐慌扩散，而是把危机拆成隔离、回款、融资三条线。团队开始按优先级行动。",
+          "你没有让恐慌扩散，而是把危机拆成隔离、回款、融资三条线同时推进。团队第一次在慌乱中拿到了明确的优先级，48 小时里每个人都知道自己该先做什么。",
         theory: "《矛盾论》：抓住主要矛盾，其他矛盾就能牵动起来。"
       },
       {
@@ -751,7 +751,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { communication: 2, mobilize: 2 },
         resources: { energy: -6, trust: 4, influence: 3 },
         feedback:
-          "透明度带来了危机意识，但也引发了恐慌和离职风险。危机通报需要配行动方案。",
+          "透明度带来了危机意识，也引发了恐慌和离职风险。危机通报必须配上一套行动方案，否则大家只知道问题有多大，却不知道该往哪里使劲。",
         theory: "《孙子兵法》：上下同欲者胜。"
       },
       {
@@ -761,7 +761,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { strategy: 2 },
         resources: { energy: -5, trust: -3, influence: -5 },
         feedback:
-          "你可能拿到了钱，但也交出了主导权。危机中最危险的信号是“我只等别人救”。",
+          "你可能拿到了钱，但也交出了主导权。危机中最危险的信号就是“我只等别人来救”，因为你亲手让团队相信，关键时刻你并不能扛住，真正的筹码也不在你手里。",
         theory: "《权经》：权乃人授，授为大焉，但受制于人则不能自主。"
       }
     ]
@@ -864,7 +864,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { structure: 3, strategy: 2, execution: 1 },
         resources: { energy: -8, trust: 6, influence: 6 },
         feedback:
-          "你没有武断地砍掉项目，也没有被情绪绑架。组织学到了如何理性地拥抱不确定。",
+          "你没有武断地砍掉项目，也没有被团队的乐观情绪绑架。用数据定义半年后的验证标准，再配上两套资源方案，组织从你这里学到的，是如何理性地拥抱不确定。",
         theory: "《矛盾论》：不同质的矛盾，只有用不同质的方法才能解决。"
       },
       {
@@ -874,7 +874,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { execution: 3, authority: 1 },
         resources: { energy: -6, trust: -2, influence: 3 },
         feedback:
-          "纪律是对的，但你留下的组织可能学会了“高风险就是错误”。真正的自适应管理不是回避风险。",
+          "纪律是对的，但你留下的组织可能从此学会“高风险就是错误”。真正的自适应管理不是回避风险，而是能区分什么该赌、什么该停，一刀切只会把创新一起掐死。",
         theory: "《孙子兵法》：善战者，先为不可胜。"
       },
       {
@@ -884,7 +884,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { recovery: 2, strategy: 1 },
         resources: { energy: -4, trust: -4, influence: -4 },
         feedback:
-          "你把责任推给了未来，等于给继任者埋雷。传承最重要的是把决策方法和勇气一起传下去。",
+          "你把责任推给了未来，等于给继任者埋了一颗雷。传承最重要的不是交出一个干净的答案，而是把决策的方法和承担后果的勇气一起传下去。",
         theory: "《贞观政要》：创业难，守成更难，关键在于持续担当。"
       }
     ]
