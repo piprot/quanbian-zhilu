@@ -37,25 +37,25 @@ function unsplashUrl(photoId, w = 800) {
  * Themes are carefully matched to each chapter/scene's content.
  */
 const MANIFEST = [
-  // ── Chapter backgrounds (landscape 800×500) ──
+  // ── Chapter backgrounds (landscape 1600×900) ──
   // Ch1 识局 Diagnose — boardroom analysis, strategic assessment
-  { file: "art/chapter-1.jpg", photo: "photo-1573166364839-1bfe9196c23e", w: 800 },
+  { file: "art/chapter-1.jpg", photo: "photo-1573166364839-1bfe9196c23e", w: 1600 },
   // Ch2 谋权 Power Strategy — chess, strategic positioning
-  { file: "art/chapter-2.jpg", photo: "photo-1528819622765-d6bcf132f793", w: 800 },
+  { file: "art/chapter-2.jpg", photo: "photo-1528819622765-d6bcf132f793", w: 1600 },
   // Ch3 用人 Talent — team collaboration, people management
-  { file: "art/chapter-3.jpg", photo: "photo-1599529108753-5fcaac8e9512", w: 800 },
+  { file: "art/chapter-3.jpg", photo: "photo-1599529108753-5fcaac8e9512", w: 1600 },
   // Ch4 驭势 Momentum — leadership direction, team moving forward
-  { file: "art/chapter-4.jpg", photo: "photo-1632045927895-d336d181e5d7", w: 800 },
+  { file: "art/chapter-4.jpg", photo: "photo-1632045927895-d336d181e5d7", w: 1600 },
   // Ch5 执权 Execute — business action, signing, execution
-  { file: "art/chapter-5.jpg", photo: "photo-1503423571797-2d2bb372094a", w: 800 },
+  { file: "art/chapter-5.jpg", photo: "photo-1503423571797-2d2bb372094a", w: 1600 },
   // Ch6 掌权 Govern — corporate building, institutional power
-  { file: "art/chapter-6.jpg", photo: "photo-1526289034009-0240ddb68ce3", w: 800 },
+  { file: "art/chapter-6.jpg", photo: "photo-1526289034009-0240ddb68ce3", w: 1600 },
   // Ch7 固权 Secure — building structure, foundation, stability
-  { file: "art/chapter-7.jpg", photo: "photo-1510507024924-fc3847d49ae2", w: 800 },
+  { file: "art/chapter-7.jpg", photo: "photo-1510507024924-fc3847d49ae2", w: 1600 },
   // Ch8 破局 Breakthrough — light, tunnel, innovation
-  { file: "art/chapter-8.jpg", photo: "photo-1523225580870-1780b3b506fd", w: 800 },
+  { file: "art/chapter-8.jpg", photo: "photo-1523225580870-1780b3b506fd", w: 1600 },
   // Ch9 成业 Legacy — sunrise, success, achievement
-  { file: "art/chapter-9.jpg", photo: "photo-1490668219599-a79d4d90cf66", w: 800 },
+  { file: "art/chapter-9.jpg", photo: "photo-1490668219599-a79d4d90cf66", w: 1600 },
 
   // ── Menu card covers (landscape 600×400) ──
   // 00 继续上次决策 — open meeting room, resume
@@ -81,10 +81,10 @@ const MANIFEST = [
   // 10 教练工作坊 — training, workshop
   { file: "art/menu-card-10.jpg", photo: "photo-1776492909032-56f5c2fdd05b", w: 600 },
 
-  // ── Backgrounds (landscape 1200×800) ──
-  { file: "bg/bg-main-menu.jpg", photo: "photo-1582653291997-079a1c04e5a1", w: 1200 },
-  { file: "bg/bg-victory.jpg", photo: "photo-1610238115932-44c5c930fd3a", w: 1200 },
-  { file: "bg/bg-duel-lobby.jpg", photo: "photo-1586165368502-1bad197a6461", w: 1200 },
+  // ── Backgrounds (landscape 1920×1280) ──
+  { file: "bg/bg-main-menu.jpg", photo: "photo-1582653291997-079a1c04e5a1", w: 1920 },
+  { file: "bg/bg-victory.jpg", photo: "photo-1610238115932-44c5c930fd3a", w: 1920 },
+  { file: "bg/bg-duel-lobby.jpg", photo: "photo-1586165368502-1bad197a6461", w: 1920 },
 
   // ── Power stages (square 400×400) ──
   { file: "art/power-stage-1.jpg", photo: "photo-1536743939714-23ec5ac2dbae", w: 400 },
