@@ -193,6 +193,54 @@ function sixPartReviewMarkup(
     `;
 }
 
+// 情感钩子：把本次决策与一个具体 NPC 的后果挂钩，复用人物档案的 storyNote。
+function npcEchoMarkup(
+  save: SaveState,
+  language: Language,
+  outcome: ChoiceOutcome,
+  storyNodeId: string
+): string {
+  let node: StoryNode;
+  try {
+    node = getNodeForRole(save.profile.role, storyNodeId);
+  } catch {
+    return "";
+  }
+  const npc = NPCS.find(
+    (candidate) =>
+      candidate.nodeId === storyNodeId ||
+      (candidate.nodeId.startsWith("c") &&
+        Number(candidate.nodeId.slice(1, 2)) === node.chapterId)
+  );
+  if (!npc) return "";
+  const view = npcDisplay(language, npc);
+  const story = npcStoryFor(npc.id);
+  const note =
+    language === "en"
+      ? (story?.storyNoteEn ?? view.description)
+      : (story?.storyNoteZh ?? view.description);
+  const label = outcome.option.label;
+  const quality = outcome.option.quality;
+  const echo =
+    quality === "expert"
+      ? language === "en"
+        ? `After "${label}" took effect, ${view.name} sought you out alone and put a judgment they had kept private on the table. ${note}`
+        : `「${label}」落地后，${view.name}在会后单独找到你，把一个原本只藏在心里的判断放到了桌面上。${note}`
+      : quality === "partial"
+        ? language === "en"
+          ? `"${label}" earned a nod from ${view.name}, but a hesitation stayed in their eyes. ${note}`
+          : `「${label}」让${view.name}暂时点了点头，但眼神里还留着没说完的保留。${note}`
+        : language === "en"
+          ? `"${label}" left ${view.name} quiet for a moment. ${note} — winning this person back starts with listening first.`
+          : `「${label}」让${view.name}沉默了片刻。${note}——要让这个人重新靠近，需要你下一次先倾听。`;
+  return `
+      <div class="npc-echo" style="--dot:${npcAvatarColor(npc.id)}">
+        <span>${language === "en" ? "Narrative Echo" : "叙事回响"}</span>
+        <p>${escapeHtml(echo)}</p>
+      </div>
+    `;
+}
+
 function outcomeMarkup(
   save: SaveState,
   language: Language,
@@ -268,6 +316,7 @@ function outcomeMarkup(
         }
         <h2>${escapeHtml(option.label)}</h2>
         <p>${escapeHtml(option.feedback)}</p>
+        ${npcEchoMarkup(save, language, outcome, state.lastOutcomeNodeId ?? state.storyNodeId)}
         <blockquote>${escapeHtml(option.theory)}</blockquote>
         ${sixPartReviewMarkup(save, language, outcome, state.lastOutcomeNodeId, state.storyNodeId)}
         <div class="leadership-lens ${option.quality}">
