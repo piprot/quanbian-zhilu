@@ -48,12 +48,12 @@ const MANIFEST = [
   // ── NPC 头像（方形 400×400，替代原 1920×1920 AI 生图）──
   // 性别仅按姓名/作者猜测；picsum 无性别元数据，进游戏后请人工核对并按需改 id。
   // 女（她）：
-  { name: "npc-assistant", id: 1015, dir: "npc", w: 400, h: 400 }, // 行政主管
+  { name: "npc-assistant", url: "https://randomuser.me/api/portraits/women/44.jpg", dir: "npc", w: 400, h: 400 }, // 行政主管
   { name: "npc-finance", id: 91, dir: "npc", w: 400, h: 400 }, // 财务经理
-  { name: "npc-xu", id: 1022, dir: "npc", w: 400, h: 400 }, // 小许
+  { name: "npc-xu", url: "https://randomuser.me/api/portraits/women/65.jpg", dir: "npc", w: 400, h: 400 }, // 小许
   { name: "npc-tang", id: 823, dir: "npc", w: 400, h: 400 }, // 唐岚
   // 男（他）：
-  { name: "npc-ops", id: 1009, dir: "npc", w: 400, h: 400 }, // 运营负责人
+  { name: "npc-ops", url: "https://randomuser.me/api/portraits/men/32.jpg", dir: "npc", w: 400, h: 400 }, // 运营负责人
   { name: "npc-young", id: 338, dir: "npc", w: 400, h: 400 }, // 年轻骨干
   { name: "npc-veteran", id: 447, dir: "npc", w: 400, h: 400 }, // 老将
   { name: "npc-chen", id: 1012, dir: "npc", w: 400, h: 400 }, // 陈屿
@@ -68,7 +68,7 @@ const warn = (msg) => process.stderr.write(`[picsum][warn] ${msg}\n`);
 
 /** 校验 buffer 是否为合法 JPEG（FF D8 FF 魔数 + 最小体积，避免拿到 HTML/占位） */
 function isValidJpeg(buf) {
-  if (!buf || buf.length < 5000) return false;
+  if (!buf || buf.length < 2000) return false;
   if (buf[0] !== 0xff || buf[1] !== 0xd8 || buf[2] !== 0xff) return false;
   return true;
 }
@@ -82,7 +82,7 @@ async function downloadOne(item, index, total) {
   }
   const w = item.w || W;
   const h = item.h || H;
-  const url = `https://picsum.photos/id/${item.id}/${w}/${h}`;
+  const url = item.url || `https://picsum.photos/id/${item.id}/${w}/${h}`;
   try {
     const res = await fetch(url, { redirect: "follow", headers: { Accept: "image/*" } });
     if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
