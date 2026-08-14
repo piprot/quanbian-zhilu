@@ -545,7 +545,6 @@ export function storyView(
   const en = language === "en";
   const scenarioShell = scenarioShellFor(node.chapterId, save.scenarioSeed ?? 1);
   const showingOutcome = state.lastOutcomeNodeId === node.id && state.lastOutcome;
-  const showOnboarding = save.playCount === 0 && !showingOutcome;
   const civ = stageForChapter(node.chapterId);
   const narrative = chapterNarrative(node.chapterId);
   const isExtraMainNode =
@@ -562,6 +561,15 @@ export function storyView(
         Number(npc.nodeId.slice(1, 2)) === node.chapterId)
   );
   const explorationFound = save.explorationFound?.[node.id] ?? [];
+  // 渐进引导：第一个情境内，按 勘察→选择→看反馈 三步高亮当前一步。
+  const decisionCount = save.decisionHistory.length;
+  const showOnboarding =
+    decisionCount === 0 || (showingOutcome && decisionCount === 1);
+  const onboardingStep = showingOutcome
+    ? 3
+    : explorationFound.length > 0
+      ? 2
+      : 1;
   const explorationReady =
     state.replayMode || showingOutcome || explorationFound.length > 0;
   const relevantAbilities = [
@@ -669,9 +677,20 @@ export function storyView(
                   ? `
                     <div class="onboarding-tip">
                       <strong>${uiString(language, "onboardingTitle")}</strong>
-                      <p>${uiString(language, "onboarding1")}</p>
-                      <p>${uiString(language, "onboarding2")}</p>
-                      <p>${uiString(language, "onboarding3")}</p>
+                      <ol class="onboarding-steps">
+                        <li class="${onboardingStep === 1 ? "active" : onboardingStep > 1 ? "done" : ""}">
+                          <b>①</b>
+                          <span>${en ? "Recon first" : "先勘察现场"}：${en ? "Complete one field-recon action on the right to unlock the choices." : "在右侧完成一次情报勘察，才能解锁选项。"}</span>
+                        </li>
+                        <li class="${onboardingStep === 2 ? "active" : onboardingStep > 2 ? "done" : ""}">
+                          <b>②</b>
+                          <span>${en ? "Choose a move" : "选择一个动作"}：${en ? "Pick the option that best fits the situation." : "从选项里挑一个最贴合局势的动作。"}</span>
+                        </li>
+                        <li class="${onboardingStep === 3 ? "active" : ""}">
+                          <b>③</b>
+                          <span>${en ? "Read the feedback" : "读反馈"}：${en ? "This is the consequence of your decision — who it affected and what it cost." : "这是你这条决定的后果——它影响了谁、付出了什么代价。"}</span>
+                        </li>
+                      </ol>
                     </div>
                   `
                   : ""
