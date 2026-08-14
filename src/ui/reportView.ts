@@ -793,6 +793,99 @@ export function reportView(
   `;
 }
 
+// 结局回顾蒙太奇：路线可视化 + 关键转折点（选择后果的叙事化呈现）。
+function endingMontageMarkup(save: SaveState, language: "zh" | "en"): string {
+  const en = language === "en";
+  const history = save.decisionHistory;
+  if (history.length === 0) return "";
+
+  const routeClass: Record<string, string> = {
+    expert: "expert",
+    risk: "risk",
+    partial: "partial"
+  };
+  const routeStrip = CHAPTERS.map((chapter) => {
+    const route = save.routePath[chapter.id];
+    const record = save.chapterRecords.find(
+      (item) => item.chapterId === chapter.id
+    );
+    const reached = Boolean(record && record.completedNodeIds.length >= 1);
+    return `
+      <div class="route-dot ${route ? routeClass[route] : "none"} ${reached ? "reached" : ""}" title="${escapeAttr(chapterDisplay(language, chapter).title)}">
+        <span>${chapter.code}</span>
+      </div>
+    `;
+  }).join("");
+
+  const titleOf = (nodeId: string): string => {
+    try {
+      return getNode(nodeId).title;
+    } catch {
+      return nodeId;
+    }
+  };
+
+  const milestones: Array<{
+    label: string;
+    record: (typeof history)[number] | undefined;
+  }> = [
+    { label: en ? "Where you began" : "起点", record: history[0] },
+    {
+      label: en ? "First precise read" : "第一次精准判断",
+      record: history.find((item) => item.quality === "expert")
+    },
+    {
+      label: en ? "First bold bet" : "第一次冒险",
+      record: history.find((item) => item.quality === "risk")
+    },
+    {
+      label: en ? "Your best call" : "最佳一着",
+      record: history.reduce<(typeof history)[number] | undefined>(
+        (acc, item) =>
+          (item.qualityScore ?? 0) > (acc?.qualityScore ?? -1) ? item : acc,
+        undefined
+      )
+    }
+  ];
+
+  const seen = new Set<string>();
+  const milestoneRows = milestones
+    .filter((m) => m.record)
+    .filter((m) => {
+      if (!m.record) return false;
+      const key = `${m.record.nodeId}-${m.record.optionIndex}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((m) => {
+      const record = m.record!;
+      return `
+        <div class="milestone-row">
+          <span class="milestone-label">${m.label}</span>
+          <strong>${escapeHtml(titleOf(record.nodeId))}</strong>
+          <em>${qualityLabel(language, record.quality)}</em>
+          <small>${record.qualityScore ?? 0}</small>
+        </div>
+      `;
+    })
+    .join("");
+
+  return `
+    <section class="ending-montage">
+      <h2>${en ? "Your Journey" : "你的旅程"}</h2>
+      <div class="route-strip" aria-label="${en ? "Route through chapters" : "章节路线"}">${routeStrip}</div>
+      <div class="route-legend">
+        <span class="expert">${en ? "Precise" : "精准"}</span>
+        <span class="partial">${en ? "Steady" : "稳健"}</span>
+        <span class="risk">${en ? "Bold" : "激进"}</span>
+        <span class="none">${en ? "Unreached" : "未达"}</span>
+      </div>
+      <div class="milestone-list">${milestoneRows}</div>
+    </section>
+  `;
+}
+
 export function endingView(
   save: SaveState,
   language: "zh" | "en",
@@ -873,6 +966,7 @@ export function endingView(
             : ""
         }
       </section>
+      ${endingMontageMarkup(save, language)}
       <section class="ending-timeline">
         <h2>${uiString(language, "endingTimeline")}</h2>
         <div class="ending-decision-list">

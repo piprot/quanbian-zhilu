@@ -2690,7 +2690,8 @@ details.fold[open] .intel-head small::after {
 .ending-hero,
 .ending-timeline,
 .ending-relations,
-.ending-choice-panel {
+.ending-choice-panel,
+.ending-montage {
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -2700,8 +2701,134 @@ details.fold[open] .intel-head small::after {
 .ending-timeline,
 .ending-relations,
 .ending-progress,
-.ending-choice-panel {
+.ending-choice-panel,
+.ending-montage {
   margin-top: 14px;
+}
+
+.ending-montage h2 {
+  margin: 0 0 12px;
+  color: var(--gold);
+  font-size: 15px;
+}
+
+.route-strip {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.route-dot {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.route-dot.expert {
+  border-color: rgba(65, 199, 192, 0.6);
+  background: rgba(65, 199, 192, 0.16);
+  color: var(--teal);
+}
+
+.route-dot.partial {
+  border-color: rgba(242, 193, 78, 0.6);
+  background: rgba(242, 193, 78, 0.14);
+  color: var(--gold);
+}
+
+.route-dot.risk {
+  border-color: rgba(233, 130, 108, 0.6);
+  background: rgba(233, 130, 108, 0.14);
+  color: #e9826c;
+}
+
+.route-dot.reached {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+}
+
+.route-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.route-legend span::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 5px;
+  background: var(--line);
+}
+
+.route-legend span.expert::before {
+  background: var(--teal);
+}
+
+.route-legend span.partial::before {
+  background: var(--gold);
+}
+
+.route-legend span.risk::before {
+  background: #e9826c;
+}
+
+.milestone-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.milestone-row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) 90px 56px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-2);
+}
+
+.milestone-label {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.milestone-row strong {
+  color: var(--text);
+}
+
+.milestone-row em {
+  font-style: normal;
+  color: var(--muted);
+}
+
+.milestone-row small {
+  text-align: right;
+  color: var(--teal);
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .milestone-row {
+    grid-template-columns: 1fr auto;
+  }
+  .milestone-row .milestone-label {
+    grid-column: 1 / -1;
+  }
 }
 
 .ending-choice-actions {
