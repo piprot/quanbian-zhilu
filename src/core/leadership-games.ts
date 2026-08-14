@@ -1,3 +1,5 @@
+import type { AbilityId } from "./types";
+
 export type LeadershipGameId =
   | "decision-chess"
   | "game-theory"
@@ -15,6 +17,8 @@ export interface LeadershipGameMeta {
   enDesc: string;
   insightZh: string;
   insightEn: string;
+  /** 完成该小游戏所训练的核心能力，用于结算时发放对应能力经验。 */
+  abilityId: AbilityId;
 }
 
 export const LEADERSHIP_GAMES: LeadershipGameMeta[] = [
@@ -25,7 +29,8 @@ export const LEADERSHIP_GAMES: LeadershipGameMeta[] = [
     zhDesc: "在棋盘上推进目标，用有限资源换取信任、影响力与组织结果。",
     enDesc: "Advance on the board and trade limited resources for trust, influence, and results.",
     insightZh: "领导力不是一次漂亮的决策，而是每一步都在为下一步创造选择空间。",
-    insightEn: "Leadership is not one brilliant move; every step should create options for the next."
+    insightEn: "Leadership is not one brilliant move; every step should create options for the next.",
+    abilityId: "strategy"
   },
   {
     id: "game-theory",
@@ -34,7 +39,8 @@ export const LEADERSHIP_GAMES: LeadershipGameMeta[] = [
     zhDesc: "在合作与竞争之间反复选择，练习读懂对手并建立可预测的信任。",
     enDesc: "Repeatedly choose between cooperation and competition to read opponents and build predictable trust.",
     insightZh: "重复博弈中，可预测的合作往往比短期占便宜更能积累长期收益。",
-    insightEn: "In repeated games, predictable cooperation usually beats short-term advantage."
+    insightEn: "In repeated games, predictable cooperation usually beats short-term advantage.",
+    abilityId: "insight"
   },
   {
     id: "resource-allocation",
@@ -43,7 +49,8 @@ export const LEADERSHIP_GAMES: LeadershipGameMeta[] = [
     zhDesc: "在现金流、客户、团队与创新之间分配有限预算，练习取舍与平衡。",
     enDesc: "Allocate limited budget across cash flow, customers, team, and innovation.",
     insightZh: "资源分配考验的不是平均，而是知道什么阶段该倾斜、什么缺口不能放。",
-    insightEn: "Allocation is not about being average; it is about knowing what to bias and what gap you cannot ignore."
+    insightEn: "Allocation is not about being average; it is about knowing what to bias and what gap you cannot ignore.",
+    abilityId: "structure"
   },
   {
     id: "team-management",
@@ -52,7 +59,8 @@ export const LEADERSHIP_GAMES: LeadershipGameMeta[] = [
     zhDesc: "把对的人放到对的任务上，管理成员精力与任务匹配度。",
     enDesc: "Put the right people on the right tasks while managing energy and fit.",
     insightZh: "团队管理最大的杠杆，是把人的长项和任务的真正需求对齐。",
-    insightEn: "The biggest team leverage is aligning each person's strength with the task's real need."
+    insightEn: "The biggest team leverage is aligning each person's strength with the task's real need.",
+    abilityId: "deploy"
   },
   {
     id: "crisis-command",
@@ -61,7 +69,8 @@ export const LEADERSHIP_GAMES: LeadershipGameMeta[] = [
     zhDesc: "在高压事件里做取舍，练习稳住局面、恢复信任并推动结果。",
     enDesc: "Make trade-offs under pressure: stabilize, rebuild trust, and drive results.",
     insightZh: "危机里最重要的不是显得果断，而是让关键人知道你的判断依据。",
-    insightEn: "In a crisis, clarity of reasoning matters more than appearing decisive."
+    insightEn: "In a crisis, clarity of reasoning matters more than appearing decisive.",
+    abilityId: "recovery"
   }
 ];
 

@@ -107,6 +107,7 @@ import {
   weeklyChallenges
 } from "../core/challenges";
 import { scoreTrainingAnswers } from "../core/training";
+import { LEADERSHIP_GAMES } from "../core/leadership-games";
 import {
   EXPANDED_TRAINING
 } from "../core/trainingExtras";
@@ -1159,6 +1160,14 @@ export class AdaptiveGameApp {
     if (won) {
       this.save.leadershipGameWins += 1;
       this.save.masteryPoints += 2;
+      const meta = LEADERSHIP_GAMES.find((game) => game.id === gameId);
+      if (meta) {
+        this.save.profile.abilities[meta.abilityId] = clamp(
+          (this.save.profile.abilities[meta.abilityId] ?? 0) + 2,
+          0,
+          40
+        );
+      }
       const currentLevel =
         this.save.leadershipBestLevel?.[gameId] ?? 1;
       if (currentLevel < 3) {
@@ -1185,9 +1194,6 @@ export class AdaptiveGameApp {
     const earned = this.save.leadershipAchievements[gameId] ?? [];
     const merged = [...new Set([...earned, ...achievements])];
     this.save.leadershipAchievements[gameId] = merged;
-    if (branch) {
-      this.save.leadershipBranches[gameId] = branch;
-    }
     if (achievements.length > 0) {
       this.showToast(
         this.language === "en"

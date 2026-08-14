@@ -138,12 +138,9 @@ export const DEFAULT_SAVE: SaveState = {
   firstPickStreak: 0,
   duelSeenNodeIds: [],
   completedFilmQuests: [],
-  junqiWins: 0,
-  junqiLosses: 0,
   leadershipGameWins: 0,
   leadershipGameLosses: 0,
   leadershipAchievements: {},
-  leadershipBranches: {},
   leadershipBestLevel: {},
   reviewCards: [],
   dimensionExp: {
@@ -402,8 +399,6 @@ function normalizeSave(save: SaveState): SaveState {
     completedFilmQuests: Array.isArray(save.completedFilmQuests)
       ? save.completedFilmQuests
       : [],
-    junqiWins: Math.max(0, Number(save.junqiWins) || 0),
-    junqiLosses: Math.max(0, Number(save.junqiLosses) || 0),
     leadershipGameWins: Math.max(0, Number(save.leadershipGameWins) || 0),
     leadershipGameLosses: Math.max(
       0,
@@ -413,10 +408,6 @@ function normalizeSave(save: SaveState): SaveState {
       save.leadershipAchievements &&
       typeof save.leadershipAchievements === "object"
         ? save.leadershipAchievements
-        : {},
-    leadershipBranches:
-      save.leadershipBranches && typeof save.leadershipBranches === "object"
-        ? save.leadershipBranches
         : {},
     leadershipBestLevel:
       save.leadershipBestLevel && typeof save.leadershipBestLevel === "object"
@@ -476,12 +467,9 @@ export function computeSaveHash(save: SaveState): string {
     ach: save.achievements,
     dw: save.duelWins,
     dl: save.duelLosses,
-    jw: save.junqiWins,
-    jl: save.junqiLosses,
     lgw: save.leadershipGameWins,
     lgl: save.leadershipGameLosses,
     lgach: save.leadershipAchievements,
-    lgbranch: save.leadershipBranches,
     lgbest: save.leadershipBestLevel,
     rv: (save.reviewCards ?? []).map((card) => [
       card.nodeId,

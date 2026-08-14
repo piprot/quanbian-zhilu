@@ -206,18 +206,12 @@ export interface SaveState {
   /** 每日对练任务：最近领取日期与当日已完成对局数。 */
   lastDuelBonusDate?: string;
   duelsToday?: number;
-  /** Junqi war-room wins. */
-  junqiWins: number;
-  /** Junqi war-room losses. */
-  junqiLosses: number;
   /** Leadership game center wins. */
   leadershipGameWins: number;
   /** Leadership game center losses. */
   leadershipGameLosses: number;
   /** Per-game earned achievement ids. */
   leadershipAchievements: Record<string, string[]>;
-  /** Per-game last branch/route label. */
-  leadershipBranches: Record<string, string>;
   /** Per-game highest unlocked difficulty (1-3). */
   leadershipBestLevel: Record<string, number>;
   /** SM-2 间隔复习卡：未选专家项的决策进入到期回练队列。 */
