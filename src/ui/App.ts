@@ -117,12 +117,10 @@ import {
 } from "../core/challenges";
 import { scoreTrainingAnswers } from "../core/training";
 import {
-  EXPANDED_TRAINING,
-  type ExpandedAbilityTraining
+  EXPANDED_TRAINING
 } from "../core/trainingExtras";
 import {
-  EXPANDED_TRAINING_EN,
-  type ExpandedAbilityTrainingEn
+  EXPANDED_TRAINING_EN
 } from "../core/trainingExtrasEn";
 import {
   PRACTICE_TASKS,
@@ -166,6 +164,7 @@ import { mapView } from "./mapView";
 import { trialView } from "./trialView";
 import { trialBattleView } from "./trialBattleView";
 import { assessmentResultView, assessmentView } from "./assessmentView";
+import { hiddenBranchView } from "./hiddenBranchView";
 import {
   optionCostSummary,
   primaryAbilityForOption,
@@ -1695,10 +1694,6 @@ export class AdaptiveGameApp {
       });
   }
 
-  private trainingDisplay(path: ExpandedAbilityTraining): ExpandedAbilityTrainingEn {
-    return this.language === "en" ? EXPANDED_TRAINING_EN[path.abilityId] : path;
-  }
-
   private renderTraining(): void {
     this.root.innerHTML = trainingView(this.save, this.language, {
       abilityId: this.trainingAbilityId,
@@ -2261,71 +2256,11 @@ export class AdaptiveGameApp {
       this.show("map");
       return;
     }
-    const path = EXPANDED_TRAINING[abilityId];
-    const view = this.trainingDisplay(path);
-    const en = this.language === "en";
-    const steps = hiddenRouteSteps(abilityId);
-    const completed = this.save.hiddenRoutes.includes(`hidden-${abilityId}`);
-    const stepIndex = Math.min(
-      this.hiddenRouteStep,
-      Math.max(0, steps.length - 1)
-    );
-    const currentStep = steps[stepIndex];
-    const answered = this.hiddenRouteLastCorrect !== undefined;
-    this.root.innerHTML = `
-      <header class="topbar">
-        <div class="brand">${this.t("brand")}</div>
-        <button class="link" data-action="open-map">${this.t("hiddenBranchBack")}</button>
-      </header>
-      <main class="hidden-branch-shell" aria-label="${this.t("hiddenBranchTitle")}">
-        <section class="hidden-branch-hero">
-          <p class="eyebrow">${this.t("hiddenBranchTitle")}</p>
-          <h1>${abilityDisplay(this.language, abilityId).name} · ${escapeHtml(view.routeTitle)}</h1>
-          <p class="muted">${escapeHtml(view.routeSummary)}</p>
-          <p class="hidden-route-progress">${stepIndex + 1} / ${steps.length}</p>
-        </section>
-        ${
-          completed
-            ? `
-              <section class="hidden-branch-grid">
-                <div>
-                  <h2>${this.t("trainingFormula")}</h2>
-                  <code>${escapeHtml(view.formula.expression)}</code>
-                  <p>${escapeHtml(view.formula.explanation)}</p>
-                </div>
-                <div>
-                  <h2>${this.t("trainingApplication")}</h2>
-                  <ul>${view.applicationPoints.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}</ul>
-                </div>
-                <div>
-                  <h2>${this.t("trainingExamples")}</h2>
-                  <p>${escapeHtml(view.workedExamples[0]?.scenario ?? "")}</p>
-                  <p class="muted">${escapeHtml(view.workedExamples[0]?.application ?? "")}</p>
-                </div>
-              </section>
-              <p class="muted">${en ? "Hidden route completed and written into your ending." : "隐藏章节已完成，并已写入结局。"}</p>
-              <button class="primary" data-action="continue-hidden-exit">${en ? "Back to Outcome" : "返回本次结算"}</button>
-            `
-            : answered
-              ? `
-                <section class="hidden-route-feedback">
-                  <h2>${this.hiddenRouteLastCorrect ? (en ? "Correct" : "判断正确") : (en ? "Not quite" : "判断有偏差")}</h2>
-                  <p>${escapeHtml(currentStep.explanation)}</p>
-                  <p class="muted">${en ? "Reference: " : "参考答案："}${escapeHtml(currentStep.referenceAnswer)}</p>
-                  <button class="primary" data-action="hidden-next">${this.hiddenRouteLastCorrect ? (en ? "Next Step" : "下一节点") : (en ? "Try Again" : "重试本题")}</button>
-                </section>
-              `
-              : `
-                <section class="hidden-route-question">
-                  <h2>${escapeHtml(currentStep.prompt)}</h2>
-                  <div class="hidden-route-options">
-                    ${currentStep.options.map((option, index) => `<button data-action="hidden-option" data-option="${index}">${escapeHtml(option)}</button>`).join("")}
-                  </div>
-                </section>
-              `
-        }
-      </main>
-    `;
+    this.root.innerHTML = hiddenBranchView(this.save, this.language, {
+      abilityId,
+      step: this.hiddenRouteStep,
+      lastCorrect: this.hiddenRouteLastCorrect
+    });
   }
 
 
