@@ -46,20 +46,20 @@ const MANIFEST = [
   { name: "role-highPotential", id: 1011, w: W, h: H }, // 高潜人才
 
   // ── NPC 头像（方形 400×400，替代原 1920×1920 AI 生图）──
-  // 性别仅按姓名/作者猜测；picsum 无性别元数据，进游戏后请人工核对并按需改 id。
+  // 全部改用 randomuser.me 正面大头照（能看到完整头部）；性别按角色设定锁定（方然为女）。
   // 女（她）：
   { name: "npc-assistant", url: "https://randomuser.me/api/portraits/women/44.jpg", dir: "npc", w: 400, h: 400 }, // 行政主管
-  { name: "npc-finance", id: 91, dir: "npc", w: 400, h: 400 }, // 财务经理
+  { name: "npc-finance", url: "https://randomuser.me/api/portraits/women/28.jpg", dir: "npc", w: 400, h: 400 }, // 财务经理
   { name: "npc-xu", url: "https://randomuser.me/api/portraits/women/65.jpg", dir: "npc", w: 400, h: 400 }, // 小许
-  { name: "npc-tang", id: 823, dir: "npc", w: 400, h: 400 }, // 唐岚
+  { name: "npc-tang", url: "https://randomuser.me/api/portraits/women/79.jpg", dir: "npc", w: 400, h: 400 }, // 唐岚
+  { name: "npc-fang", url: "https://randomuser.me/api/portraits/women/31.jpg", dir: "npc", w: 400, h: 400 }, // 方然
   // 男（他）：
   { name: "npc-ops", url: "https://randomuser.me/api/portraits/men/32.jpg", dir: "npc", w: 400, h: 400 }, // 运营负责人
-  { name: "npc-young", id: 338, dir: "npc", w: 400, h: 400 }, // 年轻骨干
-  { name: "npc-veteran", id: 447, dir: "npc", w: 400, h: 400 }, // 老将
-  { name: "npc-chen", id: 1012, dir: "npc", w: 400, h: 400 }, // 陈屿
-  { name: "npc-shen", id: 660, dir: "npc", w: 400, h: 400 }, // 沈捷
-  { name: "npc-he", id: 1006, dir: "npc", w: 400, h: 400 }, // 何川
-  { name: "npc-fang", id: 1013, dir: "npc", w: 400, h: 400 }, // 方然
+  { name: "npc-young", url: "https://randomuser.me/api/portraits/men/15.jpg", dir: "npc", w: 400, h: 400 }, // 年轻骨干
+  { name: "npc-veteran", url: "https://randomuser.me/api/portraits/men/61.jpg", dir: "npc", w: 400, h: 400 }, // 老将
+  { name: "npc-chen", url: "https://randomuser.me/api/portraits/men/33.jpg", dir: "npc", w: 400, h: 400 }, // 陈屿
+  { name: "npc-shen", url: "https://randomuser.me/api/portraits/men/86.jpg", dir: "npc", w: 400, h: 400 }, // 沈捷
+  { name: "npc-he", url: "https://randomuser.me/api/portraits/men/44.jpg", dir: "npc", w: 400, h: 400 }, // 何川
 ];
 
 // ---------- 工具函数 ---------- //
