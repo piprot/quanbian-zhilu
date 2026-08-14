@@ -103,6 +103,31 @@ export function dimensionLevel(exp: number): number {
   return Math.min(5, level);
 }
 
+/**
+ * 由十项能力经验聚合出五项领导力维度经验（0–40，与能力经验同尺度）。
+ * 每个维度取其映射能力（见 ABILITY_DIMENSION_MAP）的平均经验，供「领导力画像」展示，
+ * 与 trial 累积的 dimensionExp 相互独立。
+ */
+export function aggregateDimensionExp(
+  abilities: Record<AbilityId, number>
+): Record<LeadershipDimension, number> {
+  const sums = Object.fromEntries(
+    DIMENSION_ORDER.map((id) => [id, 0])
+  ) as Record<LeadershipDimension, number>;
+  const counts = { ...sums };
+  for (const [abilityId, dimension] of Object.entries(
+    ABILITY_DIMENSION_MAP
+  ) as Array<[AbilityId, LeadershipDimension]>) {
+    sums[dimension] += abilities[abilityId] ?? 0;
+    counts[dimension] += 1;
+  }
+  const result = {} as Record<LeadershipDimension, number>;
+  for (const id of DIMENSION_ORDER) {
+    result[id] = counts[id] > 0 ? sums[id] / counts[id] : 0;
+  }
+  return result;
+}
+
 export function addDimensionExp(
   save: SaveState,
   dimension: LeadershipDimension,

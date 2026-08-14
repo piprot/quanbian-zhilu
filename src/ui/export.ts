@@ -49,7 +49,8 @@ export function buildReportMarkdown(
   const decision = decisionProfile(save);
   const training = recommendedTraining(
     save.profile.abilities,
-    save.profile.role
+    save.profile.role,
+    save.decisionHistory
   );
   const strengths = ABILITY_ORDER.slice()
     .sort(

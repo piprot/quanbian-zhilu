@@ -1242,7 +1242,8 @@ export class AdaptiveGameApp {
   private wireTrainingLinks(): void {
     const recommended = recommendedTraining(
       this.save.profile.abilities,
-      this.save.profile.role
+      this.save.profile.role,
+      this.save.decisionHistory
     );
     this.root
       .querySelectorAll<HTMLElement>(".training-item")
@@ -4326,7 +4327,8 @@ export class AdaptiveGameApp {
   private adaptiveInterferenceText(): string {
     const focus = recommendedTraining(
       this.save.profile.abilities,
-      this.save.profile.role
+      this.save.profile.role,
+      this.save.decisionHistory
     )[0];
     const abilityName = focus ? abilityDisplay(this.language, focus).name : "沟通";
     return this.language === "en"

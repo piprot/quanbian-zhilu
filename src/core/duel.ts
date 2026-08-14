@@ -4,12 +4,15 @@ import {
   abilityLevel,
   createDefaultAbilities
 } from "./abilities.ts";
+import { ABILITY_DIMENSION_MAP } from "./leadership-model.ts";
 import { duelNodes } from "./story.ts";
 import type {
   AbilityId,
   AiArchetype,
+  DecisionRecord,
   DuelProfile,
   DuelResult,
+  LeadershipDimension,
   RoleId,
   SaveState,
   StoryNode
@@ -303,17 +306,61 @@ export function duelSeed(): number {
   return Math.floor(Math.random() * 100000);
 }
 
+function abilitiesForDimension(dimension: LeadershipDimension): AbilityId[] {
+  return (
+    Object.entries(ABILITY_DIMENSION_MAP) as Array<[AbilityId, LeadershipDimension]>
+  )
+    .filter(([, d]) => d === dimension)
+    .map(([id]) => id);
+}
+
+/** 依据决策画像（与 decisionProfile 分类阈值一致）返回应优先补强的能力集合。 */
+function decisionPriority(decisionHistory?: DecisionRecord[]): Set<AbilityId> {
+  const priorities = new Set<AbilityId>();
+  if (!decisionHistory || decisionHistory.length < 3) return priorities;
+  let expert = 0;
+  let partial = 0;
+  let risk = 0;
+  for (const record of decisionHistory) {
+    if (record.quality === "expert") expert++;
+    else if (record.quality === "partial") partial++;
+    else risk++;
+  }
+  const total = decisionHistory.length;
+  const expertRatio = expert / total;
+  const riskRatio = risk / total;
+  const partialRatio = partial / total;
+  if (riskRatio >= 0.35) {
+    // 高压破局者：太冒险 → 补韧性（recovery）与信服/稳定（stability, authority）
+    for (const id of abilitiesForDimension("resilience")) priorities.add(id);
+    for (const id of abilitiesForDimension("credibility")) priorities.add(id);
+  } else if (partialRatio >= 0.6) {
+    // 渐进探索者：太犹豫 → 补决断（strategy, execution）
+    for (const id of abilitiesForDimension("decisiveness")) priorities.add(id);
+  } else if (expertRatio < 0.3) {
+    // 判断不足 → 补决断与洞察（strategy, execution, insight）
+    for (const id of abilitiesForDimension("decisiveness")) priorities.add(id);
+    priorities.add("insight");
+  }
+  return priorities;
+}
+
 export function recommendedTraining(
   abilities: Record<AbilityId, number>,
-  role?: RoleId
+  role?: RoleId,
+  decisionHistory?: DecisionRecord[]
 ): AbilityId[] {
   const focus = role ? ROLES[role].focusAbilities : [];
+  const priority = decisionPriority(decisionHistory);
   return ABILITY_ORDER.slice()
     .sort((a, b) => {
       const focusDelta =
         (focus.includes(b) ? 1 : 0) - (focus.includes(a) ? 1 : 0);
+      const priorityDelta =
+        (priority.has(b) ? 1 : 0) - (priority.has(a) ? 1 : 0);
       return (
         focusDelta * 10 +
+        priorityDelta * 10 +
         (abilityLevel(abilities[a]) - abilityLevel(abilities[b]))
       );
     })

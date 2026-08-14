@@ -7,6 +7,7 @@ import type { Language } from "../core/i18n";
 import {
   DIMENSION_ORDER,
   LEADERSHIP_DIMENSIONS,
+  aggregateDimensionExp,
   dimensionLevel
 } from "../core/leadership-model";
 import { NPCS, npcRelation } from "../core/npcs";
@@ -401,9 +402,10 @@ export function chapterBadge(
 
 export function dimensionMarkup(language: Language, save: SaveState): string {
   const en = language === "en";
+  const aggregated = aggregateDimensionExp(save.profile.abilities);
   const bars = DIMENSION_ORDER.map((id) => {
     const def = LEADERSHIP_DIMENSIONS[id];
-    const exp = save.dimensionExp?.[id] ?? 0;
+    const exp = aggregated[id];
     const level = dimensionLevel(exp);
     const color =
       id === "credibility"
@@ -422,7 +424,7 @@ export function dimensionMarkup(language: Language, save: SaveState): string {
             <span>${en ? def.enSub : def.zhSub}</span>
             <em>${en ? `Tier ${level}` : `第 ${level} 档`}</em>
           </div>
-          <div class="dimension-bar"><i style="width:${Math.min(100, exp)}%"></i></div>
+          <div class="dimension-bar"><i style="width:${Math.min(100, Math.round((exp / 40) * 100))}%"></i></div>
           <small>${en ? def.growEn : def.growZh}</small>
         </div>
       `;
