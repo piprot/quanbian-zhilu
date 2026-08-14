@@ -497,6 +497,37 @@ function endingMarkup(save: SaveState, language: "zh" | "en"): string {
   `;
 }
 
+// 认证荣誉凭证：把「认证通过」从数字证明升级为可分享的叙事凭证。
+function certificationCredentialMarkup(
+  save: SaveState,
+  language: "zh" | "en"
+): string {
+  const cert = certificationLevel(save);
+  if (!cert.passed) return "";
+  const en = language === "en";
+  const role = save.profile.role;
+  const roleName = roleDisplay(language, role).shortName;
+  const focusNames = ROLES[role].focusAbilities
+    .map((id) => abilityDisplay(language, id).name)
+    .join(en ? " · " : "、");
+  const title: Record<RoleId, string> = {
+    parachute: en ? "Turnaround Leader" : "空降变革者",
+    founder: en ? "Organization Builder" : "组织建造者",
+    highPotential: en ? "Influence Connector" : "影响力连接者"
+  };
+  const narrative = en
+    ? `This credential rests on the ten-ability spectrum — specifically ${focusNames}, the abilities a ${roleName} repeatedly verified in real situations.`
+    : `这份凭证以十项能力谱系为根基，聚焦 ${focusNames}——这是「${roleName}」在真实情境中反复验证过的能力。`;
+  return `
+    <div class="credential-card">
+      <span class="credential-seal">${en ? "Honor Credential" : "荣誉凭证"}</span>
+      <h2>${escapeHtml(title[role])} · ${escapeHtml(cert.level)}</h2>
+      <p>${escapeHtml(narrative)}</p>
+      <small>${en ? "Share it via the report card below." : "可通过下方报告卡片分享。"}</small>
+    </div>
+  `;
+}
+
 export function reportView(
   save: SaveState,
   language: "zh" | "en",
@@ -588,6 +619,7 @@ export function reportView(
           <button data-action="apply-certification">${language === "en" ? "Apply for Certification" : "申请认证"}</button>
           <button data-action="certification-help">${language === "en" ? "How Certification Points Work" : "认证点如何获得"}</button>
         </div>
+        ${certificationCredentialMarkup(save, language)}
         <button data-action="reset-profile">${uiString(language, "resetProfile")}</button>
         <button data-action="export-save">${uiString(language, "exportSave")}</button>
         <button data-action="export-report">${uiString(language, "exportReport")}</button>

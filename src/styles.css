@@ -3021,6 +3021,46 @@ details.fold[open] .intel-head small::after {
   color: #57c7a3;
 }
 
+.credential-card {
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid rgba(242, 193, 78, 0.45);
+  border-radius: 10px;
+  background:
+    linear-gradient(150deg, rgba(242, 193, 78, 0.1), transparent 70%),
+    var(--panel-2);
+}
+
+.credential-seal {
+  display: inline-block;
+  padding: 3px 10px;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.credential-card h2 {
+  margin: 10px 0 6px;
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.credential-card p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.credential-card small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  opacity: 0.8;
+}
+
 .stat-tiles {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
