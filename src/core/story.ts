@@ -956,7 +956,7 @@ export const STORY_NODES: StoryNode[] = [
         effects: { execution: 2 },
         resources: { energy: -3, trust: 1, influence: -1 },
         feedback:
-          "你把他拉回了流程，但也可能扼杀了他提出新视角的意愿。",
+          "你把他拉回了流程，但也可能扼杀了他提出新视角的意愿，创新空间被收窄。",
         theory: "《贞观政要》：舍短取长，用其所长。"
       },
       {
@@ -1273,7 +1273,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { insight: 3, communication: 2 },
         resources: { energy: -6, trust: 8, influence: 5 },
-        feedback: "你把第一个盟友放进了正确位置，组织信息开始流向你。",
+        feedback: "你把第一个盟友放进了正确位置，组织信息开始主动流向你，你的判断也有了落地通道。",
         theory: "《人物志》：观其外而知其内，察其行而辨其品。"
       },
       {
@@ -1282,7 +1282,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 2, structure: 2 },
         resources: { energy: -7, trust: 5, influence: 3 },
-        feedback: "你拿到了数据，但行政主管开始觉得你绕过了她。",
+        feedback: "你拿到了数据，但行政主管开始觉得你绕过了她，你的信息渠道反而在收窄。",
         theory: "《权经》：权乃人授，授为大焉。"
       },
       {
@@ -1291,7 +1291,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { execution: 2 },
         resources: { energy: -9, trust: -4, influence: 1 },
-        feedback: "你信息更全面了，但也在第一周制造了两个潜在的反对者。",
+        feedback: "你信息更全面了，但第一周就制造了两个潜在反对者，后续协作要先消解这段警惕。",
         theory: "《孙子兵法》：先为不可胜，以待敌之可胜。"
       }
     ]
@@ -1311,7 +1311,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { execution: 3, structure: 2 },
         resources: { energy: -8, trust: 5, influence: 6 },
-        feedback: "你用一个可验证动作把关系访谈变成了业务推进。",
+        feedback: "你用一个可验证动作把关系访谈变成了业务推进，团队第一次在数据里看到方向。",
         theory: "德鲁克：管理者的成果是贡献，不是忙碌。"
       },
       {
@@ -1320,7 +1320,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { communication: 2 },
         resources: { energy: -5, trust: 3, influence: 2 },
-        feedback: "团队觉得你重视他们，但业务仍没有新的变化。",
+        feedback: "团队觉得你重视他们，但业务仍没有变化，信任正在被等待消耗。",
         theory: "《权经》：揣为上，事次之。"
       },
       {
@@ -1329,7 +1329,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { execution: 3, strategy: 1 },
         resources: { energy: -7, trust: -6, influence: 2 },
-        feedback: "你可能验证了业务，却让团队认为你并不真的听他们。",
+        feedback: "你可能验证了业务，却让团队认为你并不真的听他们，未来沟通成本会成倍上升。",
         theory: "《孙子兵法》：兵贵胜，不贵久。"
       }
     ]
@@ -1349,7 +1349,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { communication: 3, mobilize: 2 },
         resources: { energy: -7, trust: 8, influence: 6 },
-        feedback: "计划不再是你一个人的，各部门开始主动认领责任。",
+        feedback: "计划不再是你一个人的，各部门开始主动认领责任，横向共识第一次有了抓手。",
         theory: "毛泽东《党委会的工作方法》：互通情报，取得共同语言。"
       },
       {
@@ -1358,7 +1358,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { strategy: 3 },
         resources: { energy: -5, trust: -3, influence: 4 },
-        feedback: "你获得了背书，却削弱了横向共识的主动性。",
+        feedback: "你获得了背书，却削弱了横向共识的主动性，部门开始只对上级负责。",
         theory: "《权经》：携为上，功次之。"
       },
       {
@@ -1367,7 +1367,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { execution: 2, authority: 1 },
         resources: { energy: -6, trust: -6, influence: 2 },
-        feedback: "清单很快被各部门当成别人家的事。",
+        feedback: "清单很快被各部门当成别人家的事，执行变成了表面配合。",
         theory: "《论语》：不患人之不己知，患不知人也。"
       }
     ]
@@ -1387,7 +1387,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { execution: 3, strategy: 2 },
         resources: { energy: -6, trust: 5, influence: 6 },
-        feedback: "你把授权真空变成观察期，用可验证结果换回了主动权。",
+        feedback: "你把授权真空变成观察期，用可验证结果换回了主动权，名分开始跟着成果走。",
         theory: "《权经》：携为上，功次之。"
       },
       {
@@ -1396,7 +1396,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { strategy: 2, communication: 1 },
         resources: { energy: -5, trust: 2, influence: 3 },
-        feedback: "你争取了授权，但也可能让高层觉得你在等别人给权力。",
+        feedback: "你争取了授权，但高层可能觉得你在等别人给权力，主动性反而被削弱。",
         theory: "《权经》：权乃人授，授为大焉。"
       },
       {
@@ -1405,7 +1405,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -6, trust: -4, influence: 2 },
-        feedback: "你展现了行动力，但越权动作会留下权力边界风险。",
+        feedback: "你展现了行动力，但越权动作会留下权力边界风险，后续每件事都要被重新审视。",
         theory: "《韩非子》：事以密成，语以泄败。"
       }
     ]
@@ -1425,7 +1425,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { execution: 3, structure: 2 },
         resources: { energy: -7, trust: 5, influence: 5 },
-        feedback: "你用一个真实回款动作建立了创业团队的第一套确定性。",
+        feedback: "你用一个真实回款动作建立了创业团队的第一套确定性，现金流成了最好的共识。",
         theory: "德鲁克：管理者的成果是贡献，不是忙碌。"
       },
       {
@@ -1434,7 +1434,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { communication: 2 },
         resources: { energy: -5, trust: 3, influence: 2 },
-        feedback: "共识变多了，但业务动作仍没有开始。",
+        feedback: "共识变多了，但业务动作仍没有开始，团队在讨论里耗掉了时机。",
         theory: "《论语》：君子信而后劳其民。"
       },
       {
@@ -1443,7 +1443,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { execution: 3 },
         resources: { energy: -7, trust: -5, influence: 1 },
-        feedback: "资源被集中了，但团队对未来的安全感被同时砍掉。",
+        feedback: "资源被集中了，但团队对未来的安全感被同时砍掉，人心开始向外部流动。",
         theory: "《孙子兵法》：兵贵胜，不贵久。"
       }
     ]
@@ -1463,7 +1463,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { communication: 3, structure: 2 },
         resources: { energy: -6, trust: 6, influence: 5 },
-        feedback: "你没有要求授权，而是让协作关系变得可操作。",
+        feedback: "你没有要求授权，而是让协作关系变得可操作，各部门第一次看见共同的节奏。",
         theory: "毛泽东《党委会的工作方法》：互通情报，取得共同语言。"
       },
       {
@@ -1472,7 +1472,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { strategy: 2 },
         resources: { energy: -5, trust: 2, influence: 2 },
-        feedback: "你获得了局部支持，但未被邀请的部门会感到被排除。",
+        feedback: "你获得了局部支持，但未被邀请的部门感到被排除，裂痕开始出现。",
         theory: "《权经》：揣为上，事次之。"
       },
       {
@@ -1481,7 +1481,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 1, execution: 1 },
         resources: { energy: -4, trust: -4, influence: 2 },
-        feedback: "方案被推进了，但横向关系反而变得更疏远。",
+        feedback: "方案被推进了，但横向关系反而变得更疏远，你在部门间失去了缓冲。",
         theory: "《韩非子》：事以密成，语以泄败。"
       }
     ]
@@ -1501,7 +1501,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { deploy: 3, structure: 2, insight: 1 },
         resources: { energy: -7, trust: 6, influence: 5 },
-        feedback: "你让人事决定变得可解释，团队开始用成果而非关系理解你。",
+        feedback: "你让人事决定变得可解释，团队开始用成果而非关系理解你，规则成了你的护城河。",
         theory: "《贞观政要》：用非其才，必难致治。"
       },
       {
@@ -1510,7 +1510,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2, strategy: 1 },
         resources: { energy: -5, trust: 3, influence: 2 },
-        feedback: "业务暂时稳定，但团队认为你被核心客户绑架。",
+        feedback: "业务暂时稳定，但团队认为你被核心客户绑架，你的判断独立性开始被质疑。",
         theory: "《权经》：携为上，功次之。"
       },
       {
@@ -1519,7 +1519,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 3 },
         resources: { energy: -6, trust: -8, influence: 2 },
-        feedback: "你获得了短期服从，但组织开始为自保而隐藏信息。",
+        feedback: "你获得了短期服从，但组织开始为自保而隐藏信息，决策越来越依赖二手消息。",
         theory: "《孙子兵法》：先为不可胜，以待敌之可胜。"
       }
     ]
@@ -1539,7 +1539,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, deploy: 2 },
         resources: { energy: -7, trust: 5, influence: 5 },
-        feedback: "你没有直接开人，而是让组织不再被单个明星绑架。",
+        feedback: "你没有直接开人，而是让组织不再被单个明星绑架，客户关系第一次可复制。",
         theory: "德鲁克：用人之所长，同时让成果可复制。"
       },
       {
@@ -1548,7 +1548,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -5, trust: 2, influence: -1 },
-        feedback: "短期业绩稳定，但组织对人的依赖正在加深。",
+        feedback: "短期业绩稳定，但组织对人的依赖正在加深，单点风险越积越大。",
         theory: "《韩非子》：明主之道，使智者尽其虑。"
       },
       {
@@ -1557,7 +1557,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -7, trust: -7, influence: 1 },
-        feedback: "你削弱了个人依赖，但客户流失风险在交接期爆发。",
+        feedback: "你削弱了个人依赖，但客户流失风险在交接期爆发，团队信心受到打击。",
         theory: "《孙子兵法》：善战者，先为不可胜。"
       }
     ]
@@ -1577,7 +1577,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, communication: 2 },
         resources: { energy: -6, trust: 6, influence: 5 },
-        feedback: "你没有制造派系，而是让组织开始用共同标准讨论人。",
+        feedback: "你没有制造派系，而是让组织开始用共同标准讨论人，判断第一次不靠印象。",
         theory: "《人物志》：观其外而知其内，察其行而辨其品。"
       },
       {
@@ -1586,7 +1586,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { strategy: 2 },
         resources: { energy: -5, trust: 2, influence: 2 },
-        feedback: "你保护了自己，但结论缺少公开依据，容易被推翻。",
+        feedback: "你保护了自己，但结论缺少公开依据，很容易在下一轮被推翻。",
         theory: "《权经》：揣为上，事次之。"
       },
       {
@@ -1595,7 +1595,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -5, trust: -6, influence: 2 },
-        feedback: "你指出了事实，却让被点名者成为靶子，讨论开始转向人身。",
+        feedback: "你指出了事实，却让被点名者成为靶子，讨论开始转向人身攻击。",
         theory: "《论语》：君子成人之美，不成人之恶。"
       }
     ]
@@ -1615,7 +1615,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { mobilize: 3, communication: 2 },
         resources: { energy: -7, trust: 8, influence: 6 },
-        feedback: "你让最有能力反对的人开始为结果负责，变革第一次有了共同所有权。",
+        feedback: "你让最有能力反对的人开始为结果负责，变革第一次有了共同所有权，阻力变成了推力。",
         theory: "《孙子兵法》：上下同欲者胜。"
       },
       {
@@ -1624,7 +1624,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { strategy: 2 },
         resources: { energy: -5, trust: 3, influence: 2 },
-        feedback: "他暂时支持你，但团队其他人并不清楚你们的交易。",
+        feedback: "他暂时支持你，但团队其他人并不清楚你们的交易，共识出现了裂缝。",
         theory: "《权经》：揣为上，事次之。"
       },
       {
@@ -1633,7 +1633,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 3 },
         resources: { energy: -5, trust: -7, influence: 4 },
-        feedback: "流程落地了，但运营团队开始用沉默抵抗你。",
+        feedback: "流程落地了，但运营团队开始用沉默抵抗你，执行被暗中稀释。",
         theory: "《孙子兵法》：令之以文，齐之以武，但不可偏废。"
       }
     ]
@@ -1653,7 +1653,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, mobilize: 2 },
         resources: { energy: -7, trust: 7, influence: 5 },
-        feedback: "你把创始人之间的争论变成了组织学习，团队重新开始合作。",
+        feedback: "你把创始人之间的争论变成了组织学习，团队重新开始合作，分歧成了验证材料。",
         theory: "《实践论》：从实践中找规律。"
       },
       {
@@ -1662,7 +1662,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 2, execution: 1 },
         resources: { energy: -5, trust: -4, influence: 3 },
-        feedback: "方向定了，但联合创始人的不认同仍会持续影响执行。",
+        feedback: "方向定了，但联合创始人的不认同仍会持续影响执行，内耗转入地下。",
         theory: "《权经》：权惟用，不为大也。"
       },
       {
@@ -1671,7 +1671,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { strategy: 2 },
         resources: { energy: -4, trust: -6, influence: -3 },
-        feedback: "你避免了亲自得罪人，却让团队看到创始团队无法自治。",
+        feedback: "你避免了亲自得罪人，却让团队看到创始团队无法自治，权威开始外移。",
         theory: "《韩非子》：明主之道，使智者尽其虑。"
       }
     ]
@@ -1691,7 +1691,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { communication: 3, structure: 2 },
         resources: { energy: -6, trust: 8, influence: 5 },
-        feedback: "你把最强反对者变成了最强协作者，方案反而更扎实。",
+        feedback: "你把最强反对者变成了最强协作者，方案反而更扎实，专业赢得了尊重。",
         theory: "《论语》：君子求诸己，小人求诸人。"
       },
       {
@@ -1700,7 +1700,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { strategy: 2 },
         resources: { energy: -5, trust: -5, influence: 3 },
-        feedback: "方案暂时通过了，但资深负责人不会再主动帮助你。",
+        feedback: "方案暂时通过了，但资深负责人不会再主动帮助你，你失去了一个导师。",
         theory: "《权经》：权乃人授，授为大焉。"
       },
       {
@@ -1709,7 +1709,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 1 },
         resources: { energy: -4, trust: -6, influence: -2 },
-        feedback: "你证明了观点，却把讨论变成谁对谁错，协作入口关闭了。",
+        feedback: "你证明了观点，却把讨论变成谁对谁错，协作的入口从此关闭。",
         theory: "《人物志》：审其变而见其性。"
       }
     ]
@@ -1729,7 +1729,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, execution: 2, authority: 1 },
         resources: { energy: -7, trust: 5, influence: 6 },
-        feedback: "目标第一次变成可检查的作战图，团队不再只点头。",
+        feedback: "目标第一次变成可检查的作战图，团队不再只点头，开始为结果负责。",
         theory: "德鲁克：把资源集中在真正重要的少数任务上。"
       },
       {
@@ -1738,7 +1738,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { communication: 2 },
         resources: { energy: -5, trust: 3, influence: 1 },
-        feedback: "各部门目标很快互相冲突，你只能不断协调。",
+        feedback: "各部门目标很快互相冲突，你只能不断协调，精力耗在了对齐上。",
         theory: "《韩非子》：使事不相干，使士不兼官。"
       },
       {
@@ -1747,7 +1747,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2, execution: 1 },
         resources: { energy: -5, trust: -5, influence: 3 },
-        feedback: "数字被下达了，但团队开始寻找最容易完成的解释。",
+        feedback: "数字被下达了，但团队开始寻找最容易完成的解释，目标被悄悄架空。",
         theory: "《孙子兵法》：上下同欲者胜。"
       }
     ]
@@ -1767,7 +1767,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { execution: 3, structure: 2 },
         resources: { energy: -7, trust: 5, influence: 5 },
-        feedback: "不同部门第一次用同一个结果语言协作。",
+        feedback: "不同部门第一次用同一个结果语言协作，目标不再各说各话。",
         theory: "《卓有成效的管理者》：要事优先。"
       },
       {
@@ -1776,7 +1776,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { deploy: 2 },
         resources: { energy: -5, trust: 3, influence: 1 },
-        feedback: "部门目标各自合理，但合在一起并不支持增长。",
+        feedback: "部门目标各自合理，但合在一起并不支持增长，整体方向失焦。",
         theory: "《韩非子》：明主之道，使智者尽其虑。"
       },
       {
@@ -1785,7 +1785,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -5, trust: -6, influence: 2 },
-        feedback: "团队开始执行，但不再愿意暴露真实风险。",
+        feedback: "团队开始执行，但不再愿意暴露真实风险，坏消息被压到最后。",
         theory: "《孙子兵法》：令之以文，齐之以武。"
       }
     ]
@@ -1805,7 +1805,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { communication: 3, structure: 2 },
         resources: { energy: -6, trust: 7, influence: 5 },
-        feedback: "你让项目变成共同所有，而不是你一个人的任务。",
+        feedback: "你让项目变成共同所有，而不是你一个人的任务，跨部门开始互相补位。",
         theory: "毛泽东《党委会的工作方法》：互通情报，取得共同语言。"
       },
       {
@@ -1814,7 +1814,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { strategy: 2 },
         resources: { energy: -5, trust: 2, influence: 2 },
-        feedback: "负责人支持了，但成员仍然只向原部门汇报。",
+        feedback: "负责人支持了，但成员仍然只向原部门汇报，你的小组名存实亡。",
         theory: "《权经》：权乃人授，授为大焉。"
       },
       {
@@ -1823,7 +1823,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { execution: 2 },
         resources: { energy: -5, trust: -5, influence: 2 },
-        feedback: "清单发出去了，但被各部门当作别人的项目。",
+        feedback: "清单发出去了，但被各部门当作别人的项目，执行落空。",
         theory: "《论语》：不患人之不己知，患不知人也。"
       }
     ]
@@ -1843,7 +1843,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { authority: 3, structure: 2 },
         resources: { energy: -7, trust: 2, influence: 6 },
-        feedback: "你让权力边界从个人态度变成组织规则，冲突被流程吸收。",
+        feedback: "你让权力边界从个人态度变成组织规则，冲突被流程吸收，绕行开始失效。",
         theory: "《韩非子》：法度既立，虽庸主可治。"
       },
       {
@@ -1852,7 +1852,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 2, communication: 1 },
         resources: { energy: -5, trust: -2, influence: 3 },
-        feedback: "对方暂时收敛了，但没有制度约束，下一次会换个方式绕过。",
+        feedback: "对方暂时收敛了，但没有制度约束，下一次会换个方式绕过你。",
         theory: "《权经》：权乃人授，授为大焉。"
       },
       {
@@ -1861,7 +1861,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { strategy: 2 },
         resources: { energy: -5, trust: -5, influence: -2 },
-        feedback: "你可能等到了失败，但组织也承担了本可避免的损失。",
+        feedback: "你可能等到了失败，但组织也承担了本可避免的损失，代价被放大。",
         theory: "《孙子兵法》：先为不可胜，以待敌之可胜。"
       }
     ]
@@ -1881,7 +1881,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, authority: 2 },
         resources: { energy: -6, trust: 3, influence: 6 },
-        feedback: "你让权力边界回到治理规则，合伙人无法再靠私人关系绕过你。",
+        feedback: "你让权力边界回到治理规则，合伙人无法再靠私人关系绕过你，制度开始说话。",
         theory: "《韩非子》：法、术、势并用。"
       },
       {
@@ -1890,7 +1890,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { communication: 2, strategy: 1 },
         resources: { energy: -5, trust: 2, influence: 3 },
-        feedback: "权责变清晰了，但执行时仍缺少强制检查。",
+        feedback: "权责变清晰了，但执行时仍缺少强制检查，边界仍会被试探。",
         theory: "《权经》：权乃人授，授为大焉。"
       },
       {
@@ -1899,7 +1899,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 3 },
         resources: { energy: -5, trust: -7, influence: 2 },
-        feedback: "你夺回了表面权力，但合伙人开始在公司外寻找盟友。",
+        feedback: "你夺回了表面权力，但合伙人开始在公司外寻找盟友，冲突转向暗处。",
         theory: "《孙子兵法》：令之以文，齐之以武。"
       }
     ]
@@ -1919,7 +1919,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, communication: 2 },
         resources: { energy: -6, trust: 4, influence: 5 },
-        feedback: "你没有争夺头衔，而是让项目本身有了可执行的决策规则。",
+        feedback: "你没有争夺头衔，而是让项目本身有了可执行的决策规则，边界由章程守住。",
         theory: "《韩非子》：使事不相干，使士不兼官。"
       },
       {
@@ -1928,7 +1928,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { strategy: 2 },
         resources: { energy: -5, trust: 2, influence: 2 },
-        feedback: "高层暂时接受了，但绕过行为没有变成制度约束。",
+        feedback: "高层暂时接受了，但绕过行为没有变成制度约束，下次还会发生。",
         theory: "《权经》：揣为上，事次之。"
       },
       {
@@ -1937,7 +1937,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -5, trust: -6, influence: -3 },
-        feedback: "你守住了责任边界，却被视为不配合高层。",
+        feedback: "你守住了责任边界，却被视为不配合高层，机会开始绕开你。",
         theory: "《论语》：君子求诸己，小人求诸人。"
       }
     ]
@@ -1957,7 +1957,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { stability: 3, structure: 2 },
         resources: { energy: -7, trust: 4, influence: 6 },
-        feedback: "你开始把个人经验产品化，组织第一次不再依赖你的反应速度。",
+        feedback: "你开始把个人经验产品化，组织第一次不再依赖你的反应速度，能力开始沉淀。",
         theory: "毛泽东《党委会的工作方法》：制度建党，不依赖个人。"
       },
       {
@@ -1966,7 +1966,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { deploy: 2, strategy: 1 },
         resources: { energy: -5, trust: 4, influence: 2 },
-        feedback: "你降低了短期风险，却把组织能力绑定在另一个人身上。",
+        feedback: "你降低了短期风险，却把组织能力绑定在另一个人身上，单点仍在。",
         theory: "《权经》：授能干者，授忠诚者。"
       },
       {
@@ -1975,7 +1975,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -4, trust: -5, influence: -5 },
-        feedback: "你保住了位置，却让组织无法放大你的价值。",
+        feedback: "你保住了位置，却让组织无法放大你的价值，个人成了天花板。",
         theory: "《贞观政要》：善始慎终，创业难守成更难。"
       }
     ]
@@ -1995,7 +1995,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { stability: 3, structure: 2 },
         resources: { energy: -7, trust: 5, influence: 6 },
-        feedback: "你开始把创始人直觉制度化，公司第一次有了“不依赖你也能决策”的路径。",
+        feedback: "你开始把创始人直觉制度化，公司第一次有了“不依赖你也能决策”的路径，能力真正沉淀下来。",
         theory: "德鲁克：把个人贡献转化为组织能力。"
       },
       {
@@ -2004,7 +2004,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { deploy: 2 },
         resources: { energy: -5, trust: 3, influence: 2 },
-        feedback: "公司不再只依赖你，但开始依赖另一个个人。",
+        feedback: "公司不再只依赖你，但开始依赖另一个个人，真正的制度化还没发生。",
         theory: "《权经》：授能干者，授忠诚者。"
       },
       {
@@ -2013,7 +2013,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -8, trust: -2, influence: -2 },
-        feedback: "公司稳定在你手里，但增长被你的精力锁死。",
+        feedback: "公司稳定在你手里，但增长被你的精力锁死，规模上限由你一个人决定。",
         theory: "《贞观政要》：善始慎终。"
       }
     ]
@@ -2042,7 +2042,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { deploy: 2 },
         resources: { energy: -5, trust: 3, influence: 2 },
-        feedback: "替代者接手了，但组织仍依赖个人关系而非机制。",
+        feedback: "替代者接手了，但组织仍依赖个人关系而非机制，换一个人就会断。",
         theory: "《权经》：授能干者，授忠诚者。"
       },
       {
@@ -2051,7 +2051,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 1 },
         resources: { energy: -3, trust: -5, influence: -4 },
-        feedback: "你保住了影响力，却让项目变得脆弱。",
+        feedback: "你保住了影响力，却让项目变得脆弱，一次休假就可能停摆。",
         theory: "《贞观政要》：善始慎终。"
       }
     ]
@@ -2071,7 +2071,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, execution: 2, recovery: 1 },
         resources: { energy: -7, trust: 6, influence: 6 },
-        feedback: "你没有让恐慌扩散，而是把危机拆成可管理的任务。",
+        feedback: "你没有让恐慌扩散，而是把危机拆成可管理的任务，团队找到了抓手。",
         theory: "《矛盾论》：抓住主要矛盾，其他问题才能迎刃而解。"
       },
       {
@@ -2080,7 +2080,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { communication: 2, mobilize: 2 },
         resources: { energy: -6, trust: 4, influence: 2 },
-        feedback: "团队开始行动，但恐慌和离职风险也被同步放大。",
+        feedback: "团队开始行动，但恐慌和离职风险也被同步放大，军心开始动摇。",
         theory: "《孙子兵法》：上下同欲者胜。"
       },
       {
@@ -2089,7 +2089,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { strategy: 2 },
         resources: { energy: -5, trust: -3, influence: -4 },
-        feedback: "你可能拿到了钱，却把主导权也交给了别人。",
+        feedback: "你可能拿到了钱，却把主导权也交给了别人，危机换了一种方式继续。",
         theory: "《权经》：权乃人授，授为大焉。"
       }
     ]
@@ -2109,7 +2109,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, execution: 2 },
         resources: { energy: -7, trust: 5, influence: 6 },
-        feedback: "你把危机拆成两条线，团队第一次看到现金流可以恢复的路径。",
+        feedback: "你把危机拆成两条线，团队第一次看到现金流可以恢复的路径，恐慌开始收敛。",
         theory: "《实践论》：从感性材料上升到理性认识。"
       },
       {
@@ -2118,7 +2118,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -6, trust: 2, influence: 2 },
-        feedback: "成本降了，但团队也看到了你对未来的不安全感。",
+        feedback: "成本降了，但团队也看到了你对未来的不安全感，士气开始流失。",
         theory: "《孙子兵法》：兵贵胜，不贵久。"
       },
       {
@@ -2127,7 +2127,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { communication: 2 },
         resources: { energy: -8, trust: 1, influence: 1 },
-        feedback: "客户可能回来，但其他现金流风险没有被隔离。",
+        feedback: "客户可能回来，但其他现金流风险没有被隔离，危机仍在蔓延。",
         theory: "《孙子兵法》：先为不可胜。"
       }
     ]
@@ -2147,7 +2147,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, execution: 2 },
         resources: { energy: -6, trust: 5, influence: 5 },
-        feedback: "你没有让项目塌掉，而是让团队清楚知道什么必须保住。",
+        feedback: "你没有让项目塌掉，而是让团队清楚知道什么必须保住，取舍变得有据。",
         theory: "德鲁克：要事优先。"
       },
       {
@@ -2156,7 +2156,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { strategy: 2 },
         resources: { energy: -5, trust: 1, influence: 2 },
-        feedback: "你可能争取到资源，但团队仍在等待答案。",
+        feedback: "你可能争取到资源，但团队仍在等待答案，窗口在流失。",
         theory: "《权经》：携为上，功次之。"
       },
       {
@@ -2165,7 +2165,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 1 },
         resources: { energy: -3, trust: -5, influence: -4 },
-        feedback: "你保护了团队，却让客户重新评估项目价值。",
+        feedback: "你保护了团队，却让客户重新评估项目价值，信任开始打折。",
         theory: "《论语》：信而后劳其民。"
       }
     ]
@@ -2185,7 +2185,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { stability: 3, deploy: 2 },
         resources: { energy: -7, trust: 8, influence: 8 },
-        feedback: "你让组织知道你离开后依然能运行，晋升反而变得更安全。",
+        feedback: "你让组织知道你离开后依然能运行，晋升反而变得更安全，交接成了加分项。",
         theory: "《贞观政要》：善始慎终。"
       },
       {
@@ -2194,7 +2194,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 2, execution: 2 },
         resources: { energy: -5, trust: -4, influence: 5 },
-        feedback: "你抓住了机会，但组织可能因交接断层退回原样。",
+        feedback: "你抓住了机会，但组织可能因交接断层退回原样，成果难以延续。",
         theory: "《孙子兵法》：将能而君不御者胜。"
       },
       {
@@ -2203,7 +2203,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { stability: 2, recovery: 1 },
         resources: { energy: -3, trust: -2, influence: -6 },
-        feedback: "你保住了安全区，却限制了组织的人才流动。",
+        feedback: "你保住了安全区，却限制了组织的人才流动，继任者没有成长空间。",
         theory: "《权经》：权惟用，不为大也。"
       }
     ]
@@ -2223,7 +2223,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { stability: 3, strategy: 2 },
         resources: { energy: -7, trust: 7, influence: 7 },
-        feedback: "你把创始人控制权变成了团队治理，公司开始不依赖你也能决策。",
+        feedback: "你把创始人控制权变成了团队治理，公司开始不依赖你也能决策，治理有了根基。",
         theory: "毛泽东《党委会的工作方法》：民主集中制。"
       },
       {
@@ -2232,7 +2232,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { deploy: 2 },
         resources: { energy: -6, trust: 3, influence: 3 },
-        feedback: "你减轻了管理负担，但公司仍依赖一个人做关键判断。",
+        feedback: "你减轻了管理负担，但公司仍依赖一个人做关键判断，接班并未完成。",
         theory: "《权经》：授能干者，授忠诚者。"
       },
       {
@@ -2241,7 +2241,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -7, trust: -2, influence: -2 },
-        feedback: "公司稳定在你手里，但增长被你的精力锁死。",
+        feedback: "公司稳定在你手里，但增长被你的精力锁死，规模被你的带宽限制。",
         theory: "《贞观政要》：创业难，守成更难。"
       }
     ]
@@ -2261,7 +2261,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { stability: 3, deploy: 2 },
         resources: { energy: -6, trust: 7, influence: 6 },
-        feedback: "你不仅完成了交接，还让组织第一次拥有了可传承的判断能力。",
+        feedback: "你不仅完成了交接，还让组织第一次拥有了可传承的判断能力，经验成了资产。",
         theory: "毛泽东《党委会的工作方法》：制度建党。"
       },
       {
@@ -2270,7 +2270,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -6, trust: 3, influence: 2 },
-        feedback: "接替者学到了做法，但组织仍缺少可复用的判断规则。",
+        feedback: "接替者学到了做法，但组织仍缺少可复用的判断规则，方法没被沉淀。",
         theory: "《权经》：授能干者，授忠诚者。"
       },
       {
@@ -2279,7 +2279,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 1 },
         resources: { energy: -4, trust: -5, influence: -3 },
-        feedback: "你抓住了机会，却让项目在交接期承受风险。",
+        feedback: "你抓住了机会，却让项目在交接期承受风险，交接成了空档。",
         theory: "《贞观政要》：善始慎终。"
       }
     ]
@@ -2308,7 +2308,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 2 },
         resources: { energy: -2, trust: 2, influence: 2 },
-        feedback: "他看到了你的信心，但没有看到具体判断。",
+        feedback: "他看到了你的信心，但没有看到具体判断，印象只是模糊的好感。",
         theory: "《孙子兵法》：先为不可胜，以待敌之可胜。"
       },
       {
@@ -2317,7 +2317,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { strategy: 1 },
         resources: { energy: -2, trust: -1, influence: -3 },
-        feedback: "谨慎保护了信息，却可能让 CEO 觉得你还没有准备。",
+        feedback: "谨慎保护了信息，却可能让 CEO 觉得你还没有准备好接这个位子。",
         theory: "《韩非子》：事以密成，语以泄败。"
       }
     ]
@@ -2337,7 +2337,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, insight: 1 },
         resources: { energy: -5, trust: 2, influence: 3 },
-        feedback: "你没有让直觉变成指控，而是先把事实链闭合。",
+        feedback: "你没有让直觉变成指控，而是先把事实链闭合，判断有了可靠的依据。",
         theory: "《实践论》：从感性材料上升到理性认识。"
       },
       {
@@ -2346,7 +2346,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { communication: 2 },
         resources: { energy: -4, trust: 3, influence: 1 },
-        feedback: "直接沟通减少了猜疑，但你可能还没掌握足够细节。",
+        feedback: "直接沟通减少了猜疑，但你可能还没掌握足够细节，容易被反问。",
         theory: "《论语》：不患人之不己知，患不知人也。"
       },
       {
@@ -2355,7 +2355,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 1 },
         resources: { energy: -2, trust: -2, influence: -2 },
-        feedback: "你避开了冲突，但也可能让不合规行为继续发生。",
+        feedback: "你避开了冲突，但也可能让不合规行为继续发生，底线被悄悄侵蚀。",
         theory: "《资治通鉴》：不塞隙穴，则暴雨疾风必坏。"
       }
     ]
@@ -2384,7 +2384,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -8, trust: 2, influence: 2 },
-        feedback: "客户安心了，但团队被临时承诺拖入疲劳。",
+        feedback: "客户安心了，但团队被临时承诺拖入疲劳，精力被透支。",
         theory: "《孙子兵法》：兵贵胜，不贵久。"
       },
       {
@@ -2393,7 +2393,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 1 },
         resources: { energy: -2, trust: -4, influence: -3 },
-        feedback: "你保护了团队，却可能让关键客户重新评估合作关系。",
+        feedback: "你保护了团队，却可能让关键客户重新评估合作关系，机会在流失。",
         theory: "《论语》：信而后劳其民。"
       }
     ]
@@ -2413,7 +2413,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { communication: 3, mobilize: 2 },
         resources: { energy: -5, trust: 6, influence: 5 },
-        feedback: "你没有追查传话人，而是用透明信息切断了恐慌。",
+        feedback: "你没有追查传话人，而是用透明信息切断了恐慌，流言失去了土壤。",
         theory: "毛泽东《党委会的工作方法》：互通情报，取得共同语言。"
       },
       {
@@ -2422,7 +2422,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { deploy: 2 },
         resources: { energy: -4, trust: 2, influence: 2 },
-        feedback: "团队暂时稳定，但不同主管说法不一，信息开始失真。",
+        feedback: "团队暂时稳定，但不同主管说法不一，信息开始失真，信任被打折。",
         theory: "《韩非子》：明主之道，使智者尽其虑。"
       },
       {
@@ -2431,7 +2431,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 1 },
         resources: { energy: -2, trust: -5, influence: -3 },
-        feedback: "流言没有自动消失，反而在沉默中变得更加可信。",
+        feedback: "流言没有自动消失，反而在沉默中变得更加可信，人心开始浮动。",
         theory: "《论语》：不患人之不己知，患不知人也。"
       }
     ]
@@ -2460,7 +2460,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { deploy: 2 },
         resources: { energy: -4, trust: 2, influence: 2 },
-        feedback: "你展示了团队能力，但资深负责人可能觉得你在回避。",
+        feedback: "你展示了团队能力，但资深负责人可能觉得你在回避，质疑没有真正落地。",
         theory: "《权经》：权惟用，不为大也。"
       },
       {
@@ -2469,7 +2469,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -4, trust: -6, influence: -2 },
-        feedback: "你赢得了场面，却输掉了复盘会最重要的信任。",
+        feedback: "你赢得了场面，却输掉了复盘会最重要的信任，问题被压得更深。",
         theory: "《孙子兵法》：致人而不致于人，但不能以伤人为目的。"
       }
     ]
@@ -2489,7 +2489,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { deploy: 3, communication: 2 },
         resources: { energy: -5, trust: 7, influence: 4 },
-        feedback: "你把人看得比留住人更重要，他反而开始考虑留下。",
+        feedback: "你把人看得比留住人更重要，他反而开始考虑留下，成长被重新定义。",
         theory: "德鲁克：用人之所长，让人才持续成长。"
       },
       {
@@ -2498,7 +2498,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -4, trust: 3, influence: 2 },
-        feedback: "他暂时留了下来，但下一次成长瓶颈会更快出现。",
+        feedback: "他暂时留了下来，但下一次成长瓶颈会更快出现，治标不治本。",
         theory: "《贞观政要》：用非其才，必难致治。"
       },
       {
@@ -2545,7 +2545,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { strategy: 2 },
         resources: { energy: -4, trust: -5, influence: -2 },
-        feedback: "你暂时避开了提问，但也让其他人看到你缺乏数据准备。",
+        feedback: "你暂时避开了提问，但也让其他人看到你缺乏数据准备，专业形象受损。",
         theory: "《权经》：揣为上，事次之。"
       }
     ]
@@ -2574,7 +2574,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 2, communication: 1 },
         resources: { energy: -4, trust: -5, influence: 3 },
-        feedback: "客户看到了你的严谨，但新人在客户面前失去了信任。",
+        feedback: "客户看到了你的严谨，但新人在客户面前失去了信任，表达勇气受挫。",
         theory: "《论语》：君子信而后劳其民。"
       },
       {
@@ -2612,7 +2612,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { communication: 2 },
         resources: { energy: -4, trust: 2, influence: 2 },
-        feedback: "你了解了真相，但团队其他成员仍不知道风险正在升级。",
+        feedback: "你了解了真相，但团队其他成员仍不知道风险正在升级，信息没有对齐。",
         theory: "《韩非子》：事以密成，语以泄败。"
       },
       {
@@ -2621,7 +2621,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 1 },
         resources: { energy: -2, trust: -3, influence: -3 },
-        feedback: "你遵守了流程，却让延期风险在沉默中继续扩大。",
+        feedback: "你遵守了流程，却让延期风险在沉默中继续扩大，干预窗口关闭。",
         theory: "《资治通鉴》：不塞隙穴，则暴雨疾风必坏。"
       }
     ]
@@ -2641,7 +2641,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { authority: 3, structure: 2 },
         resources: { energy: -5, trust: 5, influence: 4 },
-        feedback: "你拒绝了灰色空间，但保住了长期合作与组织安全。",
+        feedback: "你拒绝了灰色空间，但保住了长期合作与组织安全，底线被客户尊重。",
         theory: "《论语》：君子爱财，取之有道。"
       },
       {
@@ -2650,7 +2650,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { communication: 2 },
         resources: { energy: -4, trust: 2, influence: 2 },
-        feedback: "你避免了直接冲突，但客户可能把沉默当成默许。",
+        feedback: "你避免了直接冲突，但客户可能把沉默当成默许，边界被模糊。",
         theory: "《权经》：权惟用，不为大也。"
       },
       {
@@ -2659,7 +2659,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { execution: 2 },
         resources: { energy: -4, trust: -8, influence: 2 },
-        feedback: "订单暂时保住了，但组织风险已经转移到你个人身上。",
+        feedback: "订单暂时保住了，但组织风险已经转移到你个人身上，代价迟早显现。",
         theory: "《孙子兵法》：先为不可胜，以待敌之可胜。"
       }
     ]
@@ -2679,7 +2679,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { mobilize: 3, communication: 2 },
         resources: { energy: -5, trust: 7, influence: 5 },
-        feedback: "你保护了新人，也教会老员工用证据而非身份评价人。",
+        feedback: "你保护了新人，也教会老员工用证据而非身份评价人，语言开始规范。",
         theory: "《人物志》：观其外而知其内，察其行而辨其品。"
       },
       {
@@ -2688,7 +2688,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 2 },
         resources: { energy: -4, trust: -3, influence: 2 },
-        feedback: "场面没失控，但新人已经公开受伤，下一次更难开口。",
+        feedback: "场面没失控，但新人已经公开受伤，下一次更难开口，勇气受损。",
         theory: "《论语》：君子成人之美，不成人之恶。"
       },
       {
@@ -2726,7 +2726,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -6, trust: -6, influence: 3 },
-        feedback: "融资暂时保住了，但组织开始担心你是谁都能砍的人。",
+        feedback: "融资暂时保住了，但组织开始担心你是谁都能砍的人，忠诚在流失。",
         theory: "《权经》：权惟用，不为大也。"
       },
       {
@@ -2735,7 +2735,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2, recovery: 1 },
         resources: { energy: -5, trust: 2, influence: -5 },
-        feedback: "你守住了组织价值，但现金流风险可能压垮整个公司。",
+        feedback: "你守住了组织价值，但现金流风险可能压垮整个公司，赌注太大。",
         theory: "《孙子兵法》：善战者，先为不可胜。"
       }
     ]
@@ -2755,7 +2755,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, execution: 2 },
         resources: { energy: -6, trust: 4, influence: 5 },
-        feedback: "你没有被动接受砍预算，而是让高层看到你如何管理取舍。",
+        feedback: "你没有被动接受砍预算，而是让高层看到你如何管理取舍，专业得到认可。",
         theory: "德鲁克：把资源集中在真正重要的少数任务上。"
       },
       {
@@ -2764,7 +2764,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -8, trust: -2, influence: 1 },
-        feedback: "团队继续冲刺，但资源缺口会很快变成交付风险。",
+        feedback: "团队继续冲刺，但资源缺口会很快变成交付风险，问题被延后。",
         theory: "《孙子兵法》：先为不可胜，以待敌之可胜。"
       },
       {
@@ -2793,7 +2793,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { communication: 3, authority: 1 },
         resources: { energy: -5, trust: 5, influence: 5 },
-        feedback: "你没有追查告密者，而是直接消除了信息差。",
+        feedback: "你没有追查告密者，而是直接消除了信息差，误会没有发酵。",
         theory: "毛泽东《党委会的工作方法》：互通情报，取得共同语言。"
       },
       {
@@ -2802,7 +2802,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { structure: 2 },
         resources: { energy: -6, trust: 2, influence: 2 },
-        feedback: "你掌握了事实，但 CEO 可能已经形成了初步判断。",
+        feedback: "你掌握了事实，但 CEO 可能已经形成了初步判断，被动已经形成。",
         theory: "《实践论》：从感性材料上升到理性认识。"
       },
       {
@@ -2811,7 +2811,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 1 },
         resources: { energy: -3, trust: -3, influence: -3 },
-        feedback: "误解不会自动消失，反而会在沉默中变成默认结论。",
+        feedback: "误解不会自动消失，反而会在沉默中变成默认结论，形象被固化。",
         theory: "《论语》：不患人之不己知，患不知人也。"
       }
     ]
@@ -2840,7 +2840,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { communication: 2 },
         resources: { energy: -5, trust: 3, influence: -2 },
-        feedback: "客户满意了，但团队开始不确定谁才是真正的接口。",
+        feedback: "客户满意了，但团队开始不确定谁才是真正的接口，流程被绕过。",
         theory: "《权经》：权乃人授，授为大焉。"
       },
       {
@@ -2849,7 +2849,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -3, trust: -5, influence: -3 },
-        feedback: "你守住了流程，却可能让客户觉得你不够重视。",
+        feedback: "你守住了流程，却可能让客户觉得你不够重视，关系降温。",
         theory: "《论语》：君子信而后劳其民。"
       }
     ]
@@ -2869,7 +2869,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { insight: 3, structure: 2 },
         resources: { energy: -6, trust: 6, influence: 4 },
-        feedback: "你发现流程缺少两个关键节点，而不是团队不愿执行。",
+        feedback: "你发现流程缺少两个关键节点，而不是团队不愿执行，问题被精准定位。",
         theory: "《实践论》：从实践中找规律。"
       },
       {
@@ -2878,7 +2878,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 2, execution: 1 },
         resources: { energy: -5, trust: -3, influence: 3 },
-        feedback: "执行率上升了，但团队开始用绕过系统的方式完成工作。",
+        feedback: "执行率上升了，但团队开始用绕过系统的方式完成工作，形式大于实质。",
         theory: "《韩非子》：法度既立，虽庸主可治。"
       },
       {
@@ -2887,7 +2887,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { communication: 1 },
         resources: { energy: -3, trust: -2, influence: -2 },
-        feedback: "通知越多，团队越觉得这是形式主义。",
+        feedback: "通知越多，团队越觉得这是形式主义，执行意愿更低。",
         theory: "《论语》：不患人之不己知，患不知人也。"
       }
     ]
@@ -2907,7 +2907,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { deploy: 3, communication: 2 },
         resources: { energy: -6, trust: 7, influence: 5 },
-        feedback: "你把他想离开的动机转成了组织可用的成长设计。",
+        feedback: "你把他想离开的动机转成了组织可用的成长设计，双赢有了抓手。",
         theory: "德鲁克：用人之所长，让人才持续成长。"
       },
       {
@@ -2916,7 +2916,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 2 },
         resources: { energy: -5, trust: 3, influence: 2 },
-        feedback: "他暂时留下了，但下次遇到成长瓶颈会更难处理。",
+        feedback: "他暂时留下了，但下次遇到成长瓶颈会更难处理，问题只是推迟。",
         theory: "《贞观政要》：用非其才，必难致治。"
       },
       {
@@ -2925,7 +2925,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 1 },
         resources: { energy: -3, trust: -4, influence: -3 },
-        feedback: "你避免了拉扯，但项目延期风险没有提前化解。",
+        feedback: "你避免了拉扯，但项目延期风险没有提前化解，空档已经形成。",
         theory: "《人物志》：审其变而见其性。"
       }
     ]
@@ -2945,7 +2945,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, communication: 2 },
         resources: { energy: -7, trust: 5, influence: 6 },
-        feedback: "你没有让危机被情绪放大，而是用事实重新建立控制。",
+        feedback: "你没有让危机被情绪放大，而是用事实重新建立控制，舆论开始转向。",
         theory: "《实践论》：从感性材料上升到理性认识。"
       },
       {
@@ -2963,7 +2963,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 1 },
         resources: { energy: -3, trust: -5, influence: -5 },
-        feedback: "沉默让失实内容看起来更像真相，客户开始主动询问。",
+        feedback: "沉默让失实内容看起来更像真相，客户开始主动询问，被动加剧。",
         theory: "《论语》：不患人之不己知，患不知人也。"
       }
     ]
@@ -2992,7 +2992,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -5, trust: 2, influence: -2 },
-        feedback: "供应保住了，但其他供应商可能开始提出同样要求。",
+        feedback: "供应保住了，但其他供应商可能开始提出同样要求，连锁反应。",
         theory: "《权经》：权惟用，不为大也。"
       },
       {
@@ -3001,7 +3001,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -7, trust: -4, influence: 1 },
-        feedback: "你守住了账期，但切换供应商的时间和风险可能更大。",
+        feedback: "你守住了账期，但切换供应商的时间和风险可能更大，代价被低估。",
         theory: "《孙子兵法》：善战者，求之于势。"
       }
     ]
@@ -3030,7 +3030,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -9, trust: 3, influence: 3 },
-        feedback: "你展示了担当，但现有职责可能开始出现风险。",
+        feedback: "你展示了担当，但现有职责可能开始出现风险，精力被稀释。",
         theory: "《孙子兵法》：兵贵胜，不贵久。"
       },
       {
@@ -3068,7 +3068,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 2 },
         resources: { energy: -5, trust: -4, influence: 4 },
-        feedback: "功劳澄清了，但对方部门从此开始防备你们。",
+        feedback: "功劳澄清了，但对方部门从此开始防备你们，协作变冷。",
         theory: "《孙子兵法》：令之以文，齐之以武。"
       },
       {
@@ -3077,7 +3077,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 2 },
         resources: { energy: -3, trust: -3, influence: -5 },
-        feedback: "团队觉得你不够硬气，跨部门功劳从此开始失衡。",
+        feedback: "团队觉得你不够硬气，跨部门功劳从此开始失衡，士气受损。",
         theory: "《孙子兵法》：先为不可胜，以待敌之可胜。"
       }
     ]
@@ -3097,7 +3097,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { deploy: 3, communication: 2 },
         resources: { energy: -7, trust: 6, influence: 5 },
-        feedback: "协作从任务开始重建，老员工看到了新骨干的真实价值。",
+        feedback: "协作从任务开始重建，老员工看到了新骨干的真实价值，排斥被化解。",
         theory: "《贞观政要》：舍短取长，各尽其能。"
       },
       {
@@ -3106,7 +3106,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 3 },
         resources: { energy: -5, trust: -6, influence: 4 },
-        feedback: "位置稳了，但老员工把排挤转到了更隐蔽的层面。",
+        feedback: "位置稳了，但老员工把排挤转到了更隐蔽的层面，问题更难查。",
         theory: "《韩非子》：明主之道，使智者尽其虑。"
       },
       {
@@ -3115,7 +3115,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 2 },
         resources: { energy: -3, trust: -4, influence: -4 },
-        feedback: "冲突暂时消失，但组织学会了用换人回避管理问题。",
+        feedback: "冲突暂时消失，但组织学会了用换人回避管理问题，病根没除。",
         theory: "《资治通鉴》：防微杜渐。"
       }
     ]
@@ -3144,7 +3144,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 3 },
         resources: { energy: -5, trust: -3, influence: 2 },
-        feedback: "对方否认并开始销毁痕迹，你失去了取证的主动权。",
+        feedback: "对方否认并开始销毁痕迹，你失去了取证的主动权，线索中断。",
         theory: "《孙子兵法》：致人而不致于人。"
       },
       {
@@ -3153,7 +3153,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 2 },
         resources: { energy: -2, trust: -6, influence: -5 },
-        feedback: "流言传开后，组织开始怀疑你在包庇，底线问题变得模糊。",
+        feedback: "流言传开后，组织开始怀疑你在包庇，底线问题变得模糊，公信受损。",
         theory: "《论语》：君子求诸己，小人求诸人。"
       }
     ]
@@ -3173,7 +3173,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, communication: 2 },
         resources: { energy: -7, trust: 7, influence: 5 },
-        feedback: "反对变成了改进意见，考核标准第一次获得团队背书。",
+        feedback: "反对变成了改进意见，考核标准第一次获得团队背书，阻力变成共建。",
         theory: "《贞观政要》：善始慎终，取信于人。"
       },
       {
@@ -3182,7 +3182,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 3 },
         resources: { energy: -5, trust: -6, influence: 3 },
-        feedback: "方案落地了，但团队开始用最低标准应付考核。",
+        feedback: "方案落地了，但团队开始用最低标准应付考核，执行走样。",
         theory: "《孙子兵法》：齐之以武，也要令之以文。"
       },
       {
@@ -3191,7 +3191,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 2 },
         resources: { energy: -4, trust: 2, influence: -6 },
-        feedback: "情绪平了，但下一次改革会面对同样的不信任。",
+        feedback: "情绪平了，但下一次改革会面对同样的不信任，权威受损。",
         theory: "《孙子兵法》：不可胜在己，可胜在敌。"
       }
     ]
@@ -3211,7 +3211,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { insight: 3, strategy: 2 },
         resources: { energy: -7, trust: 5, influence: 6 },
-        feedback: "你发现砍单来自一位新财务负责人，并找到了重新合作的切口。",
+        feedback: "你发现砍单来自一位新财务负责人，并找到了重新合作的切口，问题被定位。",
         theory: "《人物志》：观察人在不同情境中的取舍，才能看见真实动机。"
       },
       {
@@ -3220,7 +3220,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { communication: 2 },
         resources: { energy: -6, trust: 3, influence: -3 },
-        feedback: "诚意到了，但你没有拿到真实原因，下次砍单仍会发生。",
+        feedback: "诚意到了，但你没有拿到真实原因，下次砍单仍会发生，治标不治本。",
         theory: "《论语》：不患人之不己知，患不知人也。"
       },
       {
@@ -3229,7 +3229,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { execution: 2 },
         resources: { energy: -5, trust: -3, influence: -5 },
-        feedback: "数字暂时对齐，但系统性问题被掩盖了。",
+        feedback: "数字暂时对齐，但系统性问题被掩盖了，风险还在积累。",
         theory: "《孙子兵法》：先为不可胜。"
       }
     ]
@@ -3258,7 +3258,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -5, trust: -6, influence: 2 },
-        feedback: "回归者到位了，但顶替者失去信心，团队开始动荡。",
+        feedback: "回归者到位了，但顶替者失去信心，团队开始动荡，稳定被破坏。",
         theory: "《韩非子》：用人之道，贵在明白责任。"
       },
       {
@@ -3267,7 +3267,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 2 },
         resources: { energy: -3, trust: 3, influence: -6 },
-        feedback: "团队稳定了，但你失去了把外部资源内化的机会。",
+        feedback: "团队稳定了，但你失去了把外部资源内化的机会，成长被错过。",
         theory: "《孙子兵法》：善战者，求之于势。"
       }
     ]
@@ -3305,7 +3305,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 2 },
         resources: { energy: -4, trust: 2, influence: -5 },
-        feedback: "你保住了短期平静，却让方案失去窗口期，下一次变化会更被动。",
+        feedback: "你保住了短期平静，却让方案失去窗口期，下一次变化会更被动，主动权流失。",
         theory: "《论语》：不患人之不己知，患不知人也。"
       }
     ]
@@ -3410,7 +3410,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 2 },
         resources: { energy: -6, trust: -5, influence: 2 },
-        feedback: "数字保住了，但交付标准被集体稀释，验收争议开始外溢到客户。",
+        feedback: "数字保住了，但交付标准被集体稀释，验收争议开始外溢到客户，口碑受损。",
         theory: "《孙子兵法》：兵贵胜，不贵久。"
       },
       {
@@ -3419,7 +3419,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { strategy: 2 },
         resources: { energy: -5, trust: -3, influence: -5 },
-        feedback: "你争取到了缓冲，却让集团认为你不擅长在约束下做选择。",
+        feedback: "你争取到了缓冲，却让集团认为你不擅长在约束下做选择，信任打折。",
         theory: "《权经》：权乃人授。"
       }
     ]
@@ -3486,7 +3486,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -6, trust: 2, influence: 2 },
-        feedback: "助手到岗了，但判断仍集中在一个人身上，瓶颈只是被延后。",
+        feedback: "助手到岗了，但判断仍集中在一个人身上，瓶颈只是被延后，隐患仍在。",
         theory: "《韩非子》：明主之道，使智者尽其虑。"
       },
       {
@@ -3667,7 +3667,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { mobilize: 3, structure: 2 },
         resources: { energy: -7, trust: 7, influence: 6 },
-        feedback: "反对者第一次为方案负责，会议从立场陈述变成交付承诺。",
+        feedback: "反对者第一次为方案负责，会议从立场陈述变成交付承诺，阻力变成交付力。",
         theory: "《论语》：举直错诸枉，则民服。"
       },
       {
@@ -3676,7 +3676,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 2 },
         resources: { energy: -5, trust: -3, influence: 2 },
-        feedback: "形式有了，但成员很快发现意见不会被采纳，热度下降。",
+        feedback: "形式有了，但成员很快发现意见不会被采纳，委员会成了摆设。",
         theory: "《韩非子》：法势术并用。"
       },
       {
@@ -3685,7 +3685,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -5, trust: -8, influence: 2 },
-        feedback: "阻力看似消失，实际转入地下，下一次反对会以更隐蔽的方式出现。",
+        feedback: "阻力看似消失，实际转入地下，下一次反对会以更隐蔽的方式出现，更难察觉。",
         theory: "《孙子兵法》：先为不可胜。"
       }
     ]
@@ -3705,7 +3705,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { authority: 3, communication: 2 },
         resources: { energy: -7, trust: 6, influence: 6 },
-        feedback: "高层支持变成了可执行的协作规则，团队开始用公约而不是命令对齐。",
+        feedback: "高层支持变成了可执行的协作规则，团队开始用公约而不是命令对齐，背书落地了。",
         theory: "《韩非子》：法度既立，虽庸主可治。"
       },
       {
@@ -3714,7 +3714,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -6, trust: -4, influence: 3 },
-        feedback: "配合到了，但各部门只是应付节点，真实协作仍未发生。",
+        feedback: "配合到了，但各部门只是应付节点，真实协作仍未发生，形式大于实质。",
         theory: "《孙子兵法》：令之以文，齐之以武。"
       },
       {
@@ -3723,7 +3723,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -4, trust: -8, influence: 2 },
-        feedback: "表面安静了，但关键信息开始绕开你流动。",
+        feedback: "表面安静了，但关键信息开始绕开你流动，你被排除在真实决策外。",
         theory: "《资治通鉴》：防微杜渐。"
       }
     ]
@@ -3743,7 +3743,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { execution: 3, communication: 2 },
         resources: { energy: -7, trust: 5, influence: 6 },
-        feedback: "质疑被数据挡回，试点第一次成为组织共同的语言。",
+        feedback: "质疑被数据挡回，试点第一次成为组织共同的语言，证据开始说话。",
         theory: "《矛盾论》：实践是检验真理的唯一标准。"
       },
       {
@@ -3752,7 +3752,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -6, trust: -3, influence: 2 },
-        feedback: "试点更快了，但反对部门认为你仍在圈外推进，裂痕加深。",
+        feedback: "试点更快了，但反对部门认为你仍在圈外推进，裂痕越拉越大。",
         theory: "《权经》：携为上。"
       },
       {
@@ -3761,7 +3761,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { recovery: 2 },
         resources: { energy: -4, trust: -5, influence: -4 },
-        feedback: "争议小了，但组织学会用质疑阻止任何新尝试。",
+        feedback: "争议小了，但组织学会用质疑阻止任何新尝试，创新开始畏手畏脚。",
         theory: "《孙子兵法》：不可胜在己。"
       }
     ]
@@ -3781,7 +3781,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { stability: 3, deploy: 2 },
         resources: { energy: -7, trust: 6, influence: 6 },
-        feedback: "接班人第一次知道哪些判断属于他，组织开始按规则而不是按人运行。",
+        feedback: "接班人第一次知道哪些判断属于他，组织开始按规则而不是按人运行，放权有了边界。",
         theory: "《贞观政要》：善始慎终。"
       },
       {
@@ -3790,7 +3790,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -5, trust: 2, influence: 2 },
-        feedback: "安全了，但关键判断仍全部由你做出，接班周期被拉长。",
+        feedback: "安全了，但关键判断仍全部由你做出，接班周期被无限拉长。",
         theory: "《资治通鉴》：用人之长。"
       },
       {
@@ -3799,7 +3799,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -5, trust: -5, influence: 2 },
-        feedback: "接班人独立了，但没有护栏的第一次失误会动摇团队信任。",
+        feedback: "接班人独立了，但没有护栏的第一次失误会动摇团队信任，代价很高。",
         theory: "《孙子兵法》：上下同欲者胜。"
       }
     ]
@@ -3819,7 +3819,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { stability: 3, communication: 2 },
         resources: { energy: -6, trust: 6, influence: 5 },
-        feedback: "你既没有抢回决策，也没有放任风险，组织第一次有了可学习的放权模板。",
+        feedback: "你既没有抢回决策，也没有放任风险，组织第一次有了可学习的放权模板，带教成了机制。",
         theory: "《韩非子》：明主之道，使智者尽其虑。"
       },
       {
@@ -3828,7 +3828,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { authority: 2 },
         resources: { energy: -5, trust: -4, influence: 2 },
-        feedback: "风险挡住了，但接班人学会了重要决策先等你表态。",
+        feedback: "风险挡住了，但接班人学会了重要决策先等你表态，放权又退回去了。",
         theory: "《权经》：权乃人授。"
       },
       {
@@ -3837,7 +3837,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { execution: 2 },
         resources: { energy: -5, trust: -5, influence: -3 },
-        feedback: "信任表达了，但组织为未设防的风险支付了代价。",
+        feedback: "信任表达了，但组织为未设防的风险支付了代价，护栏本可以避免。",
         theory: "《孙子兵法》：先为不可胜。"
       }
     ]
@@ -3857,7 +3857,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "expert",
         effects: { structure: 3, stability: 2 },
         resources: { energy: -7, trust: 5, influence: 6 },
-        feedback: "你仍然是最终把关人，但组织开始先自我校准，瓶颈第一次松动。",
+        feedback: "你仍然是最终把关人，但组织开始先自我校准，瓶颈第一次松动，效率回来了。",
         theory: "《资治通鉴》：防微杜渐。"
       },
       {
@@ -3866,7 +3866,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "partial",
         effects: { execution: 2 },
         resources: { energy: -8, trust: -2, influence: 2 },
-        feedback: "决策更快了一点，但你的时间被会议吞掉，瓶颈上移。",
+        feedback: "决策更快了一点，但你的时间被会议吞掉，瓶颈只是换了位置。",
         theory: "《韩非子》：法度既立。"
       },
       {
@@ -3875,7 +3875,7 @@ export const STORY_NODES: StoryNode[] = [
         quality: "risk",
         effects: { authority: 2 },
         resources: { energy: -4, trust: -6, influence: -3 },
-        feedback: "你的时间省下了，但组织开始揣测秘书的偏好，权力路径变得扭曲。",
+        feedback: "你的时间省下了，但组织开始揣测秘书的偏好，权力路径变得扭曲，风险暗藏。",
         theory: "《权经》：权惟用。"
       }
     ]
