@@ -167,6 +167,7 @@ import {
 import { chapterTransitionView } from "./transitionView";
 import { coachView } from "./coachView";
 import { mapView } from "./mapView";
+import { trialView } from "./trialView";
 import {
   optionCostSummary,
   primaryAbilityForOption,
@@ -2183,175 +2184,10 @@ export class AdaptiveGameApp {
   }
 
   private renderTrial(): void {
-    const en = this.language === "en";
-    const energy = this.save.trialEnergy;
-    const hp = this.save.trialHp;
-    const items = this.save.trialItems;
-    const capital = this.save.profile.resources.capital;
-    const influence = this.save.profile.resources.influence;
-    const trust = this.save.profile.resources.trust;
-    const accelerator = this.save.trialAcceleratorLevel;
-    const restDone =
-      this.save.lastTrialEnergyDate ===
-      new Date().toISOString().slice(0, 10);
-    this.root.innerHTML = `
-      <header class="topbar">
-        <div class="brand">${this.t("brand")}</div>
-        <button class="link" data-action="open-menu">${this.t("returnHome")}</button>
-      </header>
-      <main class="trial-shell" aria-label="${this.t("trialTitle")}">
-        <section class="trial-hero">
-          <div>
-            <p class="eyebrow">${this.t("trialTitle")}</p>
-            <h1>${en ? "Grow through battles, not questionnaires" : "不是问卷，是打怪升级"}</h1>
-            <p class="muted">${en ? "Clear gates with ability levels, spend energy on battles, and unlock loot, companions, and MBA cases." : "用能力门槛解锁关卡，消耗精力值挑战守关者，获得道具、同伴和 MBA 高难案例。"}</p>
-          </div>
-          <div class="trial-energy-panel">
-            <span>${this.t("trialEnergy")}</span>
-            <strong>${energy} / 100</strong>
-            <div class="trial-energy-bar"><i style="width:${energy}%"></i></div>
-            <strong>${this.t("trialHp")} ${hp} / 100</strong>
-            <div class="trial-energy-bar hp-bar"><i style="width:${hp}%"></i></div>
-            <div class="trial-energy-actions">
-              <button data-action="trial-rest" ${restDone ? "disabled" : ""}>${this.t("trialRest")} +30</button>
-              <button data-action="trial-buy-energy" ${capital < 15 || energy >= 100 ? "disabled" : ""}>${this.t("trialBuyEnergy")} -15</button>
-              <button data-action="trial-buy-energy-influence" ${influence < 25 || energy >= 100 ? "disabled" : ""}>${this.t("trialBuyEnergyInfluence")} -25</button>
-              <button data-action="trial-invest-accelerator" ${accelerator >= 3 || capital < 40 + accelerator * 20 ? "disabled" : ""}>${this.t("trialAccelerator")} Lv.${accelerator} -${40 + accelerator * 20}</button>
-              <button data-action="trial-hire-ally" ${trust < 20 || this.save.trialItems.includes("临时同伴") ? "disabled" : ""}>${this.t("trialAllyHire")} -20</button>
-            </div>
-            <small>${accelerator > 0 ? `${this.t("trialAcceleratorActive")} Lv.${accelerator}` : this.t("trialBuyCost")} 15 · ${capital} · ${influence} · ${trust}</small>
-          </div>
-        </section>
-        <section class="trial-morale-panel">
-          <strong>${en ? "Morale" : "士气"}</strong>
-          <div class="trial-energy-bar"><i style="width:${this.save.morale ?? 75}%"></i></div>
-          <small>${en ? "Resilience and adversity choices move morale." : "韧性值与困境选择会改变士气。"}</small>
-        </section>
-        ${
-          this.activePracticeTaskId
-            ? (() => {
-                const task = PRACTICE_TASKS.find(
-                  (item) => item.id === this.activePracticeTaskId
-                );
-                if (!task) return "";
-                return `
-                  <section class="practice-editor">
-                    <h2>${escapeHtml(task.title)}</h2>
-                    <p>${escapeHtml(task.action)}</p>
-                    <textarea data-practice-result rows="5" placeholder="${this.t("practiceHint")}"></textarea>
-                    <button class="primary" data-action="practice-submit">${this.t("practiceSubmit")}</button>
-                  </section>
-                `;
-              })()
-            : ""
-        }
-        <section class="trial-next-step">
-          <h2>${this.t("nextStepTitle")}</h2>
-          <p>${escapeHtml(this.nextActionAdvice().text)}</p>
-          ${
-            this.nextActionAdvice().action
-              ? `<button data-action="${this.nextActionAdvice().action}" ${this.nextActionAdvice().ability ? `data-ability="${this.nextActionAdvice().ability}"` : ""}>${this.t("nextStepAction")}</button>`
-              : ""
-          }
-        </section>
-        <section class="trial-loot-panel">
-          <h2>${this.t("trialItems")}</h2>
-          ${
-            items.length
-              ? `<div class="trial-loot">${items.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>`
-              : `<p class="muted">${en ? "No loot yet. Clear trial stages to collect weapons, allies, and tools." : "还没有战利品，通关试炼会获得武器、同伴和工具。"}</p>`
-          }
-        </section>
-        <section class="trial-unlocks">
-          <h2>${en ? "Growth Unlocks" : "成长解锁"}</h2>
-          <div class="unlock-list">
-            <span class="unlocked">${en ? "HP: Energy Bar" : "血条：精力值"}</span>
-            <span class="${Math.max(...ABILITY_ORDER.map((id) => abilityLevel(this.save.profile.abilities[id]))) >= 2 ? "unlocked" : "locked"}">${en ? "Skill: Ability Lv.2" : "技能：能力 Lv.2"}</span>
-            <span class="${this.save.trialCleared.length >= 5 ? "unlocked" : "locked"}">${en ? "Armor: Clear Trial 5" : "防护：通关第 5 关"}</span>
-            <span class="${this.save.trialCleared.length >= 7 ? "unlocked" : "locked"}">${en ? "Ally: Clear Trial 7" : "同伴：通关第 7 关"}</span>
-            <span class="${this.save.trialCleared.length >= 10 ? "unlocked" : "locked"}">${en ? "Weapon: Clear Trial 10" : "武器：通关第 10 关"}</span>
-            <span class="${this.save.trialCleared.length >= 19 ? "unlocked" : "locked"}">${en ? "MBA Cases: Clear All Trials" : "MBA 关卡：通关全部试炼"}</span>
-          </div>
-        </section>
-        <section class="trial-stages">
-
-          <h2>${this.t("trialStages")}</h2>
-          <div class="trial-stage-list">
-            ${TRIAL_STAGES.map((stage) => {
-              const done = this.save.trialCleared.includes(stage.id);
-              const enterable = canEnterTrial(this.save, stage);
-              const gateText = stage.gates
-                .map((gate) => `${abilityDisplay(this.language, gate.abilityId).name} Lv.${gate.level}`)
-                .join(" + ");
-              return `
-                <div class="trial-stage-card ${done ? "cleared" : enterable ? "open" : "locked"}">
-                  <div class="trial-stage-head">
-                    <span>${String(stage.order).padStart(2, "0")}</span>
-                    <strong>${escapeHtml(stage.name)}</strong>
-                    <em>${escapeHtml(stage.boss)}</em>
-                  </div>
-                  <p>${trialStageLabel(stage)}</p>
-                  <div class="trial-stage-meta">
-                    <span>${this.t("trialGate")}：${escapeHtml(gateText)}</span>
-                    <span>${this.t("trialEnergyCost")} ${trialCostFor(this.save, stage)}</span>
-                  </div>
-                  ${
-                    enterable
-                      ? `<button class="primary" data-action="trial-stage" data-stage="${stage.id}">${this.t("trialEnter")}</button>`
-                      : `
-                        <div class="trial-lock-actions">
-                          <span class="trial-lock">${done ? this.t("trialCleared") : this.t("trialLocked")}</span>
-                          ${
-                            done
-                              ? ""
-                              : stage.gates
-                                  .map(
-                                    (gate) => `
-                                      <button data-action="open-training" data-ability="${gate.abilityId}">
-                                        ${abilityDisplay(this.language, gate.abilityId).name} Lv.${gate.level}
-                                      </button>
-                                    `
-                                  )
-                                  .join("")
-                          }
-                        </div>
-                      `
-                  }
-                </div>
-              `;
-            }).join("")}
-          </div>
-        </section>
-        <section class="trial-practice">
-          <h2>${this.t("trialPractice")}</h2>
-          <p class="muted">${en ? "Write a real reflection; rewards unlock after keyword scoring." : "请完成真实文字修炼，通过关键词评分后才会发放奖励。"}</p>
-          <div class="practice-list">
-            ${PRACTICE_TASKS.map((task) => {
-              const done = this.save.completedPracticeTasks.includes(task.id);
-              return `
-                <article class="practice-card ${done ? "done" : ""}">
-                  <div>
-                    <h3>${escapeHtml(task.title)}</h3>
-                    <small>${escapeHtml(task.source)}</small>
-                    <blockquote>${escapeHtml(task.quote)}</blockquote>
-                    <p>${escapeHtml(task.action)}</p>
-                  </div>
-                  <div class="practice-reward">
-                    <span>${abilityDisplay(this.language, task.rewardAbility).name} +${task.rewardExp}</span>
-                    <span>${this.t("trialEnergy")} +${task.rewardEnergy}</span>
-                  </div>
-                  ${
-                    done
-                      ? `<span class="practice-done">${this.t("trialCleared")}</span>`
-                      : `<button data-action="practice-task" data-task="${task.id}">${en ? "Complete Mission" : "完成修炼"}</button>`
-                  }
-                </article>
-              `;
-            }).join("")}
-          </div>
-        </section>
-      </main>
-    `;
+    this.root.innerHTML = trialView(this.save, this.language, {
+      activePracticeTaskId: this.activePracticeTaskId,
+      nextAdvice: this.nextActionAdvice()
+    });
   }
 
   private trialResultBranch(): string {
