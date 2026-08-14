@@ -2,7 +2,6 @@ import {
   ABILITIES,
   ABILITY_ORDER,
   ROLES,
-  RESOURCE_NAMES,
   abilityLevel
 } from "../core/abilities";
 import {
@@ -63,12 +62,10 @@ import {
 import {
   CHAPTERS,
   forkNodeForRoute,
-  NODE_INTEL,
   getChapter,
   getNode,
   getNodeForRole
 } from "../core/story";
-import { chapterNarrative } from "../core/chapterNarrative";
 import type {
   AbilityId,
   ChoiceOutcome,
@@ -83,11 +80,7 @@ import { ManualRtcPeer, type RtcMessage } from "../net/rtc";
 import { RoomClient, type RoomServerMessage } from "../net/roomClient";
 import { GameAudioV2 } from "../audio-v2";
 import { ThemeMusic } from "../core/theme-music";
-import {
-  stageForChapter,
-  reconMoments
-} from "../core/expedition";
-import { npcStoryFor } from "../core/npcStories";
+import { reconMoments } from "../core/expedition";
 import type { LeadershipGamesApp, LeadershipGameId } from "./leadership-games";
 import type { TeamAcademyApp } from "./team-academy";
 import {
@@ -103,12 +96,10 @@ import {
   type CoachGoal,
   type CoachPlan
 } from "../core/coach-plan";
-import { scenarioCoachHint } from "../core/coach-hints";
 import {
   ASSESSMENT_QUESTIONS,
   certificationLevel
 } from "../core/assessment";
-import { NPCS } from "../core/npcs";
 import {
   dailyChallenges,
   todayKey,
@@ -119,9 +110,6 @@ import { scoreTrainingAnswers } from "../core/training";
 import {
   EXPANDED_TRAINING
 } from "../core/trainingExtras";
-import {
-  EXPANDED_TRAINING_EN
-} from "../core/trainingExtrasEn";
 import {
   PRACTICE_TASKS,
   TRIAL_STAGES,
@@ -140,12 +128,11 @@ import {
   readAnalyticsEvents,
   trackEvent
 } from "../core/analytics";
-import { ROLE_EN } from "../core/translations";
-import { rankName, chapterDisplay, abilityDisplay, abilityDetailDisplay, roleDisplay, resourceDisplay, qualityLabel, npcDisplay, npcAvatarColor, achievementDisplay, aiArchetypeLabel, leadershipLensText, roleMove, nodeIntel, resourceChips, dimensionMarkup } from "./display";
+import { rankName, abilityDisplay, roleDisplay, qualityLabel, aiArchetypeLabel } from "./display";
 import { buildReportMarkdown, downloadText, encodeSaveLink } from "./export";
 import { artAsset, chapterArtStyle } from "./assets";
 import { storyNodeDisplay } from "./nodeView";
-import { escapeAttr, escapeHtml, formatDelta } from "./escape";
+import { escapeAttr, escapeHtml } from "./escape";
 import { abilityView, endingView, reportView } from "./reportView";
 import { settingsView } from "./settingsView";
 import { achievementsView } from "./achievementsView";
@@ -165,18 +152,14 @@ import { trialView } from "./trialView";
 import { trialBattleView } from "./trialBattleView";
 import { assessmentResultView, assessmentView } from "./assessmentView";
 import { hiddenBranchView } from "./hiddenBranchView";
+import { storyView } from "./storyView";
 import {
-  optionCostSummary,
   primaryAbilityForOption,
   storyOptionOrder
 } from "./storyMarkup";
 import { renderAbilityRadar, renderGroupRadar } from "./charts";
 import { renderPowerBoard } from "./art";
 import { renderTrainingBoard } from "./trainingArt";
-import {
-  proceduralNarrativeFor,
-  scenarioShellFor
-} from "../core/scenarioShell";
 import {
   dueReviewCards,
   dualAxisQuality,
@@ -705,115 +688,6 @@ export class AdaptiveGameApp {
   }
 
 
-  private explorationPanelMarkup(node: StoryNode): string {
-    const en = this.language === "en";
-    const seed = this.save.scenarioSeed ?? 1;
-    const moments = reconMoments(node.chapterId, node.id, seed);
-    const found = this.save.explorationFound?.[node.id] ?? [];
-    const doneAll = (this.save.explorationCompleted ?? []).includes(node.id);
-    const actions = moments
-      .map((moment) => {
-        const done = found.includes(moment.kind);
-        return `
-          <button
-            class="exploration-action ${done ? "done" : ""}"
-            data-action="expedition-explore"
-            data-kind="${moment.kind}"
-            ${done ? "disabled" : ""}
-          >${done ? "✓ " : ""}${escapeHtml(en ? moment.titleEn : moment.titleZh)}</button>
-        `;
-      })
-      .join("");
-    const findings = found
-      .map((kind) => {
-        const moment = moments.find((item) => item.kind === kind);
-        if (!moment) return "";
-        return `
-          <p>
-            <strong>${escapeHtml(en ? moment.titleEn : moment.titleZh)}</strong>
-            ${escapeHtml(en ? moment.textEn : moment.textZh)}
-          </p>
-        `;
-      })
-      .join("");
-    return `
-      <section class="exploration-panel ${doneAll ? "complete" : ""}">
-        <div class="exploration-head">
-          <span>${en ? "Field recon" : "情报勘察"}</span>
-          <strong>${found.length} / 3</strong>
-        </div>
-        <div class="exploration-actions">${actions}</div>
-        <div class="exploration-findings">${findings}</div>
-        ${doneAll ? `<p class="exploration-reward">${en ? "Full survey complete: +1 focus ability, +2 energy, +1 mastery." : "完整勘察完成：重点能力+1、精力+2、修炼点+1。"}</p>` : ""}
-      </section>
-    `;
-  }
-
-  private integrityGateMarkup(node: StoryNode): string {
-    if (this.pendingIntegrityOption === undefined) return "";
-    const option = node.options[this.pendingIntegrityOption];
-    if (!option) return "";
-    const en = this.language === "en";
-    if (this.integrityGateMode === "ability") {
-      const primary = primaryAbilityForOption(option);
-      const distractors = ABILITY_ORDER.filter((id) => id !== primary).slice(
-        0,
-        2
-      );
-      return `
-        <section class="integrity-gate" role="dialog" aria-label="${en ? "Weakness verification" : "短板验证"}">
-          <div class="integrity-gate-head">
-            <span>${en ? "Adaptive Weakness Check" : "自适应短板验证"}</span>
-            <h3>${en ? "Recent decisions missed too many expert moves." : "你近期的决策错过了太多专家方案。"}</h3>
-            <p>${en ? "Name the ability this move truly tests before it can pass." : "先说出这一手真正考验的能力，才能继续。"}</p>
-          </div>
-          <div class="integrity-gate-options">
-            ${[primary, ...distractors]
-              .map(
-                (id) => `
-                  <button data-action="integrity-answer" data-ability="${id}">
-                    ${abilityDisplay(this.language, id).name}
-                    <small>${abilityDisplay(this.language, id).tagline}</small>
-                  </button>
-                `
-              )
-              .join("")}
-          </div>
-        </section>
-      `;
-    }
-    const cost = optionCostSummary(this.language,option);
-    const wrongOne = en
-      ? "No cost at all; the choice itself is the answer"
-      : "没有代价，选择本身就是答案";
-    const wrongTwo = en
-      ? "It only affects other people, not you"
-      : "只影响别人，不影响你";
-    return `
-      <section class="integrity-gate" role="dialog" aria-label="${en ? "Colleague verification" : "同事验证"}">
-        <div class="integrity-gate-head">
-          <span>${en ? "Decision Witness" : "决策见证人"}</span>
-          <h3>${en ? "Mechanical pick pattern detected." : "检测到机械选择模式。"}</h3>
-          <p>${en ? "Before this move counts, name its real trade-off." : "在让这一手生效前，先说出它真正的取舍。"}</p>
-        </div>
-        <div class="integrity-gate-options">
-          <button data-action="integrity-answer" data-cost="correct">
-            ${escapeHtml(cost)}
-            <small>${en ? "This is the actual trade-off" : "这才是真实的取舍"}</small>
-          </button>
-          <button data-action="integrity-answer" data-cost="wrong-one">
-            ${escapeHtml(wrongOne)}
-            <small>${en ? "Too convenient to be true" : "太顺理成章，反而不真实"}</small>
-          </button>
-          <button data-action="integrity-answer" data-cost="wrong-two">
-            ${escapeHtml(wrongTwo)}
-            <small>${en ? "Ignoring who carries the cost" : "忽略了代价由谁承担"}</small>
-          </button>
-        </div>
-      </section>
-    `;
-  }
-
   private render(): void {
     switch (this.view) {
       case "menu":
@@ -1052,351 +926,46 @@ export class AdaptiveGameApp {
     });
   }
 
-  /** 上一章章末路线横幅：让玩家看到选择真的带到了下一章。 */
-  private routeBannerMarkup(chapterId: number): string {
-    const route = this.save.routePath[chapterId - 1];
-    if (!route) return "";
-    const labelKey =
-      route === "expert"
-        ? "routeExpert"
-        : route === "risk"
-          ? "routeRisk"
-          : "routePartial";
-    return `
-      <div class="route-banner" role="status">
-        <strong>${escapeHtml(this.t("routeBannerPrefix"))}</strong>
-        <span>${escapeHtml(this.t(labelKey))}</span>
-      </div>
-    `;
-  }
-
-  private proceduralNarrativeMarkup(): string {
-    if (!this.storyNodeId) return "";
-    let node: StoryNode;
-    try {
-      node = getNode(this.storyNodeId);
-    } catch {
-      return "";
-    }
-    const narrative = proceduralNarrativeFor(
-      node.chapterId,
-      this.save.scenarioSeed ?? 1,
-      this.save.profile.role
-    );
-    const en = this.language === "en";
-    return `
-      <details class="procedural-narrative">
-        <summary>${en ? "Procedural Narrative" : "程序化叙事"}</summary>
-        <p>${escapeHtml(en ? narrative.en : narrative.zh)}</p>
-      </details>
-    `;
-  }
-
   private renderStory(): void {
     if (!this.storyNodeId) {
       this.show("map");
       return;
     }
-    const node = storyNodeDisplay(this.language, this.save,
-      getNodeForRole(this.save.profile.role, this.storyNodeId)
-    );
-    const chapter = chapterDisplay(this.language, getChapter(node.chapterId));
-    const en = this.language === "en";
+    const node = getNodeForRole(this.save.profile.role, this.storyNodeId);
     let scenarioSeed = this.save.scenarioSeed;
     if (scenarioSeed === undefined) {
       scenarioSeed = Math.floor(Math.random() * 1_000_000) + 1;
       this.save.scenarioSeed = scenarioSeed;
     }
-    const scenarioShell = scenarioShellFor(node.chapterId, scenarioSeed);
     const showingOutcome = this.lastOutcomeNodeId === node.id && this.lastOutcome;
-    const showOnboarding = this.save.playCount === 0 && !showingOutcome;
-    const civ = stageForChapter(node.chapterId);
-    const narrative = chapterNarrative(node.chapterId);
-    const isExtraMainNode =
-      node.kind === "main" && /n[3-9]$/.test(node.id);
-    const chapterFocusAbility = chapter.focus[0] ?? "insight";
-    const lessonExtra =
-      this.language === "en"
-        ? EXPANDED_TRAINING_EN[chapterFocusAbility]
-        : EXPANDED_TRAINING[chapterFocusAbility];
-    const sceneNpc = NPCS.find(
-      (npc) =>
-        npc.nodeId === node.id ||
-        (npc.nodeId.startsWith("c") &&
-          Number(npc.nodeId.slice(1, 2)) === node.chapterId)
-    );
-    const explorationFound = this.save.explorationFound?.[node.id] ?? [];
-    const explorationReady =
-      this.replayMode || showingOutcome || explorationFound.length > 0;
     if (!showingOutcome && !this.replayMode) {
       this.save.lastStoryNodeId = node.id;
       this.persistSave();
     }
-    const relevantAbilities = [
-      ...new Set(
-        node.options.flatMap((option) =>
-          Object.keys(option.effects) as AbilityId[]
-        )
-      )
-    ];
-    const optionOrder = storyOptionOrder(this.save,node);
-    const optionGates = optionOrder.map((index) =>
-      optionGateFor(this.save, node.options[index], node.chapterId)
-    );
-    const enabledOptionCount = optionGates.filter(
-      (gate) => gate.kind === "ok"
-    ).length;
-    const energyLocked = optionGates.some(
-      (gate) => gate.kind === "resource" && gate.resource === "energy"
-    );
     if (node.chapterId !== this.lastEnergyRestoreChapter) {
       this.lastEnergyRestoreChapter = node.chapterId;
       this.energyRestoreUsed = false;
     }
-    const unlockAbility = relevantAbilities.find(
-      (id) => abilityLevel(this.save.profile.abilities[id]) >= 3
-    );
-    this.root.innerHTML = `
-      <header class="topbar">
-        <div class="brand">${this.t("brand")}</div>
-        <div class="topbar-meta">
-          ${resourceChips(this.language, this.save.profile)}
-          <span id="round-timer" class="round-timer" style="display:none"></span>
-        </div>
-      </header>
-      <main class="story-shell" style="${chapterArtStyle(chapter.id)}" aria-label="${this.language === "en" ? "Story scenario" : "剧情情境"}">
-        ${this.routeBannerMarkup(node.chapterId)}
-        ${
-          this.riskCrisisActive()
-            ? `<div class="trust-crisis-banner" role="alert">${this.language === "en" ? "Trust is shaking: recent risk-heavy choices made the team withhold information. Choose steady moves to rebuild trust." : "信任正在动摇：你近期的风险选择让团队开始保留信息。选择稳健动作可以重建信任。"}</div>`
-            : ""
-        }
-        <div class="scenario-shell" aria-label="${en ? "Scenario shell" : "情境外壳"}">
-          <span>${en ? "Scenario shell" : "情境外壳"}</span>
-          <strong>${en ? scenarioShell.en : scenarioShell.zh}</strong>
-        </div>
-        <section class="expedition-scene" style="--civ:${civ.color}">
-          <div>
-            <span>${en ? `${civ.nameEn} · ${civ.focusEn}` : `${civ.nameZh} · ${civ.focusZh}`}</span>
-            <strong>${en ? "Intel Journal" : "情报笔记"}</strong>
-          </div>
-          <p>${escapeHtml(en ? civ.clueEn : civ.clueZh)}</p>
-        </section>
-        ${
-          narrative
-            ? `
-              <section class="chapter-narrative" style="--civ:${civ.color}">
-                <div class="chapter-narrative-art" style="background-image:url('./art/chapter-${node.chapterId}.jpg')"></div>
-                <div class="chapter-narrative-copy">
-                  <span>${en ? "Chapter Story" : "本章剧情"}</span>
-                  <h2>${en ? "The story behind this chapter" : "这一章发生了什么"}</h2>
-                  <p>${escapeHtml(en ? narrative.en[0] : narrative.zh[0])}</p>
-                  <details>
-                    <summary>${en ? "Continue the story" : "继续看剧情"}</summary>
-                    ${(en ? narrative.en : narrative.zh)
-                      .slice(1)
-                      .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
-                      .join("")}
-                  </details>
-                </div>
-              </section>
-            `
-            : ""
-        }
-        ${
-          node.chapterId === 4 || node.chapterId === 7
-            ? `<div class="route-checkpoint" role="status">${this.language === "en" ? "Route checkpoint: your earlier choices are now shaping upcoming events and endings." : "路线分叉：此前的选择正在改变后续事件与结局权重。"}</div>`
-            : ""
-        }
-        ${this.replayMode ? `<button class="link replay-exit" data-action="open-map">${this.t("replayExit")}</button>` : ""}
-        ${
-          this.wrongReviewQueue.length
-            ? `<div class="wrong-review-header" role="status">${this.language === "en" ? `Missed-move review ${this.wrongReviewIndex + 1}/${this.wrongReviewQueue.length}` : `错题回练 ${this.wrongReviewIndex + 1}/${this.wrongReviewQueue.length}`}</div>`
-            : ""
-        }
-        <button class="link back-link" data-action="open-map">${this.t("backToMap")}</button>
-        <section class="story-art">
-          <canvas id="story-art" aria-label="${this.language === "en" ? "Diagram of the current situation" : "当前情境的局势示意图"}"></canvas>
-        </section>
-        <section class="story-layout">
-          <section class="story-narrative">
-            <section class="scenario-panel">
-              <div class="scenario-meta">
-                <span>${this.language === "en" ? `Chapter ${chapter.code} · ${chapter.title}` : `第 ${chapter.code} 章 · ${chapter.title}`}</span>
-                <span>${node.kind === "side" ? this.t("storyKindSide") : node.kind === "branch" ? this.t("storyKindBranch") : node.kind === "random" ? this.t("storyKindRandom") : isExtraMainNode ? (en ? "Extended Main Scenario" : "主线扩展情境") : this.t("storyKindMain")}</span>
-              </div>
-              <h1>${node.title}</h1>
-              ${
-                this.interferenceText
-                  ? `
-                    <div class="interference-banner" role="alert">
-                      <strong>${this.t("interferenceTitle")}</strong>
-                      <span>${escapeHtml(this.interferenceText)}</span>
-                    </div>
-                  `
-                  : ""
-              }
-              ${
-                showOnboarding
-                  ? `
-                    <div class="onboarding-tip">
-                      <strong>${this.t("onboardingTitle")}</strong>
-                      <p>${this.t("onboarding1")}</p>
-                      <p>${this.t("onboarding2")}</p>
-                      <p>${this.t("onboarding3")}</p>
-                    </div>
-                  `
-                  : ""
-              }
-              ${
-                unlockAbility
-                  ? `
-                    <div class="ability-unlock-banner">
-                      <strong>${abilityDisplay(this.language, unlockAbility).name} Lv.${abilityLevel(this.save.profile.abilities[unlockAbility])} · ${this.t("abilityUnlockTitle")}</strong>
-                      <p>${this.t("abilityUnlockText")}</p>
-                    </div>
-                  `
-                  : ""
-              }
-              <div class="role-lens">
-                <strong>${roleDisplay(this.language, this.save.profile.role).name}${this.language === "zh" ? "视角" : " Lens"}</strong>
-                <span class="role-tag">${this.language === "en" ? "Role-specific" : "角色专属"}</span>
-                <p>${escapeHtml(this.language === "en" ? ROLE_EN[this.save.profile.role].lens : ROLES[this.save.profile.role].lens)}</p>
-              </div>
-              <p class="scenario-context">${escapeHtml(node.context)}</p>
-              ${this.proceduralNarrativeMarkup()}
-              <div class="stake">
-                <strong>${this.t("currentTest")}</strong>
-                <p>${escapeHtml(node.stake)}</p>
-              </div>
-              ${
-                sceneNpc
-                  ? `
-                    <div class="npc-scene-quote" style="--dot:${npcAvatarColor(sceneNpc.id)}">
-                      <span>${escapeHtml(npcDisplay(this.language, sceneNpc).name)}</span>
-                      <p>${escapeHtml(
-                        this.language === "en"
-                          ? (npcStoryFor(sceneNpc.id)?.en[1] ??
-                              npcDisplay(this.language, sceneNpc).description)
-                          : (npcStoryFor(sceneNpc.id)?.zh[1] ??
-                              npcDisplay(this.language, sceneNpc).description)
-                      )}</p>
-                    </div>
-                  `
-                  : ""
-              }
-              <section class="story-lesson" style="--dot:${ABILITIES[chapterFocusAbility].color}">
-                <span>${en ? "Chapter Practice" : "本章修炼"} · ${abilityDisplay(this.language, chapterFocusAbility).name}</span>
-                <details class="fold fold-formula">
-                  <summary>${en ? "Practice formula" : "修炼公式"}</summary>
-                  <code>${escapeHtml(lessonExtra.formula.expression)}</code>
-                  <p>${escapeHtml(lessonExtra.roleApplications[this.save.profile.role])}</p>
-                </details>
-                <button data-action="open-training" data-ability="${chapterFocusAbility}">${en ? "Enter Practice" : "进入修炼"}</button>
-              </section>
-            </section>
-          </section>
-          <aside class="story-side">
-            <section class="intel-panel">
-              <details class="fold fold-intel">
-                <summary class="intel-head">
-                  <span>${this.t("intelTitle")}</span>
-                  <small>${this.t("intelHint")}</small>
-                </summary>
-                <div class="intel-list">
-                  ${nodeIntel(this.language, this.save.profile.role, node).map((clue) => `<p>${escapeHtml(clue)}</p>`).join("")}
-                </div>
-              </details>
-            </section>
-            <section class="decision-panel">
-              ${
-                showingOutcome && this.lastOutcome
-                  ? this.outcomeMarkup(this.lastOutcome)
-                  : `
-                    ${
-                      this.lastTimedOut
-                        ? `<p class="timed-out-note">${escapeHtml(this.t("timedOutNote"))}</p>`
-                        : ""
-                    }
-                    <div class="hint-controls">
-                      <button data-action="toggle-hint">${this.storyHintRevealed ? this.t("hideHint") : this.t("showHint")}</button>
-                      ${
-                        this.storyHintRevealed
-                          ? `<p class="coach-hint">${escapeHtml(this.adaptiveHint(node))}</p>`
-                          : ""
-                      }
-                    </div>
-                    ${
-                      enabledOptionCount === 0 && energyLocked
-                        ? `
-                          <div class="energy-restore-panel" role="status">
-                            <strong>${this.language === "en" ? "Energy exhausted" : "精力耗尽"}</strong>
-                            <p>${this.language === "en" ? "Every move needs more energy right now. Take a breath to recover +25 once per chapter." : "当前所有选项都需要更多精力。深呼吸恢复 +25，每章限一次。"}</p>
-                            ${
-                              this.energyRestoreUsed
-                                ? `<small>${this.language === "en" ? "Recovery already used this chapter." : "本章恢复已使用。"}</small>`
-                                : `<button data-action="energy-restore">${this.language === "en" ? "Breathe & Recover +25" : "深呼吸恢复 +25"}</button>`
-                            }
-                          </div>
-                        `
-                        : ""
-                    }
-                    ${
-                      this.integrityGateNodeId === node.id
-                        ? this.integrityGateMarkup(node)
-                        : `
-                          ${!showingOutcome && !this.replayMode ? this.explorationPanelMarkup(node) : ""}
-                          ${
-                            !explorationReady && !showingOutcome && !this.replayMode
-                              ? `<p class="exploration-lock-note">${en ? "Complete one recon action to unlock the choices." : "先完成一个勘察动作，才能解锁选择。"}</p>`
-                              : ""
-                          }
-                          <div class="option-list">
-                            ${optionOrder
-                              .map(
-                                (originalIndex, index) => {
-                                  const option = node.options[originalIndex];
-                                  const gate = optionGateFor(
-                                    this.save,
-                                    option,
-                                    node.chapterId
-                                  );
-                                  const blocked =
-                                    gate.kind !== "ok" || !explorationReady;
-                                  const gateNote =
-                                    gate.kind === "resource"
-                                      ? `${this.t("optionLockedResource")} ${resourceDisplay(this.language, gate.resource)} ${gate.needed}`
-                                      : gate.kind === "ability"
-                                        ? `${this.t("optionLockedAbility")} ${abilityDisplay(this.language, gate.ability).name} Lv.${gate.needed}`
-                                        : !explorationReady
-                                          ? en
-                                            ? "Complete a recon action first"
-                                            : "先完成一个勘察动作"
-                                          : "";
-                                  return `
-                                    <button class="option-card ${blocked ? "locked" : ""}" data-action="choose-option" data-option="${originalIndex}" data-quality="${option.quality}" ${blocked ? "disabled" : ""}>
-                                      <span class="option-letter">${String.fromCharCode(65 + index)}</span>
-                                      <span class="option-body">
-                                        <strong>${escapeHtml(option.label)}</strong>
-                                        <em>${escapeHtml(option.summary)}</em>
-                                        <small class="role-move">${roleMove(this.language, this.save.profile.role,option.quality)}</small>
-                                        ${gateNote ? `<small class="option-gate-note">${escapeHtml(gateNote)}</small>` : ""}
-                                      </span>
-                                    </button>
-                                  `;
-                                }
-                              )
-                              .join("")}
-                          </div>
-                        `
-                    }
-                  `
-              }
-            </section>
-          </aside>
-        </section>
-      </main>
-    `;
+    this.root.innerHTML = storyView(this.save, this.language, {
+      storyNodeId: this.storyNodeId,
+      replayMode: this.replayMode,
+      interferenceText: this.interferenceText,
+      storyHintRevealed: this.storyHintRevealed,
+      lastTimedOut: this.lastTimedOut,
+      energyRestoreUsed: this.energyRestoreUsed,
+      integrityGateNodeId: this.integrityGateNodeId,
+      lastOutcome: this.lastOutcome,
+      lastOutcomeNodeId: this.lastOutcomeNodeId,
+      pendingIntegrityOption: this.pendingIntegrityOption,
+      integrityGateMode: this.integrityGateMode,
+      pendingChapterTransition: this.pendingChapterTransition,
+      pendingForkNodeId: this.pendingForkNodeId,
+      pendingBranchNodeId: this.pendingBranchNodeId,
+      lastUnlockedAchievement: this.lastUnlockedAchievement,
+      wrongReviewQueue: this.wrongReviewQueue,
+      wrongReviewIndex: this.wrongReviewIndex,
+      riskCrisis: this.riskCrisisActive()
+    });
     this.applyStoryFolds();
     const storyArt = this.root.querySelector<HTMLCanvasElement>("#story-art");
     if (storyArt) {
@@ -6402,15 +5971,6 @@ export class AdaptiveGameApp {
     }, 1200);
   }
 
-  private adaptiveHint(node: StoryNode): string {
-    return scenarioCoachHint({
-      node,
-      save: this.save,
-      language: this.language,
-      seed: this.save.scenarioSeed
-    });
-  }
-
   private reviewAbilityFor(nodeId: string): string {
     try {
       return getChapter(getNode(nodeId).chapterId).focus[0];
@@ -6429,228 +5989,6 @@ export class AdaptiveGameApp {
         <button data-action="open-due-review">${en ? "Review Now" : "立即回练"}</button>
       </section>
     `;
-  }
-
-  private sixPartReviewMarkup(outcome: ChoiceOutcome): string {
-    const en = this.language === "en";
-    const nodeId = this.lastOutcomeNodeId ?? this.storyNodeId;
-    let node: StoryNode | null = null;
-    try {
-      if (nodeId) {
-        node = storyNodeDisplay(this.language, this.save,
-          getNodeForRole(this.save.profile.role, nodeId)
-        );
-      }
-    } catch {
-      node = null;
-    }
-    if (!node) return "";
-    const intel = NODE_INTEL[node.id] ?? [];
-    const expert = node.options.find(
-      (option) => option.quality === "expert"
-    );
-    const quality = outcome.option.quality;
-    const lesson =
-      quality === "expert"
-        ? en
-          ? "Replicate this pattern in the next similar situation: diagnose first, act second, and keep a verifiable standard."
-          : "把这一判断复制到下一个相似情境：先诊断、再行动，用可验证标准守住结果。"
-        : quality === "partial"
-          ? en
-            ? "You solved part of it. Hand the responsibility and verification node back instead of carrying the team alone."
-            : "你解决了一半；下一步把责任和验证节点还回去，而不是继续替团队扛。"
-          : en
-            ? "Stop the loss first, then review. Confirm key information and trust before using authority or risk again."
-            : "先止损再复盘；下一次先确认关键信息和信任，再动用权威或冒险。";
-    return `
-      <details class="six-part-review">
-        <summary>${en ? "Six-Part Review" : "六段式复盘"}</summary>
-        <dl>
-          <div>
-            <dt>${en ? "Situation" : "现场"}</dt>
-            <dd>${escapeHtml(node.context)}</dd>
-          </div>
-          <div>
-            <dt>${en ? "Intel" : "情报"}</dt>
-            <dd>${intel.length ? `<ul>${intel.slice(0, 3).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : escapeHtml(node.stake)}</dd>
-          </div>
-          <div>
-            <dt>${en ? "Trade-off" : "取舍"}</dt>
-            <dd>${escapeHtml(outcome.option.label)} · ${escapeHtml(outcome.option.summary)}</dd>
-          </div>
-          <div>
-            <dt>${en ? "Outcome" : "结果"}</dt>
-            <dd>${escapeHtml(outcome.option.feedback)}</dd>
-          </div>
-          <div>
-            <dt>${en ? "Comparison" : "对比"}</dt>
-            <dd>${en ? `Your move: ${qualityLabel(this.language, quality)}` : `你的选择：${qualityLabel(this.language, quality)}`}${expert ? ` · ${en ? "Expert baseline" : "专家基准"}：${escapeHtml(expert.label)}` : ""}</dd>
-          </div>
-          <div>
-            <dt>${en ? "Lesson" : "教训"}</dt>
-            <dd>${escapeHtml(lesson)}</dd>
-          </div>
-        </dl>
-      </details>
-    `;
-  }
-
-  private outcomeMarkup(outcome: ChoiceOutcome): string {
-    const option = outcome.option;
-    const transitionId = this.pendingChapterTransition;
-    const forkId = this.pendingForkNodeId;
-    const action = forkId
-      ? "finish-fork"
-      : transitionId
-        ? "continue-transition"
-        : this.pendingBranchNodeId
-          ? "continue-branch"
-          : "continue-story";
-    const actionLabel = forkId
-      ? this.language === "en"
-        ? "Finish Fork"
-        : "完成分叉"
-      : transitionId
-        ? this.language === "en"
-          ? "View Chapter Transition"
-          : "查看章节过渡"
-        : this.pendingBranchNodeId
-          ? this.language === "en"
-            ? this.pendingBranchNodeId.startsWith("ability-")
-              ? "Enter Advanced Review"
-              : "Enter Role Branch"
-            : this.pendingBranchNodeId.startsWith("ability-")
-              ? "进入高阶复盘"
-              : "进入角色分岔"
-          : this.language === "en"
-            ? "Back to Map"
-            : "返回地图";
-    const reviewActive = this.wrongReviewQueue.length > 0;
-    const finalAction = reviewActive ? "next-wrong-review" : action;
-    const finalLabel = reviewActive
-      ? this.wrongReviewIndex + 1 >= this.wrongReviewQueue.length
-        ? this.language === "en"
-          ? "Finish Review"
-          : "完成回练"
-        : this.language === "en"
-          ? "Next Missed Move"
-          : "下一道错题"
-      : actionLabel;
-    const streak = this.expertStreak();
-    const encouragement =
-      option.quality === "expert"
-        ? streak >= 2
-          ? this.language === "en"
-            ? `Expert streak x${streak}. You are finding your decision rhythm.`
-            : `连续专家判断 x${streak}，你已经找到自己的判断节奏！`
-          : this.language === "en"
-            ? "Precise read. Keep this rhythm."
-            : "这一手判断精准，保持这个节奏。"
-        : option.quality === "partial"
-          ? this.language === "en"
-            ? "Good direction; make the next step steadier."
-            : "方向不错，下一步可以更稳。"
-          : this.language === "en"
-            ? "You acted under pressure; that courage is part of leadership."
-            : "你敢于在高压中行动，这份胆识也是领导力的一部分。";
-    return `
-      <section class="outcome-panel" role="status" aria-live="polite">
-        <span class="quality ${option.quality}">${qualityLabel(this.language, option.quality)}</span>
-        <div class="positive-feedback">${encouragement}</div>
-        <div class="story-advancement ${option.quality}">${this.storyAdvancementText(outcome)}</div>
-        ${
-          this.lastUnlockedAchievement
-            ? `<div class="achievement-unlock">${this.language === "en" ? "Achievement Unlocked: " : "新成就解锁："}${escapeHtml(this.lastUnlockedAchievement)}</div>`
-            : ""
-        }
-        <h2>${escapeHtml(option.label)}</h2>
-        <p>${escapeHtml(option.feedback)}</p>
-        <blockquote>${escapeHtml(option.theory)}</blockquote>
-        ${this.sixPartReviewMarkup(outcome)}
-        <div class="leadership-lens ${option.quality}">
-          <strong>${this.language === "en" ? "Adaptive Leadership Lens" : "自适应领导力视角"}</strong>
-          <p>${escapeHtml(leadershipLensText(this.language, option.quality))}</p>
-        </div>
-        <div class="outcome-effects score-pop">
-          <span><b>+${outcome.qualityScore}</b> ${this.language === "en" ? "Expert Fit" : "专家契合分"}</span>
-          ${outcome.gainedAbilityIds.map((id) => `<span><b>+${option.effects[id] ?? 0}</b> ${abilityDisplay(this.language, id).name}</span>`).join("")}
-          ${(Object.keys(outcome.resourceDeltas) as ResourceKey[])
-            .filter((key) => outcome.resourceDeltas[key])
-            .map(
-              (key) => `
-                <span class="${(outcome.resourceDeltas[key] ?? 0) < 0 ? "negative" : "positive"}">
-                  <b>${formatDelta(outcome.resourceDeltas[key] ?? 0)}</b> ${resourceDisplay(this.language, key)}
-                </span>
-              `
-            )
-            .join("")}
-        </div>
-        ${outcome.resourceStrain ? `<p class="strain-note">${this.t("strainNote")} -${outcome.resourceStrain}</p>` : ""}
-        <div class="outcome-resources">
-          ${(Object.keys(RESOURCE_NAMES) as ResourceKey[])
-            .map((key) => {
-              const value = this.save.profile.resources[key];
-              return `
-                <span class="outcome-resource ${value < 30 ? "low" : ""}">
-                  <b>${resourceDisplay(this.language, key)}</b>
-                  <i><em style="width:${Math.round(value)}%"></em></i>
-                  <small>${Math.round(value)}</small>
-                </span>
-              `;
-            })
-            .join("")}
-        </div>
-        <canvas id="outcome-relations" class="outcome-relations" aria-label="${this.language === "en" ? "Relationship graph after this decision" : "本次决策后的人物关系图"}"></canvas>
-        <button class="primary" data-action="${finalAction}">${finalLabel}</button>
-      </section>
-    `;
-  }
-
-  private storyAdvancementText(outcome: ChoiceOutcome): string {
-    const en = this.language === "en";
-    let kind = "main";
-    try {
-      if (this.storyNodeId) {
-        kind = getNode(this.storyNodeId).kind;
-      }
-    } catch {
-      // keep main
-    }
-    if (kind === "side") {
-      return en
-        ? "Side story advances: this relationship moved one step forward."
-        : "支线剧情推进：你与这个人的关系向前走了一步。";
-    }
-    if (kind === "branch" || this.pendingBranchNodeId) {
-      return en
-        ? "The story is branching: your choice is opening a new route."
-        : "剧情分叉：你的选择正在打开一条新路线。";
-    }
-    if (outcome.option.quality === "expert") {
-      return en
-        ? "The story advances: key people begin trusting you, and new information opens."
-        : "剧情推进：关键人物开始信任你，新的信息向你开放。";
-    }
-    if (outcome.option.quality === "partial") {
-      return en
-        ? "The story holds steady, but the real tension is still unresolved."
-        : "剧情暂时稳住，但真正的悬念还没有解开。";
-    }
-    return en
-      ? "The story shifts: your strong signal changed the situation, and the cost begins to show."
-      : "剧情转向：你用强信号改变了局面，代价也开始显现。";
-  }
-
-  private expertStreak(): number {
-    let streak = 0;
-    for (let i = this.save.decisionHistory.length - 1; i >= 0; i -= 1) {
-      if (this.save.decisionHistory[i].quality === "expert") {
-        streak += 1;
-      } else {
-        break;
-      }
-    }
-    return streak;
   }
 
   private latestDecisionText(): string {
