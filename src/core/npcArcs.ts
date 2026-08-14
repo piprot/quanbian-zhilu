@@ -104,7 +104,7 @@ export const NPC_ARCS: Record<string, NpcArc> = {
   },
   "npc-chen": {
     zh: [
-      "陈宇同意在小范围会上重新发言，条件是你会亲口引用他的方案。他说，他不需要掌声，需要看到自己的观点被认真使用。",
+      "陈屿同意在小范围会上重新发言，条件是你会亲口引用他的方案。他说，他不需要掌声，需要看到自己的观点被认真使用。",
       "如果引用后方案被采纳，他会继续补充第二版；如果被否，他希望你知道否的是方案，不是他的人。"
     ],
     en: [
@@ -117,7 +117,7 @@ export const NPC_ARCS: Record<string, NpcArc> = {
       answerZh: "引用那个「最可能被跳过」的建议，而不是最受欢迎的建议。那才是我真正想被听见的东西。",
       answerEn: "Quote the suggestion most likely to be skipped, not the most popular one. That is what I actually want heard."
     },
-    questZh: "在小范围会议中亲口引用陈宇方案里最容易被跳过的建议。",
+    questZh: "在小范围会议中亲口引用陈屿方案里最容易被跳过的建议。",
     questEn: "Quote the most easily skipped suggestion from Chen Yu's proposal in a small meeting."
   },
   "npc-shen": {
@@ -176,11 +176,11 @@ export const NPC_ARCS: Record<string, NpcArc> = {
   },
   "npc-tang": {
     zh: [
-      "唐瑶获得不被打断的恢复时段后，开始主动设计自己的「不可占用时间」。她说，她以前把忙当成安全感，现在想证明休息不会让交付变差。",
+      "唐岚获得不被打断的恢复时段后，开始主动设计自己的「不可占用时间」。她说，她以前把忙当成安全感，现在想证明休息不会让交付变差。",
       "她希望你能帮她守住边界：在她休息时段内，除非真正升级到失控，否则不打扰她。"
     ],
     en: [
-      "With an unbroken recovery slot, Tang Yao starts designing her own 'non-interruptible time'. She used to treat busyness as safety and now wants to prove rest does not weaken delivery.",
+      "With an unbroken recovery slot, Tang Lan starts designing her own 'non-interruptible time'. She used to treat busyness as safety and now wants to prove rest does not weaken delivery.",
       "She asks you to protect the boundary: no interruptions during her slot unless the issue truly escalates beyond control."
     ],
     dialogue: {
@@ -189,8 +189,8 @@ export const NPC_ARCS: Record<string, NpcArc> = {
       answerZh: "当客户已经公开升级、且只有我能救场时。其余时候，先发消息不打电话，让我决定要不要接。",
       answerEn: "Only when a client has publicly escalated and only I can save it. Otherwise, message first; let me decide whether to answer."
     },
-    questZh: "为唐瑶设置每周不被打断的恢复时段，并一起定义唯一的破例标准。",
-    questEn: "Set a weekly non-interruptible recovery slot for Tang Yao and define the single exception together."
+    questZh: "为唐岚设置每周不被打断的恢复时段，并一起定义唯一的破例标准。",
+    questEn: "Set a weekly non-interruptible recovery slot for Tang Lan and define the single exception together."
   },
   "npc-fang": {
     zh: [

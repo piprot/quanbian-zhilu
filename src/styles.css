@@ -12,6 +12,9 @@
   --coral: #e9826c;
   --blue: #4db7d6;
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
+  --ember: var(--coral);
+  --avatar: var(--teal);
+  --text: var(--ink);
 }
 
 * {

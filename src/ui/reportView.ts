@@ -95,14 +95,18 @@ function abilityCard(save: SaveState, language: "zh" | "en", id: AbilityId): str
       <div class="subskill-list">${detail.subSkills.map((skill) => `<span>${escapeHtml(skill)}</span>`).join("")}</div>
       <p class="training-path">${escapeHtml(detail.trainingPath)}</p>
       ${
-        EXPANDED_TRAINING[id]?.formula?.expression
-          ? `<p class="ability-formula">${escapeHtml(EXPANDED_TRAINING[id].formula.expression)}</p>`
-          : ""
-      }
-      ${
-        EXPANDED_TRAINING[id]?.workedExamples?.[0]?.scenario
-          ? `<p class="ability-example">${escapeHtml(EXPANDED_TRAINING[id].workedExamples[0].scenario)}</p>`
-          : ""
+        (() => {
+          const training =
+            language === "en" ? EXPANDED_TRAINING_EN[id] : EXPANDED_TRAINING[id];
+          return [
+            training?.formula?.expression
+              ? `<p class="ability-formula">${escapeHtml(training.formula.expression)}</p>`
+              : "",
+            training?.workedExamples?.[0]?.scenario
+              ? `<p class="ability-example">${escapeHtml(training.workedExamples[0].scenario)}</p>`
+              : ""
+          ].join("");
+        })()
       }
       ${
         (() => {
@@ -235,7 +239,6 @@ export function abilityView(save: SaveState, language: "zh" | "en"): string {
                   <span style="--dot:${ABILITIES[id].color}"></span>
                   <strong>${abilityDisplay(language, id).name}</strong>
                   <p>${abilityDisplay(language, id).tagline}</p>
-                  <small>${abilityDisplay(language, id).tagline}</small>
                 </div>
               `
             )
@@ -674,7 +677,7 @@ export function reportView(
       </section>
       <section class="local-leaderboard">
         <h3>${language === "en" ? "Local Leaderboard" : "本地排行榜"}</h3>
-        <p>${language === "en" ? `Best Duel Score: ${save.bestScore ?? 0} 路 Wins ${save.duelWins} 路 Losses ${save.duelLosses}` : `最佳对局分：${save.bestScore ?? 0} 路 胜 ${save.duelWins} 路 负 ${save.duelLosses}`}</p>
+        <p>${language === "en" ? `Best Duel Score: ${save.bestScore ?? 0} · Wins ${save.duelWins} · Losses ${save.duelLosses}` : `最佳对局分：${save.bestScore ?? 0} · 胜 ${save.duelWins} · 负 ${save.duelLosses}`}</p>
         ${
           save.duelHistory.length
             ? `<ul>${save.duelHistory
@@ -682,7 +685,7 @@ export function reportView(
                 .reverse()
                 .map(
                   (entry) =>
-                    `<li>${escapeHtml(entry.opponentName)} 路 ${entry.playerScore}:${entry.opponentScore} 路 ${entry.won ? (language === "en" ? "Win" : "胜") : (language === "en" ? "Loss" : "负")}</li>`
+                    `<li>${escapeHtml(entry.opponentName)} · ${entry.playerScore}:${entry.opponentScore} · ${entry.won ? (language === "en" ? "Win" : "胜") : (language === "en" ? "Loss" : "负")}</li>`
                 )
                 .join("")}</ul>`
             : `<p class="muted">${language === "en" ? "Finish a duel to see local records." : "完成一局对战后会显示本地记录。"}</p><button data-action="open-duel">${language === "en" ? "Play a Duel" : "去打一局"}</button>`

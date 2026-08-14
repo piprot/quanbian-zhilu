@@ -317,8 +317,8 @@ export const NPC_STORIES: Record<string, NpcStory> = {
         answerEn: "I want a fixed process that reviews the mechanism before reviewing the person, and this time it cannot stay on paper."
       }
     ],
-    storyNoteZh: "他像连续扛了三轮项目的负责人：愿意重新开始，但需要先看到问题记录、负荷与真正的恢复计划。",
-    storyNoteEn: "He is the lead who carried three rounds of the same project: willing to start over, but only with issue logs, workload data, and a real recovery plan."
+    storyNoteZh: "她像连续扛了三轮项目的负责人：愿意重新开始，但需要先看到问题记录、负荷与真正的恢复计划。",
+    storyNoteEn: "She is the lead who carried three rounds of the same project: willing to start over, but only with issue logs, workload data, and a real recovery plan."
   }
 };
 

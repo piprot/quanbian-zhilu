@@ -291,7 +291,7 @@ export function mapView(
             <div class="challenge-panel weekly-panel mobile-collapse">
               <h3>${language === "en" ? "Weekly Focus" : "本周聚焦"}</h3>
               <p class="muted">${language === "en" ? "One leadership theme per week, not daily chores." : "每周一个领导力主题，少而精。"}</p>
-              <p class="muted">${language === "en" ? `Week ${weekKey()} 路 resets in ${Math.max(0, Math.ceil((weekEndsAt() - Date.now()) / 3600000))}h` : `本周 ${weekKey()} 路 ${Math.max(0, Math.ceil((weekEndsAt() - Date.now()) / 3600000))} 小时后重置`}</p>
+              <p class="muted">${language === "en" ? `Week ${weekKey()} · resets in ${Math.max(0, Math.ceil((weekEndsAt() - Date.now()) / 3600000))}h` : `本周 ${weekKey()} · ${Math.max(0, Math.ceil((weekEndsAt() - Date.now()) / 3600000))} 小时后重置`}</p>
               ${weeklyChallenges(save)
                 .map(
                   (challenge) => `
@@ -329,12 +329,6 @@ export function mapView(
                     <button data-action="rotate-events">${language === "en" ? "Rotate Event Pool" : "轮转事件池"}</button>
                   `
               }
-            </div>
-            <div class="lg-quest-panel">
-              <h3>${language === "en" ? "Leadership Game Center" : "领导力游戏中心"}</h3>
-              <p class="muted">${language === "en" ? `Wins ${save.leadershipGameWins} · Losses ${save.leadershipGameLosses}` : `胜 ${save.leadershipGameWins} · 负 ${save.leadershipGameLosses}`}</p>
-              <p class="muted">${language === "en" ? "Five single-player games with teach, train, and battle modes." : "五个单机游戏，每个都有教学、训练、对战模式。"}</p>
-              <button data-action="open-leadership-games">${language === "en" ? "Enter Game Center" : "进入游戏中心"}</button>
             </div>
             <div class="event-book-panel mobile-collapse">
               <h3>${language === "en" ? "Event Log" : "事件簿"}</h3>

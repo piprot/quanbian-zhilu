@@ -117,7 +117,7 @@ export function settingsView(
             <input type="file" data-import-save accept="application/json" hidden />
           </label>
           <button data-action="reset-profile">${uiString(language, "resetProfile")}</button>
-          <p class="muted">${language === "en" ? `Version ${state.version} 路 Static build` : `版本 ${state.version} 路 静态版`}</p>
+          <p class="muted">${language === "en" ? `Version ${state.version} · Static build` : `版本 ${state.version} · 静态版`}</p>
         </div>
         <div class="settings-panel">
           <h2>${uiString(language, "settingsAccessibility")}</h2>
@@ -134,7 +134,7 @@ export function settingsView(
         <div class="settings-panel">
           <h2>${language === "en" ? "About Ascend" : "关于升维"}</h2>
           <p>${language === "en" ? "Ascend is an offline-first leadership scenario game based on The Book of Power, Heifetz adaptive leadership, and scenario-golf scoring." : "升维是一款基于《权经》九章架构、Heifetz 自适应领导力与情境高尔夫计分法的可离线领导力情境游戏。"}</p>
-          <p class="muted">${language === "en" ? "v1.1 路 standard mode has no decision timer; failed chapters can be retried; duels can be resumed after refresh." : "v1.1 路 标准档不计时；未达一星的章节可重打；对局刷新后可续战。"}</p>
+          <p class="muted">${language === "en" ? "v1.1 · standard mode has no decision timer; failed chapters can be retried; duels can be resumed after refresh." : "v1.1 · 标准档不计时；未达一星的章节可重打；对局刷新后可续战。"}</p>
           <p class="muted">${language === "en" ? "Static content includes the full campaign, role branches, 9 side quests, training formulas, trials, local duels, save export/import and manual WebRTC. Account, cloud save, leaderboard and auto-match are bundled and become active in the online build." : "静态版包含完整主线、角色分岔、9 个支线、训练公式、试炼、本地对战、存档导出/导入与手动远程对战；账号、云存档、排行榜与自动匹配已内置，在线版构建后启用。"}</p>
         </div>
         <div class="settings-panel">
