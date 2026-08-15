@@ -1,6 +1,6 @@
 # 上线前 Checklist ·《权变之路》
 
-> 2026-08-07 更新：公网服务已部署到 Railway，地址 `https://adaptive-ascent-server-production-018a.up.railway.app/`；以下 Render 流程保留为备选，当前部署步骤见 `RAILWAY_SETUP.md`。
+> 2026-08-15 决策：在线功能（1v1 远程 / 云存档 / 排行榜）**留作后续**。当前正式部署为 **GitHub Pages 静态版**（`VITE_ENABLE_ONLINE` 不设），站点 `https://piprot.github.io/quanbian-zhilu/`。下方 Railway/Render 后端流程保留为**未来恢复在线功能时的参考**，非当前任务；此前 Railway 域名 `adaptive-ascent-server-production-018a.up.railway.app` 已失效。
 
 > 目标：把 WebSocket 服务端部署到 Render，让 GitHub Pages 公网前端连上它。
 > 本清单区分 **「仓库侧（已就绪，已核对）」** 与 **「需在 GitHub / Render 控制台操作」** 两类。
