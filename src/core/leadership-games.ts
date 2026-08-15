@@ -1,4 +1,5 @@
 import type { AbilityId } from "./types";
+import { shuffleOptions } from "./shuffle.ts";
 
 export type LeadershipGameId =
   | "decision-chess"
@@ -1031,6 +1032,14 @@ export const CRISIS_EVENTS: CrisisEvent[] = [
     ]
   }
 ];
+
+// 危机事件里专家选项（score: 10）原本固定排在第一项，确定性打散，消除“无脑选 A”。
+for (const event of CRISIS_EVENTS) {
+  const expertIndex = event.options.findIndex((option) => option.score === 10);
+  if (expertIndex < 0) continue;
+  const shuffled = shuffleOptions(event.options, expertIndex, event.id);
+  event.options = shuffled.options;
+}
 
 export function createCrisisCommand(
   mode: LeadershipGameMode,

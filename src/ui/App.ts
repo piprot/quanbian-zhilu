@@ -1942,7 +1942,7 @@ export class AdaptiveGameApp {
           this.trainingStep = 0;
           this.trainingAnswers = Array(
             EXPANDED_TRAINING[abilityId].questions.length
-          ).fill(0);
+          ).fill(-1);
           this.trainingResult = undefined;
           this.show("training");
         }
@@ -2387,7 +2387,7 @@ export class AdaptiveGameApp {
           this.save.masteryPoints += 1;
         }
         const firstCorrect = question.followUp
-          ? this.trialFollowUpAnswer === question.answer
+          ? this.trialFollowUpAnswer === question.followUp.answer
           : true;
         const finalCorrect =
           this.lastTrialAnswer ===
@@ -2462,7 +2462,7 @@ export class AdaptiveGameApp {
           return true;
         }
         const firstCorrect = question.followUp
-          ? this.trialFollowUpAnswer === question.answer
+          ? this.trialFollowUpAnswer === question.followUp.answer
           : true;
         const finalCorrect =
           selected ===

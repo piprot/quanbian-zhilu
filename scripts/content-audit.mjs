@@ -368,10 +368,11 @@ for (const path of TRAINING_PATHS) {
     }
   }
   const expandedEn = EXPANDED_TRAINING_EN[path.abilityId];
+  const expandedZh = EXPANDED_TRAINING[path.abilityId];
   if (expandedEn.questions.length !== path.questions.length) {
     problems.push(`${path.abilityId} English training question count mismatch`);
   }
-  if (expandedEn.questions.some((question, index) => question.answer !== path.questions[index].answer)) {
+  if (expandedEn.questions.some((question, index) => question.answer !== expandedZh.questions[index].answer)) {
     problems.push(`${path.abilityId} English training answers do not match`);
   }
   if (!EXPANDED_TRAINING[path.abilityId]) {

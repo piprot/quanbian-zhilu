@@ -1,6 +1,7 @@
 import type { AbilityId, RoleId } from "./types.ts";
 import { TRAINING_EN, type AbilityTrainingEn, type TrainingQuestionEn } from "./trainingEn.ts";
 import type { AbilityTrainingExtra, TrainingQuestionDetail } from "./trainingExtras.ts";
+import { shuffleOptions } from "./shuffle.ts";
 
 export interface ExpandedTrainingQuestionEn extends TrainingQuestionEn {
   solutionSteps: string[];
@@ -652,10 +653,20 @@ export function expandTrainingEn(
   return {
     ...path,
     ...extras,
-    questions: path.questions.map((question) => ({
-      ...question,
-      ...extras.questionDetails[question.id]
-    }))
+    questions: path.questions.map((question) => {
+      // 与中文版一致：按题目 id 确定性打乱，避免“无脑选 A”。
+      const shuffled = shuffleOptions(
+        question.options,
+        question.answer,
+        question.id
+      );
+      return {
+        ...question,
+        ...extras.questionDetails[question.id],
+        options: shuffled.options,
+        answer: shuffled.answerIndex
+      };
+    })
   };
 }
 

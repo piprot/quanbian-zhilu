@@ -66,6 +66,7 @@ import { ROLE_OPTION_SETS } from "../src/core/roleOptions.ts";
 import { DuelEngine } from "../src/core/duel.ts";
 import { DUEL_BANK, DUEL_BANK_SIZE } from "../src/core/duelBank.ts";
 import {
+  CRISIS_EVENTS,
   applyCrisisChoice,
   applyDecisionChessMove,
   applyGameTheoryChoice,
@@ -505,7 +506,16 @@ assert(
 );
 
 const crisis = createCrisisCommand("battle");
-const crisisNext = applyCrisisChoice(crisis, 0);
+const activeCrisisEvent =
+  CRISIS_EVENTS[(crisis.round - 1 + crisis.offset) % CRISIS_EVENTS.length];
+const expertCrisisIndex = activeCrisisEvent.options.findIndex(
+  (option) => option.score === 10
+);
+assert(
+  expertCrisisIndex >= 0,
+  "crisis event should contain an expert option"
+);
+const crisisNext = applyCrisisChoice(crisis, expertCrisisIndex);
 assert(
   crisisNext.score === 10,
   "expert crisis choice should score 10"

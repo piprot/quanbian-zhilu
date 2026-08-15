@@ -1,5 +1,6 @@
 import { abilityLevel } from "./abilities.ts";
 import { EXPANDED_TRAINING } from "./trainingExtras.ts";
+import { shuffleOptions } from "./shuffle.ts";
 import type {
   AbilityId,
   LeadershipDimension,
@@ -923,7 +924,29 @@ export const PRACTICE_TASKS: PracticeTaskDef[] = [
 
 export function trialQuestionFor(stage: TrialStageDef): TrialQuestion {
   if (stage.source.kind === "custom") {
-    return stage.source.question;
+    const source = stage.source.question;
+    // 自定义题按 stage.id 确定性打乱，消除“无脑选 A”；追问独立用 ":fu" 种子。
+    const main = shuffleOptions(source.options, source.answer, stage.id);
+    const followUp = source.followUp
+      ? (() => {
+          const shuffled = shuffleOptions(
+            source.followUp.options,
+            source.followUp.answer,
+            `${stage.id}:fu`
+          );
+          return {
+            ...source.followUp,
+            options: shuffled.options,
+            answer: shuffled.answerIndex
+          };
+        })()
+      : undefined;
+    return {
+      ...source,
+      options: main.options,
+      answer: main.answerIndex,
+      followUp
+    };
   }
   const question = EXPANDED_TRAINING[stage.source.abilityId].questions[
     stage.source.questionIndex

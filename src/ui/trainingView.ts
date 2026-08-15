@@ -123,7 +123,7 @@ export function trainingView(
                   <span>${result.answered[index] ? "✓" : "×"}</span>
                   <div>
                     <h3>${escapeHtml(question.prompt)}</h3>
-                    <p><strong>${en ? "Your answer: " : "你的选择："}</strong>${escapeHtml(question.options[state.answers[index]].label)}</p>
+                    <p><strong>${en ? "Your answer: " : "你的选择："}</strong>${escapeHtml(state.answers[index] >= 0 ? question.options[state.answers[index]].label : (en ? "Not answered" : "未作答"))}</p>
                     <p><strong>${en ? "Correct: " : "正确做法："}</strong>${escapeHtml(question.options[question.answer].label)}</p>
                     <div class="training-solution">
                       <strong>${uiString(language, "trainingSolved")}</strong>

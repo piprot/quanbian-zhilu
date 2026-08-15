@@ -169,7 +169,7 @@ export function trialBattleView(
                     followUp && state.followUpAnswer !== undefined
                       ? `
                         <strong>${uiString(language, "trialStageDecision")}</strong>
-                        <p>${escapeHtml(question.options[state.followUpAnswer] ?? "")}</p>
+                        <p>${escapeHtml(followUp.options[state.followUpAnswer] ?? "")}</p>
                       `
                       : ""
                   }

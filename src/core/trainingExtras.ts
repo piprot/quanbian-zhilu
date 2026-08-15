@@ -4,6 +4,7 @@ import {
   type AbilityTraining,
   type TrainingQuestion
 } from "./training.ts";
+import { shuffleOptions } from "./shuffle.ts";
 
 export interface TrainingQuestionDetail {
   solutionSteps: string[];
@@ -673,10 +674,20 @@ export function expandTraining(path: AbilityTraining): ExpandedAbilityTraining {
   return {
     ...path,
     ...extras,
-    questions: path.questions.map((question) => ({
-      ...question,
-      ...extras.questionDetails[question.id]
-    }))
+    questions: path.questions.map((question) => {
+      // 按题目 id 确定性打乱选项位置，消除“无脑选 A”。
+      const shuffled = shuffleOptions(
+        question.options,
+        question.answer,
+        question.id
+      );
+      return {
+        ...question,
+        ...extras.questionDetails[question.id],
+        options: shuffled.options,
+        answer: shuffled.answerIndex
+      };
+    })
   };
 }
 
