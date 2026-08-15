@@ -212,6 +212,100 @@ const EXTRA_SCENE_ROLE_FRAMING: Record<
   }
 };
 
+/**
+ * 模板节点选项的「场景专属文案」。此前 partial/risk 的 summary 与 risk 的 feedback
+ * 是 63 个节点逐字相同的固定句，玩家跨章节看到完全一样的措辞，重复感明显。
+ * 这里按场景各写一套，让「渐进 / 激进」两条路线的摘要与代价随情境变化。
+ */
+const SCENE_OPTION_FLAVOR: Record<
+  string,
+  { partialSummary: string; riskSummary: string; riskFeedback: string }
+> = {
+  值班事故: {
+    partialSummary: "先止血恢复服务，复盘留到事后。",
+    riskSummary: "当众切断流量，逼出根因。",
+    riskFeedback: "你切断了流量止住失血，却误伤了一批正常请求，团队在慌乱里记下了你的决断。"
+  },
+  人选组合: {
+    partialSummary: "先定下最稳的两个人，再逐步补齐。",
+    riskSummary: "押注一个明星候选人，赌他能带起全队。",
+    riskFeedback: "你把宝押在一个人身上，队伍暂时有了箭头，但单点依赖埋下了隐患。"
+  },
+  优先级抉择: {
+    partialSummary: "先压住最紧急的一件，其余往后排。",
+    riskSummary: "砍掉两件事，把资源全押最重要的一件。",
+    riskFeedback: "你保住了最重要的一件，但被砍的两件开始反噬，相关的人感到了被抛弃。"
+  },
+  伦理两难: {
+    partialSummary: "先拖住客户，给自己留出合规空间。",
+    riskSummary: "先按口头承诺开工，赌客户不会反悔。",
+    riskFeedback: "你抢到了开工的时间，却把合规风险揽到自己身上，将来客户一翻脸，责任全在你。"
+  },
+  危机通报: {
+    partialSummary: "先对内说明情况，外部口径暂缓。",
+    riskSummary: "抢先对外表态，把口径钉死。",
+    riskFeedback: "你的抢先表态稳住了外部，但内部还没统一，后续任何出入都会变成「打脸」。"
+  },
+  历史案例: {
+    partialSummary: "先照搬案例里的稳妥做法，小步试探。",
+    riskSummary: "反着案例的教训下注，赌这次会不同。",
+    riskFeedback: "你逆着教训下注，局面暂时没有重演旧案，但你可能只是跳进了案例没写到的另一个坑。"
+  },
+  风险敞口: {
+    partialSummary: "先按「正常波动」处理，继续观察一期。",
+    riskSummary: "直接掀桌子，把风险摆上台面。",
+    riskFeedback: "你把风险掀了出来，平静被打破，但若拿不出整改方案，掀桌的人会被当成制造恐慌。"
+  }
+};
+
+const SCENE_OPTION_FLAVOR_EN: Record<
+  string,
+  { partialSummary: string; riskSummary: string; riskFeedback: string }
+> = {
+  "On-Call Incident": {
+    partialSummary: "Stop the bleeding first, save the postmortem for later.",
+    riskSummary: "Cut traffic in public to force out the root cause.",
+    riskFeedback:
+      "You stopped the bleeding by cutting traffic, but a wave of healthy requests was collateral damage, and the team noted your call."
+  },
+  "Team Composition": {
+    partialSummary: "Lock in the two safest picks first, then fill the rest.",
+    riskSummary: "Bet on one star candidate to carry the whole team.",
+    riskFeedback:
+      "You bet everything on one person, which gave the team a clear frontman but left a single point of failure."
+  },
+  "Prioritization Under Overload": {
+    partialSummary: "Hold down the most urgent item, push the rest back.",
+    riskSummary: "Cut two items and pour every resource into the most important one.",
+    riskFeedback:
+      "You saved the most important item, but the two you cut started to bite back, and their owners felt abandoned."
+  },
+  "Ethics Dilemma": {
+    partialSummary: "Stall the client just enough to keep a compliance buffer.",
+    riskSummary: "Start work on the verbal promise and bet the client won't back out.",
+    riskFeedback:
+      "You bought time to start, but you took the compliance risk onto yourself — if the client turns, it's all on you."
+  },
+  "Crisis Communication": {
+    partialSummary: "Brief the inside first, hold the external line for now.",
+    riskSummary: "Speak out externally first and nail the message down.",
+    riskFeedback:
+      "Your early statement steadied the outside, but the inside was not aligned, so any later mismatch will look like a flip-flop."
+  },
+  "Decision Lab Case": {
+    partialSummary: "Copy the case's safest play and probe in small steps.",
+    riskSummary: "Bet against the case's lesson, trusting this time is different.",
+    riskFeedback:
+      "You bet against the lesson and the old case did not replay, but you may have stepped into a trap the case never covered."
+  },
+  "Risk Exposure": {
+    partialSummary: "Treat it as normal fluctuation and watch one more cycle.",
+    riskSummary: "Put the risk on the table now and break the calm.",
+    riskFeedback:
+      "You surfaced the risk and broke the calm, but without a remediation plan, the person who flipped the table will look like a panic-monger."
+  }
+};
+
 const CHAPTER_EXTRA_DETAILS: Record<
   number,
   { zh: string; en: string }
@@ -341,6 +435,7 @@ function buildOptions(
   const abilityName = ABILITIES[ability].name;
   const variant = slot % 2;
   const chapterTag = `第${chapterId}章 · ${base.titleZh}`;
+  const flavor = SCENE_OPTION_FLAVOR[base.titleZh];
   const expertLabelsZh = [
     `先把${abilityName}所需的事实和流程对齐，再让决策公开可验收（${chapterTag}）`,
     `先用一个小范围试点验证${abilityName}的判断，再决定是否全面推开（${chapterTag}）`
@@ -366,7 +461,7 @@ function buildOptions(
     },
     {
       label: partialLabelsZh[variant],
-      summary: `先稳住眼前，再回头补齐证据。`,
+      summary: flavor?.partialSummary ?? "先稳住眼前，再回头补齐证据。",
       quality: "partial",
       effects: { [ability]: 1 },
       resources: { influence: 1 },
@@ -375,11 +470,13 @@ function buildOptions(
     },
     {
       label: riskLabelsZh[variant],
-      summary: `用一次强信号换取局面破口。`,
+      summary: flavor?.riskSummary ?? "用一次强信号换取局面破口。",
       quality: "risk",
       effects: { [ability]: 1, authority: ability === "authority" ? 2 : 1 },
       resources: { energy: -9, trust: -6, influence: 4, capital: -2 },
-      feedback: `你用一次强信号硬推局面转向，短期见效，却也消耗了信任、资源与团队的耐心，代价会在之后显现。`,
+      feedback:
+        flavor?.riskFeedback ??
+        "你用一次强信号硬推局面转向，短期见效，却也消耗了信任、资源与团队的耐心，代价会在之后显现。",
       theory: "《权经》：用权有度，过刚则折。"
     }
   ];
@@ -408,6 +505,7 @@ function buildEnOptionViews(
   const abilityNameEn = ABILITY_NAME_EN[ability];
   const variant = slot % 2;
   const chapterTag = `Chapter ${chapterId} · ${base.titleEn}`;
+  const flavorEn = SCENE_OPTION_FLAVOR_EN[base.titleEn];
   const expertLabels = [
     `Align the facts and process ${abilityNameEn} needs (${chapterTag})`,
     `Validate your ${abilityNameEn} judgment in a small pilot (${chapterTag})`
@@ -428,13 +526,17 @@ function buildEnOptionViews(
     },
     {
       label: partialLabels[variant],
-      summary: "Stabilize the visible problem first, then gather evidence.",
+      summary:
+        flavorEn?.partialSummary ??
+        "Stabilize the visible problem first, then gather evidence.",
       feedback: `You eased the immediate tension, but the core tension behind ${abilityNameEn} remains open.`
     },
     {
       label: riskLabels[variant],
-      summary: "Trade a strong signal for a breakthrough.",
-      feedback: "Your strong signal moved the situation but cost trust and resources."
+      summary: flavorEn?.riskSummary ?? "Trade a strong signal for a breakthrough.",
+      feedback:
+        flavorEn?.riskFeedback ??
+        "Your strong signal moved the situation but cost trust and resources."
     }
   ];
 }
