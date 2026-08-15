@@ -1,6 +1,7 @@
 import { abilityLevel } from "../core/abilities";
 import { reconStatus, stageForChapter } from "../core/expedition";
 import type { Language } from "../core/i18n";
+import { shuffleArray } from "../core/shuffle";
 import { NPCS, npcRelation } from "../core/npcs";
 import { npcArcFor } from "../core/npcArcs";
 import { npcStoryFor } from "../core/npcStories";
@@ -25,16 +26,21 @@ import { escapeHtml } from "./escape";
 /** 情境叙事展示辅助：从 App 抽出的、依赖 language/save 的纯标记函数。 */
 
 export function storyOptionOrder(save: SaveState, node: StoryNode): number[] {
-  const order = node.options.map((_, index) => index);
-  const seed =
-    (node.id.length * 131 +
-      node.chapterId * 17 +
-      save.playCount * 7 +
-      save.profile.role.length) %
-    Math.max(1, order.length);
-  for (let i = 1; i < order.length; i += 1) {
-    const j = (i + seed * (i + 1)) % (i + 1);
-    [order[i], order[j]] = [order[j], order[i]];
+  const n = node.options.length;
+  if (n < 2) return node.options.map((_, index) => index);
+  // 按「节点 + 局次 + 角色」确定性打乱显示顺序：同一次游玩内稳定、重开时变化，
+  // 消除玩家背答案的空间（原实现对 3 选项节点恒为恒等置换，从未真正打乱）。
+  const seed = `${node.id}|${save.playCount}|${save.profile.role}`;
+  const order = shuffleArray(
+    node.options.map((_, index) => index),
+    seed
+  );
+  // 把「正确项」（quality === expert）从首位移开，彻底消除“无脑选 A”。
+  const expertIndex = node.options.findIndex(
+    (option) => option.quality === "expert"
+  );
+  if (expertIndex >= 0 && order[0] === expertIndex) {
+    [order[0], order[1]] = [order[1], order[0]];
   }
   return order;
 }

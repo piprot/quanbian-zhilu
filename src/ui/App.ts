@@ -3521,7 +3521,10 @@ export class AdaptiveGameApp {
         const nodeId = this.dualReviewQueue[this.dualReviewIndex];
         if (!nodeId) return true;
         const roleNode = getNodeForRole(this.save.profile.role, nodeId);
-        const options = storyNodeDisplay(this.language, this.save,roleNode).options;
+        const nodeView = storyNodeDisplay(this.language, this.save,roleNode);
+        // 与 dualReviewView 保持同一打乱顺序，保证 index 语义一致。
+        const order = storyOptionOrder(this.save, roleNode);
+        const options = order.map((index) => nodeView.options[index]);
         const expertIndex = options.findIndex(
           (option) => option.quality === "expert"
         );

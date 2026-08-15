@@ -9,6 +9,7 @@ import type { SaveState } from "../core/types";
 import { qualityLabel } from "./display";
 import { escapeAttr, escapeHtml } from "./escape";
 import { storyNodeDisplay } from "./nodeView";
+import { storyOptionOrder } from "./storyMarkup";
 
 export interface DualReviewViewState {
   nodeId: string;
@@ -28,7 +29,9 @@ export function dualReviewView(
   const en = language === "en";
   const roleNode = getNodeForRole(save.profile.role, state.nodeId);
   const nodeView = storyNodeDisplay(language, save, roleNode);
-  const options = nodeView.options;
+  // 与主线一致的确定性打乱显示顺序，消除回练中「最佳项永远在首位」的漏洞。
+  const order = storyOptionOrder(save, roleNode);
+  const options = order.map((index) => nodeView.options[index]);
   const expertIndex = options.findIndex(
     (option) => option.quality === "expert"
   );

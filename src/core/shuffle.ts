@@ -26,6 +26,19 @@ function mulberry32(seed: number): () => number {
   };
 }
 
+/** 生成 [0,length) 的确定性置换。 */
+function shuffleIndices(length: number, seed: string): number[] {
+  const indices = Array.from({ length }, (_, index) => index);
+  const rand = mulberry32(hashSeed(seed));
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    const tmp = indices[i];
+    indices[i] = indices[j];
+    indices[j] = tmp;
+  }
+  return indices;
+}
+
 /**
  * 打乱选项并重新定位正确项。
  * @param options 原始选项数组（返回新数组，不改动入参）
@@ -37,16 +50,17 @@ export function shuffleOptions<T>(
   answerIndex: number,
   seed: string
 ): { options: T[]; answerIndex: number } {
-  const indices = options.map((_, index) => index);
-  const rand = mulberry32(hashSeed(seed));
-  for (let i = indices.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1));
-    const tmp = indices[i];
-    indices[i] = indices[j];
-    indices[j] = tmp;
-  }
+  const indices = shuffleIndices(options.length, seed);
   return {
     options: indices.map((index) => options[index]),
     answerIndex: indices.indexOf(answerIndex)
   };
+}
+
+/**
+ * 只打乱数组顺序（不改动入参），不跟踪正确项下标。
+ * 供情境节点等按「quality」而非「下标」判分的场景使用。
+ */
+export function shuffleArray<T>(items: readonly T[], seed: string): T[] {
+  return shuffleIndices(items.length, seed).map((index) => items[index]);
 }
