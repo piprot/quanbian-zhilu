@@ -3,7 +3,7 @@
 ## 当前版本
 
 - 线上版本：1.7.30
-- 线上地址：https://piprot.github.io/shengwei-game-starter/
+- 线上地址：https://piprot.github.io/quanbian-zhilu/
 - 本次验收覆盖：核心主线闭环、1v1、试炼、修炼、复盘、间隔复习、双轴回练、六段式复盘、情境工坊、教练工作坊实时推演、程序化叙事、双语与无障碍。
 
 ## 自动化验收证据

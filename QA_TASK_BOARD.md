@@ -48,8 +48,8 @@ npm run test:server
 ## 2026-08-07 release status
 
 - GitHub main pushed to `15a3764`; `gh` auth is valid; hosts file now bypasses the local GitHub DNS hijack.
-- GitHub Pages is live at `https://piprot.github.io/shengwei-game-starter/`; Actions queue/OIDC deploy failures were transient and reruns are queued.
-- Render service is not deployed yet. Import `piprot/shengwei-game-starter` with Render Blueprint to create `adaptive-ascent-server` + `adaptive-ascent-db`.
+- GitHub Pages is live at `https://piprot.github.io/quanbian-zhilu/`; Actions queue/OIDC deploy failures were transient and reruns are queued.
+- Render service is not deployed yet. Import `piprot/quanbian-zhilu` with Render Blueprint to create `adaptive-ascent-server` + `adaptive-ascent-db`.
 - New acceptance scripts: `npm run test:live` and `npm run test:rtc:public` cover public server health/account/rank/match and public dual-context WebRTC after deployment.
 ## 2026-08-06 GitHub incident
 

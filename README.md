@@ -2,7 +2,7 @@
 
 面向高管教练业务的在线 1v1 领导力情境游戏。玩家在真实职场情境中做决策，通过主线剧情、支线任务和 1v1 对决，训练识人、用人、驭人、谋权、掌权、固权与自我进化能力。
 
-[![CI](https://github.com/piprot/shengwei-game-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/piprot/shengwei-game-starter/actions/workflows/ci.yml)
+[![CI](https://github.com/piprot/quanbian-zhilu/actions/workflows/ci.yml/badge.svg)](https://github.com/piprot/quanbian-zhilu/actions/workflows/ci.yml)
 
 ## 游戏特性
 

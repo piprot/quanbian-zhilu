@@ -42,7 +42,7 @@ gh auth status
 ```
 
 ### A. GitHub Pages 来源（必须）
-1. 打开 `https://github.com/piprot/shengwei-game-starter/settings/pages`
+1. 打开 `https://github.com/piprot/quanbian-zhilu/settings/pages`
 2. **Source** 设为 **GitHub Actions**
 3. 未设置时，`deploy` job 会跳过/失败，Pages 不会更新。
 
@@ -53,20 +53,20 @@ gh auth status
 2. 新增：`VITE_ROOM_SERVER_URL` = `wss://adaptive-ascent-server.onrender.com`
 3. 不设也能跑（CI 有兜底默认值），但设了之后换域名/服务名不用改 `ci.yml`。
 
-✅ **2026-08-06 已写入**：`gh variable set VITE_ROOM_SERVER_URL --repo piprot/shengwei-game-starter --body "wss://adaptive-ascent-server.onrender.com"` 执行成功，`gh variable list` 已可见。
+✅ **2026-08-06 已写入**：`gh variable set VITE_ROOM_SERVER_URL --repo piprot/quanbian-zhilu --body "wss://adaptive-ascent-server.onrender.com"` 执行成功，`gh variable list` 已可见。
 
 ### C. 仓库 Secrets（Render 自动重部署用）
 1. `Settings → Secrets and variables → Actions → Secrets`
 2. 新增：`RENDER_DEPLOY_HOOK_URL` = <Render 控制台 Deploy Hooks 复制的 URL>
 3. 不填则 `render-deploy.yml` 不会触发 Render 重部署（首次部署仍由 Blueprint 完成）。
 
-⏳ **待 Render 导入 Blueprint 并创建 Deploy Hook 后回填**（见三·6）。此 Secret 的值只能从 Render 控制台拿到，无法用 API 预填。你复制好 Hook URL 后可直接贴给我，我用 `gh secret set RENDER_DEPLOY_HOOK_URL --repo piprot/shengwei-game-starter --body "<URL>"` 写入；或你自己填也行。
+⏳ **待 Render 导入 Blueprint 并创建 Deploy Hook 后回填**（见三·6）。此 Secret 的值只能从 Render 控制台拿到，无法用 API 预填。你复制好 Hook URL 后可直接贴给我，我用 `gh secret set RENDER_DEPLOY_HOOK_URL --repo piprot/quanbian-zhilu --body "<URL>"` 写入；或你自己填也行。
 
 ---
 
 ## 三、需在 Render 控制台操作（你来做 ⏳）
 
-1. 登录 Render → **New → Blueprint** → 连接 `piprot/shengwei-game-starter` 仓库。
+1. 登录 Render → **New → Blueprint** → 连接 `piprot/quanbian-zhilu` 仓库。
 2. Render 读取 `render.yaml`，自动创建：
    - Web 服务 `adaptive-ascent-server`（Docker）
    - PostgreSQL `adaptive-ascent-db`
@@ -112,5 +112,5 @@ npm run deploy:check  # Render/Docker/CI 部署前置条件自检
 1. Render 导入 Blueprint → 等首次构建完成 → 记下 `wss://adaptive-ascent-server.onrender.com`
 2. GitHub：Pages Source = GitHub Actions；加 Variable `VITE_ROOM_SERVER_URL`；加 Secret `RENDER_DEPLOY_HOOK_URL`
 3. `git push` 到 `main` → CI 跑 build+test → 部署 Pages → 触发 Render 重部署
-4. 打开 `https://piprot.github.io/shengwei-game-starter/` → 进入 1v1 → 确认能匹配/对战（说明已连上公网服务端）
+4. 打开 `https://piprot.github.io/quanbian-zhilu/` → 进入 1v1 → 确认能匹配/对战（说明已连上公网服务端）
 5. `curl https://adaptive-ascent-server.onrender.com/` 应返回 `ok`

@@ -17,7 +17,7 @@ https://dashboard.render.com/blueprints/new
 Select the GitHub repository:
 
 ```text
-piprot/shengwei-game-starter
+piprot/quanbian-zhilu
 ```
 
 Render reads `render.yaml` and creates:
@@ -45,7 +45,7 @@ Open the web service, then Deploy Hooks. Copy the deploy hook URL.
 Run this from the repo root after replacing the URL:
 
 ```powershell
-gh secret set RENDER_DEPLOY_HOOK_URL --repo piprot/shengwei-game-starter --body "<hook-url>"
+gh secret set RENDER_DEPLOY_HOOK_URL --repo piprot/quanbian-zhilu --body "<hook-url>"
 ```
 
 ## Step 6: Verify the service

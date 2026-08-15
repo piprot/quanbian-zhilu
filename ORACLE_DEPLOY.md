@@ -18,7 +18,7 @@
 
 1. Oracle Cloud 账号，并确认目标区域还有 Always Free ARM 名额
 2. 一个域名，A 记录指向 VPS 公网 IP
-3. GitHub 仓库 `piprot/shengwei-game-starter`
+3. GitHub 仓库 `piprot/quanbian-zhilu`
 
 ## 1. 创建 ARM 实例
 
@@ -56,8 +56,8 @@ ssh ubuntu@<ip>
 ## 4. 部署
 
 ```bash
-git clone https://github.com/piprot/shengwei-game-starter.git
-cd shengwei-game-starter
+git clone https://github.com/piprot/quanbian-zhilu.git
+cd quanbian-zhilu
 cp deploy/oracle.env.example .env
 nano .env
 ```

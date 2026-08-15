@@ -6,7 +6,7 @@ GitHub Pages is serving the latest main build.
 
 ## Prerequisites
 
-- Latest `main` is deployed to `https://piprot.github.io/shengwei-game-starter/`.
+- Latest `main` is deployed to `https://piprot.github.io/quanbian-zhilu/`.
 - Railway service is healthy at $railwayHttps.
 - At least two devices are available:
   - iOS device with VoiceOver enabled.

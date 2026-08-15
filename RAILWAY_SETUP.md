@@ -14,7 +14,7 @@ Render 登录接口在某些网络不可用，因此项目同时支持 Railway �
 
 1. 登录 `https://railway.app/login`。
 2. 新建项目，选择 `Deploy from GitHub repo`。
-3. 选择 `piprot/shengwei-game-starter`。
+3. 选择 `piprot/quanbian-zhilu`。
 4. Railway 会读取根目录的 `railway.toml` 和 `Dockerfile` 并启动服务端。
 5. 新建 PostgreSQL 数据库插件，确认 Web 服务环境变量：
    - `DATABASE_URL` 来自 PostgreSQL 插件
