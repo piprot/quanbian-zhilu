@@ -83,6 +83,135 @@ const EXTRA_SCENE_BASES: ExtraSceneBase[] = [
   }
 ];
 
+/**
+ * 每个模板场景按角色的真实情境/赌注区分。此前只是给相同文案加"空降/创业/高潜视角"前缀，
+ * 三个角色的选项又完全相同，是"假分支"。这里让情境真正随角色差异，保留章节 detail/stake 追加。
+ */
+const EXTRA_SCENE_ROLE_FRAMING: Record<
+  string,
+  Partial<Record<RoleId, { contextZh: string; stakeZh: string }>>
+> = {
+  值班事故: {
+    parachute: {
+      contextZh:
+        "深夜两点系统告警，你空降才两个月，对这套老系统的细节还不熟，只能依赖值班工程师——而他们正通过你这次的反应，判断你值不值得跟。",
+      stakeZh: "你赌的是老团队对你这个外来者的第一份信任。"
+    },
+    founder: {
+      contextZh:
+        "凌晨两点系统崩了，你的初创公司没有值班团队，你就是第一响应人，客户正在流失，合伙人在等你拿主意。",
+      stakeZh: "你赌的是公司能不能活过这个晚上。"
+    },
+    highPotential: {
+      contextZh:
+        "深夜故障，你被临时拉进应急群，没有处理权限却被期待给出判断，资深同事正看你敢不敢担责。",
+      stakeZh: "你赌的是自己在组织里的可信度。"
+    }
+  },
+  人选组合: {
+    parachute: {
+      contextZh:
+        "你要在十个候选人里挑五个组队，简历之外你只能靠有限的观察判断谁可靠、谁在藏短板。",
+      stakeZh: "你赌的是对这个陌生团队的第一轮识人判断。"
+    },
+    founder: {
+      contextZh:
+        "预算有限，你要从十个人里挑五个搭创始团队，错选一个人会直接拖垮现金流和士气。",
+      stakeZh: "你赌的是公司未来半年的生死。"
+    },
+    highPotential: {
+      contextZh:
+        "你被邀请参与人才盘点，要给出不偏袒任何派系的专业判断，但名单背后是各方的人情。",
+      stakeZh: "你赌的是自己的判断能否被各方接受。"
+    }
+  },
+  优先级抉择: {
+    parachute: {
+      contextZh:
+        "四件事同时到期，你还不清楚哪件事背后牵扯最多人的利益，做错选择会立刻暴露你对组织的不熟悉。",
+      stakeZh: "你赌的是对组织暗流的判断。"
+    },
+    founder: {
+      contextZh:
+        "客户续约、预算答辩、核心员工谈话、安全整改同时告急，每拖延一天都在烧钱。",
+      stakeZh: "你赌的是公司现金流还能撑多久。"
+    },
+    highPotential: {
+      contextZh:
+        "你没有足够话语权，只能从四件事里挑最可能被看见、最可能被支持的一件推进。",
+      stakeZh: "你赌的是有限的注意力该押在哪里。"
+    }
+  },
+  伦理两难: {
+    parachute: {
+      contextZh:
+        "前任留下的灰色惯例摆在你面前，打破它可能得罪既得利益者，延续它可能让你背锅。",
+      stakeZh: "你赌的是原则和现实的边界。"
+    },
+    founder: {
+      contextZh:
+        "客户的灰色要求关乎一笔生死订单，你要活下来，又不能留下将来被清算的把柄。",
+      stakeZh: "你赌的是公司的底线值多少钱。"
+    },
+    highPotential: {
+      contextZh:
+        "你发现了灰色操作但没权处理，举报可能断送前程，沉默可能被视作共谋。",
+      stakeZh: "你赌的是良心与前途的取舍。"
+    }
+  },
+  危机通报: {
+    parachute: {
+      contextZh:
+        "内外同时传出负面消息，你还没建立自己的口径，高管却要你立刻表态，说错一句会被记很久。",
+      stakeZh: "你赌的是这次表态能不能建立权威。"
+    },
+    founder: {
+      contextZh:
+        "公司被截图、传闻、抱怨围攻，投资人开始追问，你要在几小时内定调，慢了谣言就会替你定。",
+      stakeZh: "你赌的是外界的最后一点耐心。"
+    },
+    highPotential: {
+      contextZh:
+        "你被要求'统一口径'，但你知道真相和上面的说法有出入，说还是不说都有风险。",
+      stakeZh: "你赌的是敢不敢在口径之外说真话。"
+    }
+  },
+  历史案例: {
+    parachute: {
+      contextZh:
+        "你面对的局面和经典案例几乎同构，你担心自己会重蹈案例里的覆辙，所有人都等着看你选哪边。",
+      stakeZh: "你赌的是自己能否比案例里的前人更清醒。"
+    },
+    founder: {
+      contextZh:
+        "你正经历教科书级的困局，唯一的区别是这次你押上了全部身家，没有重来的机会。",
+      stakeZh: "你赌的是公司的一线生机。"
+    },
+    highPotential: {
+      contextZh:
+        "你在案例复盘里被要求做决策，所有人都知道你选得对不对都会被记住。",
+      stakeZh: "你赌的是这次选择会成为别人对你的评价。"
+    }
+  },
+  风险敞口: {
+    parachute: {
+      contextZh:
+        "你发现某业务线风险连续三个月上升，财务和业务都说'正常'，你还没拿到关键数据去戳破这层平静。",
+      stakeZh: "你赌的是要不要在站稳之前就掀桌子。"
+    },
+    founder: {
+      contextZh:
+        "公司风险敞口在涨，没人敢向你汇报坏消息，你怕自己被'看起来正常'的标签麻痹。",
+      stakeZh: "你赌的是公司会不会在平静里翻船。"
+    },
+    highPotential: {
+      contextZh:
+        "你看到了风险但没人在听，你要决定是否以及如何把这件事摆上台面。",
+      stakeZh: "你赌的是要不要做那个指出问题的人。"
+    }
+  }
+};
+
 const CHAPTER_EXTRA_DETAILS: Record<
   number,
   { zh: string; en: string }
@@ -254,16 +383,7 @@ function buildOptions(
       theory: "《权经》：用权有度，过刚则折。"
     }
   ];
-  return options.map((option, index) => {
-    if (index === 0) {
-      return {
-        ...option,
-        label: expertLabelsZh[variant],
-        summary: `把「${base.titleZh}」变成一次可验证的${abilityName}练习。`
-      };
-    }
-    return option;
-  });
+  return options;
 }
 
 const ABILITY_NAME_EN: Record<AbilityId, string> = {
@@ -374,19 +494,18 @@ function buildExtraMainNodes(): {
         `当前章节背景：${detail.zh}`,
         "真正的判断依据往往不在第一份材料里"
       ];
+      const framing = EXTRA_SCENE_ROLE_FRAMING[base.titleZh] ?? {};
+      const roleContextFor = (role: RoleId): { context: string; stake: string } => {
+        const f = framing[role];
+        return {
+          context: `${f?.contextZh ?? base.contextZh} ${detail.zh}`,
+          stake: `${f?.stakeZh ?? base.stakeZh}；${chapterStake.zh}`
+        };
+      };
       roleVariants[id] = {
-        parachute: {
-          context: `空降视角：${base.contextZh} ${detail.zh}`,
-          stake: `${base.stakeZh}；${chapterStake.zh}`
-        },
-        founder: {
-          context: `创业视角：${base.contextZh} ${detail.zh}`,
-          stake: `${base.stakeZh}；${chapterStake.zh}`
-        },
-        highPotential: {
-          context: `高潜视角：${base.contextZh} ${detail.zh}`,
-          stake: `${base.stakeZh}；${chapterStake.zh}`
-        }
+        parachute: roleContextFor("parachute"),
+        founder: roleContextFor("founder"),
+        highPotential: roleContextFor("highPotential")
       };
     });
   }
