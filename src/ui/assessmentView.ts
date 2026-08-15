@@ -97,7 +97,8 @@ export function assessmentResultView(
   const training = recommendedTraining(
     save.profile.abilities,
     save.profile.role,
-    save.decisionHistory
+    save.decisionHistory,
+    save.trainingScores
   );
   const strengths = ABILITY_ORDER.slice()
     .sort(

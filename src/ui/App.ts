@@ -1249,7 +1249,8 @@ export class AdaptiveGameApp {
     const recommended = recommendedTraining(
       this.save.profile.abilities,
       this.save.profile.role,
-      this.save.decisionHistory
+      this.save.decisionHistory,
+      this.save.trainingScores
     );
     this.root
       .querySelectorAll<HTMLElement>(".training-item")
@@ -4334,7 +4335,8 @@ export class AdaptiveGameApp {
     const focus = recommendedTraining(
       this.save.profile.abilities,
       this.save.profile.role,
-      this.save.decisionHistory
+      this.save.decisionHistory,
+      this.save.trainingScores
     )[0];
     const abilityName = focus ? abilityDisplay(this.language, focus).name : "沟通";
     return this.language === "en"

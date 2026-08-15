@@ -133,7 +133,8 @@ export function abilityView(save: SaveState, language: "zh" | "en"): string {
   const training = recommendedTraining(
     save.profile.abilities,
     save.profile.role,
-    save.decisionHistory
+    save.decisionHistory,
+    save.trainingScores
   );
   return `
     <header class="topbar">
@@ -546,7 +547,8 @@ export function reportView(
   const gaps = recommendedTraining(
     save.profile.abilities,
     save.profile.role,
-    save.decisionHistory
+    save.decisionHistory,
+    save.trainingScores
   );
   const chapterReports = CHAPTERS.map((chapter) => {
     const record = save.chapterRecords.find(

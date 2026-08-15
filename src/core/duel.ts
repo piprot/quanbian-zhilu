@@ -5,6 +5,7 @@ import {
   createDefaultAbilities
 } from "./abilities.ts";
 import { ABILITY_DIMENSION_MAP } from "./leadership-model.ts";
+import { trainingQuestionCount } from "./training.ts";
 import { duelNodes } from "./story.ts";
 import type {
   AbilityId,
@@ -345,22 +346,41 @@ function decisionPriority(decisionHistory?: DecisionRecord[]): Set<AbilityId> {
   return priorities;
 }
 
+/**
+ * 训练短板：0 = 已满分，1 = 训练过但未满分，2 = 从未训练（或全错）。
+ * 用最佳答对数 / 该能力题目数 归一化，避免不同能力题目数不同造成的比较失真。
+ */
+function trainingGap(id: AbilityId, scores: Record<string, number>): number {
+  const total = trainingQuestionCount(id);
+  if (total <= 0) return 0;
+  const best = scores[id] ?? 0;
+  const ratio = best / total;
+  if (ratio >= 1) return 0;
+  if (ratio <= 0) return 2;
+  return 1;
+}
+
 export function recommendedTraining(
   abilities: Record<AbilityId, number>,
   role?: RoleId,
-  decisionHistory?: DecisionRecord[]
+  decisionHistory?: DecisionRecord[],
+  trainingScores?: Record<string, number>
 ): AbilityId[] {
   const focus = role ? ROLES[role].focusAbilities : [];
   const priority = decisionPriority(decisionHistory);
+  const scores = trainingScores ?? {};
   return ABILITY_ORDER.slice()
     .sort((a, b) => {
       const focusDelta =
         (focus.includes(b) ? 1 : 0) - (focus.includes(a) ? 1 : 0);
       const priorityDelta =
         (priority.has(b) ? 1 : 0) - (priority.has(a) ? 1 : 0);
+      // 未训练/未满分的能力优先补强，弥补「只看决策历史」看不到训练缺口的盲区。
+      const trainingDelta = trainingGap(b, scores) - trainingGap(a, scores);
       return (
         focusDelta * 10 +
         priorityDelta * 10 +
+        trainingDelta * 5 +
         (abilityLevel(abilities[a]) - abilityLevel(abilities[b]))
       );
     })
