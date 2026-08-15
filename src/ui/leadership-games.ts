@@ -26,6 +26,10 @@ import {
   type ResourceAllocationState,
   type TeamManagementState
 } from "../core/leadership-games";
+import {
+  ABILITY_DIMENSION_MAP,
+  LEADERSHIP_DIMENSIONS
+} from "../core/leadership-model";
 
 export type { LeadershipGameId } from "../core/leadership-games";
 
@@ -558,10 +562,31 @@ export class LeadershipGamesApp {
     return `<p class="lg-rounds">${en ? `Total ${state.totalRounds} rounds · Round ${state.round} · Score settles after the final round` : `共 ${state.totalRounds} 局 · 当前第 ${state.round} 局 · 终局后结算积分`}</p>`;
   }
 
+  /** 即时领导力解读：把当前小游戏映射到五维领导力模型，并给出即时解读。 */
+  private leadershipInterpretationMarkup(): string {
+    const en = this.language === "en";
+    const game = LEADERSHIP_GAMES.find((item) => item.id === this.currentGameId);
+    if (!game) return "";
+    const dimensionId = ABILITY_DIMENSION_MAP[game.abilityId];
+    const dim = LEADERSHIP_DIMENSIONS[dimensionId];
+    if (!dim) return "";
+    return `
+      <section class="lg-interpretation">
+        <p class="eyebrow">${en ? "Leadership Interpretation" : "领导力解读"}</p>
+        <div class="lg-interpretation-head">
+          <strong>${en ? dim.en : dim.zh}</strong>
+          <span>${en ? dim.enSub : dim.zhSub}</span>
+        </div>
+        <p>${esc(en ? game.insightEn : game.insightZh)}</p>
+      </section>
+    `;
+  }
+
   private reviewMarkup(state: AnyGameState): string {
     if (!("history" in state) || state.history.length === 0) return "";
     const en = this.language === "en";
     return `
+      ${this.leadershipInterpretationMarkup()}
       <section class="lg-review">
         <h3>${en ? "Review" : "复盘"}</h3>
         <ul>
