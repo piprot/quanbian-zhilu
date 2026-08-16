@@ -184,6 +184,10 @@ export function achievementLore(
       zh: "韧性组织完成，团队不再靠你一个人救火。",
       en: "A resilient team no longer depends on one firefighter."
     },
+    side_power_boundaries: {
+      zh: "权力边界收束，个人权威变成了组织规则。",
+      en: "Power boundaries hold; personal authority becomes organizational rules."
+    },
     duel_winner: {
       zh: "第一场胜利，来自对局势更完整的读取。",
       en: "The first win comes from reading the situation more completely."
@@ -382,6 +386,12 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     name: "执权者",
     description: "综合能力值达到 48",
     icon: "32"
+  },
+  {
+    id: "side_power_boundaries",
+    name: "权力边界守卫者",
+    description: "完成“权力边界”支线剧情弧",
+    icon: "33"
   }
 ];
 

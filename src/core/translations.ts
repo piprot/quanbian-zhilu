@@ -3274,6 +3274,10 @@ export const ACHIEVEMENT_EN: Record<
     name: "Resilient Organizer",
     description: "Complete the Resilient Organization side arc"
   },
+  side_power_boundaries: {
+    name: "Boundary Keeper",
+    description: "Complete the Power Boundaries side arc"
+  },
   duel_winner: {
     name: "First Victory",
     description: "Win a 1v1 duel"
