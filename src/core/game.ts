@@ -142,6 +142,7 @@ export const DEFAULT_SAVE: SaveState = {
   leadershipGameLosses: 0,
   leadershipAchievements: {},
   leadershipBestLevel: {},
+  leadershipBestStars: {},
   reviewCards: [],
   dimensionExp: {
     credibility: 0,
@@ -413,6 +414,10 @@ function normalizeSave(save: SaveState): SaveState {
       save.leadershipBestLevel && typeof save.leadershipBestLevel === "object"
         ? save.leadershipBestLevel
         : {},
+    leadershipBestStars:
+      save.leadershipBestStars && typeof save.leadershipBestStars === "object"
+        ? save.leadershipBestStars
+        : {},
     reviewCards: normalizeReviewCards(save.reviewCards),
     dimensionExp: {
       credibility: clamp(
@@ -471,6 +476,7 @@ export function computeSaveHash(save: SaveState): string {
     lgl: save.leadershipGameLosses,
     lgach: save.leadershipAchievements,
     lgbest: save.leadershipBestLevel,
+    lgstar: save.leadershipBestStars,
     rv: (save.reviewCards ?? []).map((card) => [
       card.nodeId,
       card.easiness,

@@ -16,6 +16,8 @@ import {
   createResourceAllocation,
   createTeamManagement,
   decisionChessMoves,
+  interpretLeadership,
+  starOf,
   type CrisisCommandState,
   type DecisionChessState,
   type GameTheoryChoice,
@@ -39,6 +41,7 @@ export interface LeadershipGamesCallbacks {
     gameId: LeadershipGameId,
     won: boolean,
     score: number,
+    stars: number,
     achievements: string[],
     branch: string
   ): void;
@@ -353,12 +356,14 @@ export class LeadershipGamesApp {
       this.rewarded = true;
       const achievements = this.earnedAchievements(this.state);
       const branch = this.branchOf(this.state);
+      const stars = starOf(this.currentGameId, this.state);
       this.lastAchievements = achievements;
       this.lastBranch = branch;
       this.callbacks.onReward(
         this.currentGameId,
         won,
         score,
+        stars,
         achievements,
         branch
       );
@@ -563,13 +568,14 @@ export class LeadershipGamesApp {
   }
 
   /** 即时领导力解读：把当前小游戏映射到五维领导力模型，并给出即时解读。 */
-  private leadershipInterpretationMarkup(): string {
+  private leadershipInterpretationMarkup(state: AnyGameState): string {
     const en = this.language === "en";
     const game = LEADERSHIP_GAMES.find((item) => item.id === this.currentGameId);
     if (!game) return "";
     const dimensionId = ABILITY_DIMENSION_MAP[game.abilityId];
     const dim = LEADERSHIP_DIMENSIONS[dimensionId];
     if (!dim) return "";
+    const live = interpretLeadership(this.currentGameId ?? game.id, state);
     return `
       <section class="lg-interpretation">
         <p class="eyebrow">${en ? "Leadership Interpretation" : "领导力解读"}</p>
@@ -577,16 +583,26 @@ export class LeadershipGamesApp {
           <strong>${en ? dim.en : dim.zh}</strong>
           <span>${en ? dim.enSub : dim.zhSub}</span>
         </div>
-        <p>${esc(en ? game.insightEn : game.insightZh)}</p>
+        <p class="lg-interpretation-insight">${esc(en ? game.insightEn : game.insightZh)}</p>
+        <p class="lg-interpretation-live">${esc(en ? live.en : live.zh)}</p>
       </section>
     `;
+  }
+
+  private starsMarkup(state: AnyGameState): string {
+    if (this.currentMode !== "battle" || !this.currentGameId) return "";
+    if (!state.finished) return "";
+    const stars = starOf(this.currentGameId, state);
+    if (stars <= 0) return "";
+    return `<div class="lg-stars" role="img" aria-label="${stars} / 3">${"★".repeat(stars)}${"☆".repeat(3 - stars)}</div>`;
   }
 
   private reviewMarkup(state: AnyGameState): string {
     if (!("history" in state) || state.history.length === 0) return "";
     const en = this.language === "en";
     return `
-      ${this.leadershipInterpretationMarkup()}
+      ${this.starsMarkup(state)}
+      ${this.leadershipInterpretationMarkup(state)}
       <section class="lg-review">
         <h3>${en ? "Review" : "复盘"}</h3>
         <ul>
@@ -654,6 +670,29 @@ export class LeadershipGamesApp {
 
   private renderDecisionChess(state: DecisionChessState): string {
     const en = this.language === "en";
+    const last =
+      state.lastPlayerMove && state.lastPlayerValue !== undefined
+        ? (() => {
+            const value = state.lastPlayerValue;
+            const note =
+              value === 0
+                ? en
+                  ? "You stepped on an empty cell (+0) — advancing, but you skipped nearby resources."
+                  : "你踩在空地（+0 分），向前推进但错过了沿途的资源格。"
+                : value === 1
+                  ? en
+                    ? "You landed on a trust cell (+1) — safe but low yield."
+                    : "你踩到信任格（+1 分），稳妥但收益偏低。"
+                  : value === 2
+                    ? en
+                      ? "You landed on an influence cell (+2) — decent yield, mind the goal."
+                      : "你踩到影响力格（+2 分），收益不错，注意别偏离目标。"
+                    : en
+                      ? "You landed on a resource cell (+3) — highest yield, make sure you didn't detour."
+                      : "你踩到资源格（+3 分），收益最高，但要确认没绕远路。";
+            return `<p class="lg-feedback">${note}</p>`;
+          })()
+        : "";
     const moves = state.finished
       ? []
       : decisionChessMoves(state, state.player);
@@ -701,6 +740,7 @@ export class LeadershipGamesApp {
       )}
       <p class="lg-hint">${en ? "Move toward the goal at the top middle. Collect trust, influence, and resources on the way." : "向棋盘顶部中间的目标前进，沿途收集信任、影响力与组织资源。"}</p>
       ${this.roundSummary(state)}
+      ${last}
       ${result}
       <section class="lg-board">${cells}</section>
       ${this.reviewMarkup(state)}
@@ -711,7 +751,27 @@ export class LeadershipGamesApp {
   private renderGameTheory(state: GameTheoryState): string {
     const en = this.language === "en";
     const last = state.lastPlayerChoice && state.lastAiChoice
-      ? `<p class="lg-feedback">${en ? "Last round:" : "上一轮："} ${esc(state.lastPlayerChoice === "cooperate" ? (en ? "Cooperate" : "合作") : (en ? "Compete" : "竞争"))} vs ${esc(state.lastAiChoice === "cooperate" ? (en ? "Cooperate" : "合作") : (en ? "Compete" : "竞争"))}</p>`
+      ? (() => {
+          const p = state.lastPlayerChoice;
+          const a = state.lastAiChoice;
+          const why =
+            p === "cooperate" && a === "cooperate"
+              ? en
+                ? "Both cooperated (+3) — predictable goodwill compounds trust."
+                : "双方合作 +3，可预测的善意正在积累长期信任。"
+              : p === "compete" && a === "cooperate"
+                ? en
+                  ? "You competed vs cooperation (+5) — this gain invites retaliation."
+                  : "你竞争、对方合作（+5），但这次占便宜会招来报复。"
+                : p === "cooperate" && a === "compete"
+                  ? en
+                    ? "You cooperated vs competition (−1) — your trust was betrayed."
+                    : "你合作、对方竞争（−1），对方背叛了你的信任。"
+                  : en
+                    ? "Both competed (+1 each) — a retaliation spiral hurts both."
+                    : "双方竞争各 +1，报复循环让双方都吃亏。";
+          return `<p class="lg-feedback">${en ? "Last round:" : "上一轮："} ${esc(p === "cooperate" ? (en ? "Cooperate" : "合作") : (en ? "Compete" : "竞争"))} vs ${esc(a === "cooperate" ? (en ? "Cooperate" : "合作") : (en ? "Compete" : "竞争"))} · ${esc(why)}</p>`;
+        })()
       : "";
     const result = state.finished
       ? `<section class="lg-result ${state.winner === "player" ? "win" : "lose"}">
@@ -766,7 +826,21 @@ export class LeadershipGamesApp {
       }
     ).join("");
     const last = state.lastRound
-      ? `<p class="lg-feedback">${en ? "Last round:" : "上一轮："} ${en ? "Score" : "得分"} ${state.lastRound.score}${state.lastRound.bonus ? ` · ${en ? "Balance bonus +15" : "均衡加成 +15"}` : ""}</p>`
+      ? (() => {
+          const alloc = state.lastRound.allocation;
+          const maxArea = RESOURCE_AREAS.reduce<ResourceArea>(
+            (best, area) => (alloc[area] > alloc[best] ? area : best),
+            "cashflow"
+          );
+          const why = state.lastRound.bonus
+            ? en
+              ? "All four >0 triggered the +15 balance bonus — you spread the risk."
+              : "四项都 >0 触发均衡加成 +15，你把风险摊薄了。"
+            : en
+              ? `You focused on ${RESOURCE_AREA_LABELS[maxArea].en}, peaking this round but leaving gaps.`
+              : `你重点投入「${RESOURCE_AREA_LABELS[maxArea].zh}」，单轮峰值高但留下缺口。`;
+          return `<p class="lg-feedback">${en ? "Last round:" : "上一轮："} ${en ? "Score" : "得分"} ${state.lastRound.score} · ${esc(why)}</p>`;
+        })()
       : "";
     const result = state.finished
       ? `<section class="lg-result win">
@@ -812,7 +886,17 @@ export class LeadershipGamesApp {
       )
       .join("");
     const last = state.lastRound
-      ? `<p class="lg-feedback">${en ? "Last match" : "上次匹配"} ${state.lastRound.quality}/3 · +${state.lastRound.gained}</p>`
+      ? (() => {
+          const why =
+            state.lastRound.quality === 3
+              ? en
+                ? "Skill matched the task — strength leveraged."
+                : "成员专长与任务要求匹配，长项红利最大化。"
+              : en
+                ? "Skill didn't match — task covered, strength forfeited."
+                : "成员专长不匹配，短期应付了任务，却放弃了长项红利。";
+          return `<p class="lg-feedback">${en ? "Last match" : "上次匹配"} ${state.lastRound.quality}/3 · +${state.lastRound.gained} · ${esc(why)}</p>`;
+        })()
       : "";
     const result = state.finished
       ? `<section class="lg-result win"><h2>${en ? "Round Complete" : "本轮完成"}</h2><p>${en ? "Score" : "得分"} ${state.score}</p><div class="lg-actions"><button class="primary" data-action="lg-again">${en ? "Again" : "再来一局"}</button><button data-action="lg-back">${en ? "Games" : "游戏列表"}</button></div></section>`

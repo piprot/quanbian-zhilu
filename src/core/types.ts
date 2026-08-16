@@ -214,6 +214,8 @@ export interface SaveState {
   leadershipAchievements: Record<string, string[]>;
   /** Per-game highest unlocked difficulty (1-3). */
   leadershipBestLevel: Record<string, number>;
+  /** Per-game highest earned star count (1-3). */
+  leadershipBestStars?: Record<string, number>;
   /** SM-2 间隔复习卡：未选专家项的决策进入到期回练队列。 */
   reviewCards?: ReviewCard[];
   /** Five-dimension leadership model experience. */

@@ -402,11 +402,30 @@
   color: #bdece8;
 }
 
-.lg-interpretation > p:last-child {
+.lg-interpretation-insight {
   margin: 0;
   color: #d6e9e7;
   font-size: 14px;
   line-height: 1.6;
+}
+
+.lg-interpretation-live {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(242, 193, 78, 0.35);
+  color: #f2c14e;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.lg-stars {
+  max-width: 720px;
+  margin: 20px auto 0;
+  font-size: 24px;
+  letter-spacing: 6px;
+  color: #f2c14e;
+  text-align: center;
+  text-shadow: 0 0 12px rgba(242, 193, 78, 0.35);
 }
 
 .lg-review {

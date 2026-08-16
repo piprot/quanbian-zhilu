@@ -201,6 +201,7 @@ export interface DecisionChessState {
   finished: boolean;
   winner?: "player" | "ai" | "draw";
   lastPlayerMove?: [number, number];
+  lastPlayerValue?: number;
   lastAiMove?: [number, number];
   history: Array<{
     round: number;
@@ -320,7 +321,9 @@ export function applyDecisionChessMove(
   to: [number, number]
 ): DecisionChessState {
   if (state.finished) return state;
+  const cellValue = state.board[to[0]][to[1]];
   let next = decisionChessAdvance(state, "player", to);
+  next.lastPlayerValue = cellValue;
   if (next.player[0] === 0 && next.player[1] === 3) {
     next.playerScore += 20;
     next.finished = true;
@@ -1107,4 +1110,188 @@ export function applyCrisisChoice(
     next.round += 1;
   }
   return next;
+}
+
+// ---------------------------------------------------------------------------
+// 动态领导力解读
+// ---------------------------------------------------------------------------
+// 与静态的「游戏心法」（insightZh/insightEn）不同，这里根据玩家**本局实际
+// 选择与累计倾向**生成一句话解读，随每一轮变化，让复盘真正「即时」。
+
+export type AnyLeadershipGameState =
+  | DecisionChessState
+  | GameTheoryState
+  | ResourceAllocationState
+  | TeamManagementState
+  | CrisisCommandState;
+
+export interface LeadershipInterpretation {
+  zh: string;
+  en: string;
+}
+
+export function interpretLeadership(
+  gameId: LeadershipGameId,
+  state: AnyLeadershipGameState
+): LeadershipInterpretation {
+  if ("board" in state) {
+    return interpretDecisionChess(state);
+  }
+  if ("playerHistory" in state) {
+    return interpretGameTheory(state);
+  }
+  if ("multipliers" in state) {
+    return interpretResourceAllocation(state);
+  }
+  if ("members" in state) {
+    return interpretTeamManagement(state);
+  }
+  if ("trust" in state) {
+    return interpretCrisisCommand(state);
+  }
+  return {
+    zh: "继续推进，复盘会在每一轮给出针对性解读。",
+    en: "Keep going — the review will interpret your play every round."
+  };
+}
+
+function interpretDecisionChess(state: DecisionChessState): LeadershipInterpretation {
+  const diff = state.playerScore - state.aiScore;
+  if (state.winner === "player") {
+    return {
+      zh: `你以 ${state.playerScore}:${state.aiScore} 胜出——关键是把高价值格连成一条推进路径，而不是贪单格高分。`,
+      en: `You won ${state.playerScore}:${state.aiScore} by linking high-value cells into a path instead of grabbing single cells.`
+    };
+  }
+  if (state.winner === "ai") {
+    return {
+      zh: `你以 ${state.playerScore}:${state.aiScore} 落后——AI 更快逼近终点，单格高分输给了路径的连贯性。`,
+      en: `You trail ${state.playerScore}:${state.aiScore}; the AI closed on the goal faster — single-cell scoring lost to a coherent path.`
+    };
+  }
+  return diff >= 0
+    ? {
+        zh: `当前你领先 ${diff} 分，但要盯住 AI 通往顶部中间的路线，别只捡高分格。`,
+        en: `You lead by ${diff}; watch the AI's route to the top-middle goal — don't just grab high-value cells.`
+      }
+    : {
+        zh: `当前你落后 ${-diff} 分，试着优先向顶部中间推进，目标格 +20 的收益常被低估。`,
+        en: `You trail by ${-diff}; push toward the top-middle goal — its +20 is often underweighted.`
+      };
+}
+
+function interpretGameTheory(state: GameTheoryState): LeadershipInterpretation {
+  const total = state.playerHistory.length;
+  const cooperate = state.playerHistory.filter((c) => c === "cooperate").length;
+  const diff = state.playerScore - state.aiScore;
+  if (cooperate >= total - cooperate) {
+    return {
+      zh: `你 ${cooperate}/${total} 次选择合作，可预测的善意正在积累长期信任（当前净分 ${diff}）。`,
+      en: `You cooperated ${cooperate}/${total} times; predictable goodwill compounds trust (net ${diff}).`
+    };
+  }
+  return {
+    zh: `你 ${total - cooperate}/${total} 次选择竞争，短期可能多拿，但会招来 AI 的报复（当前净分 ${diff}）。`,
+    en: `You competed ${total - cooperate}/${total} times; short-term wins invite retaliation (net ${diff}).`
+  };
+}
+
+function interpretResourceAllocation(
+  state: ResourceAllocationState
+): LeadershipInterpretation {
+  const total = state.history.length;
+  const balanced = state.history.filter((h) => h.detail.includes("+15")).length;
+  if (balanced >= Math.ceil(total / 2)) {
+    return {
+      zh: `你 ${balanced}/${total} 轮四项均衡，用单轮峰值换来了稳定加成与更低风险。`,
+      en: `You funded all four areas in ${balanced}/${total} rounds, trading peak score for a stable bonus and lower risk.`
+    };
+  }
+  return {
+    zh: `你更倾向聚焦倾斜（${total - balanced} 轮放弃均衡加成），单轮峰值高但缺口风险上升。`,
+    en: `You favored focus (skipping the balance bonus in ${total - balanced} rounds) — higher peaks, more gap risk.`
+  };
+}
+
+function interpretTeamManagement(
+  state: TeamManagementState
+): LeadershipInterpretation {
+  const total = state.history.length;
+  const perfect = state.history.filter((h) => h.detail.includes("x3")).length;
+  if (perfect >= Math.ceil(total / 2)) {
+    return {
+      zh: `你 ${perfect}/${total} 次让成员做匹配任务，人尽其才放大了团队杠杆。`,
+      en: `You matched skill to task ${perfect}/${total} times, multiplying team leverage.`
+    };
+  }
+  return {
+    zh: `你多次让成员做非专长任务，短期应付了任务，却放弃了长项红利。`,
+    en: `You assigned members off-skill several times, covering tasks but forfeiting their strengths.`
+  };
+}
+
+function interpretCrisisCommand(
+  state: CrisisCommandState
+): LeadershipInterpretation {
+  const total = state.history.length;
+  const expert = state.history.filter((h) => h.detail.includes("+10")).length;
+  if (expert >= Math.ceil(total / 2)) {
+    return {
+      zh: `你 ${expert}/${total} 次优先止血、稳住关键人，信任维持在 ${state.trust}。`,
+      en: `You stabilized first in ${expert}/${total} events, holding trust at ${state.trust}.`
+    };
+  }
+  return {
+    zh: `你多次追责或放手，信任降到 ${state.trust}——危机里先稳局面，比显得果断更重要。`,
+    en: `You often blamed or stepped back, dropping trust to ${state.trust} — stabilizing beats looking decisive.`
+  };
+}
+
+// ---------------------------------------------------------------------------
+// 星级判定
+// ---------------------------------------------------------------------------
+// 0 星 = 未过关；1-3 星 = 过关质量。2 星及以上才解锁下一难度，避免「随便赢
+// 一局就打通」带来的低区分度（balance-sim 曾显示 100% 通过、几乎全 3 星）。
+
+export function starOf(
+  gameId: LeadershipGameId,
+  state: AnyLeadershipGameState
+): number {
+  if ("board" in state) {
+    if (state.winner !== "player") return 0;
+    const s = state.playerScore;
+    if (s >= 22) return 3;
+    if (s >= 15) return 2;
+    return 1;
+  }
+  if ("playerHistory" in state) {
+    if (state.winner !== "player") return 0;
+    const s = state.playerScore;
+    if (s >= 15) return 3;
+    if (s >= 12) return 2;
+    return 1;
+  }
+  if ("multipliers" in state) {
+    const s = state.totalScore;
+    if (s >= 300) return 3;
+    if (s >= 240) return 2;
+    if (s >= 180) return 1;
+    return 0;
+  }
+  if ("members" in state) {
+    if (state.score < 60) return 0;
+    const total = state.history.length;
+    const perfect = state.history.filter((h) => h.detail.includes("x3")).length;
+    if (perfect === total) return 3;
+    if (perfect >= total - 1) return 2;
+    return 1;
+  }
+  if ("trust" in state) {
+    const s = state.score;
+    if (s >= 32) return 3;
+    if (s >= 26) return 2;
+    if (s >= 20) return 1;
+    return 0;
+  }
+  return 0;
 }

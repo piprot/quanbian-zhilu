@@ -1047,11 +1047,12 @@ export class AdaptiveGameApp {
     const { LeadershipGamesApp } = await import("./leadership-games");
     this.leadershipGames = new LeadershipGamesApp(this.language, {
       onBack: () => this.show("map"),
-      onReward: (gameId, won, score, achievements, branch) =>
+      onReward: (gameId, won, score, stars, achievements, branch) =>
         this.completeLeadershipGame(
           gameId,
           won,
           score,
+          stars,
           achievements,
           branch
         ),
@@ -1154,23 +1155,26 @@ export class AdaptiveGameApp {
     gameId: LeadershipGameId,
     won: boolean,
     score: number,
+    stars: number,
     achievements: string[],
     branch: string
   ): void {
     if (won) {
       this.save.leadershipGameWins += 1;
-      this.save.masteryPoints += 2;
+      const reward = Math.max(1, stars);
+      this.save.masteryPoints += reward;
       const meta = LEADERSHIP_GAMES.find((game) => game.id === gameId);
       if (meta) {
         this.save.profile.abilities[meta.abilityId] = clamp(
-          (this.save.profile.abilities[meta.abilityId] ?? 0) + 2,
+          (this.save.profile.abilities[meta.abilityId] ?? 0) + reward,
           0,
           40
         );
       }
       const currentLevel =
         this.save.leadershipBestLevel?.[gameId] ?? 1;
-      if (currentLevel < 3) {
+      // 星级门槛：2 星及以上才解锁下一难度，避免「赢一局就通关」的低区分度。
+      if (currentLevel < 3 && stars >= 2) {
         this.save.leadershipBestLevel[gameId] = currentLevel + 1;
       }
       this.save.profile.resources.influence = clamp(
@@ -1194,6 +1198,9 @@ export class AdaptiveGameApp {
     const earned = this.save.leadershipAchievements[gameId] ?? [];
     const merged = [...new Set([...earned, ...achievements])];
     this.save.leadershipAchievements[gameId] = merged;
+    const starsMap = this.save.leadershipBestStars ?? {};
+    starsMap[gameId] = Math.max(starsMap[gameId] ?? 0, stars);
+    this.save.leadershipBestStars = starsMap;
     if (achievements.length > 0) {
       this.showToast(
         this.language === "en"
@@ -1206,6 +1213,7 @@ export class AdaptiveGameApp {
       gameId,
       won,
       score,
+      stars,
       achievements: achievements.join(","),
       branch
     });
