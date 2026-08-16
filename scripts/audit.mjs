@@ -90,14 +90,14 @@ try {
     await page.click("text=空降首周");
     await page.waitForSelector("text=当前考验");
     await page.click("[data-action=expedition-explore]");
-    await page.waitForSelector(".option-card:not([disabled])");
-    await page.click(".option-card:not([disabled])");
+    await page.waitForSelector(".option-card[data-quality=expert]:not([disabled])");
+    await page.click(".option-card[data-quality=expert]:not([disabled])");
     await page.waitForSelector("text=专家级应对");
     await page.click("text=进入角色分岔");
     await page.waitForSelector("text=当前考验");
     await page.click("[data-action=expedition-explore]");
-    await page.waitForSelector(".option-card:not([disabled])");
-    await page.click(".option-card:not([disabled])");
+    await page.waitForSelector(".option-card[data-quality=expert]:not([disabled])");
+    await page.click(".option-card[data-quality=expert]:not([disabled])");
     await page.waitForSelector(".integrity-gate, .outcome-panel");
     if ((await page.locator(".integrity-gate").count()) > 0) {
       await page.click("[data-cost=correct]");

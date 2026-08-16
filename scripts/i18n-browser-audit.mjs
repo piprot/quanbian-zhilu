@@ -90,7 +90,13 @@ try {
   await page.click('button.chapter-badge[data-chapter="2"]');
   await page.click("text=Authority Gap");
   await page.waitForSelector("text=Current Test");
-  await page.locator(".option-card").first().click();
+  // 选项在完成一次勘察动作后才解锁；c2n1 的原始第 1 个选项（expert）带角色分岔 branchTo
+  const explore = page.locator("[data-action=expedition-explore]");
+  if ((await explore.count()) > 0) {
+    await explore.first().click();
+  }
+  await page.waitForSelector('.option-card[data-option="0"]:not([disabled])');
+  await page.locator('.option-card[data-option="0"]').first().click();
   await page.waitForSelector("text=Enter Role Branch");
   await page.click("text=Enter Role Branch");
   await page.waitForSelector("text=Role Branch");
