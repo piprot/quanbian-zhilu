@@ -1555,19 +1555,20 @@ export class AdaptiveGameApp {
     let sessionMarkup = "";
     const node = this.liveNode;
     if (node && this.liveSessionId) {
+      const view = storyNodeDisplay(this.language, this.save, node);
       const session = this.liveRunner.getSession(this.liveSessionId);
       const picks = session ? [...session.participantPicks.entries()] : [];
-      const expertIndex = node.options.findIndex(
+      const expertIndex = view.options.findIndex(
         (option) => option.quality === "expert"
       );
-      const expert = node.options[expertIndex];
+      const expert = view.options[expertIndex];
       const participantList = picks
         .map(
           ([name, optionIndex]) =>
-            `<li>${escapeHtml(name)} · ${escapeHtml(node.options[optionIndex]?.label ?? "")}</li>`
+            `<li>${escapeHtml(name)} · ${escapeHtml(view.options[optionIndex]?.label ?? "")}</li>`
         )
         .join("");
-      const optionButtons = node.options
+      const optionButtons = view.options
         .map(
           (option, index) =>
             `<button class="${index === this.livePendingOption ? "active" : ""}" data-action="live-pick" data-option="${index}">${escapeHtml(option.label)}</button>`
@@ -1576,7 +1577,7 @@ export class AdaptiveGameApp {
       const distributionMarkup =
         this.liveRevealed && this.liveDistribution
           ? `<div class="live-distribution">
-              ${node.options
+              ${view.options
                 .map((option, index) => {
                   const count = this.liveDistribution?.get(index) ?? 0;
                   const total = picks.length || 1;
@@ -1595,8 +1596,8 @@ export class AdaptiveGameApp {
           : "";
       sessionMarkup = `
         <div class="live-session">
-          <h3>${escapeHtml(node.title)}</h3>
-          <p>${escapeHtml(node.context)}</p>
+          <h3>${escapeHtml(view.title)}</h3>
+          <p>${escapeHtml(view.context)}</p>
           <div class="live-pick-row">
             <input name="live-name" value="${escapeAttr(this.liveName)}" placeholder="${en ? "Participant name" : "学员姓名"}" />
             <div class="live-options">${optionButtons}</div>

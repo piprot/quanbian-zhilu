@@ -5,7 +5,14 @@ import type {
   StoryNode
 } from "./types.ts";
 import { ABILITIES, abilityLevel } from "./abilities.ts";
-import { ABILITY_EN } from "./translations.ts";
+import {
+  ABILITY_EN,
+  BRANCH_NODE_EN,
+  FORK_NODE_EN,
+  MAIN_NODE_EN,
+  RANDOM_NODE_EN,
+  SIDE_NODE_EN
+} from "./translations.ts";
 import { scenarioShellFor } from "./scenarioShell.ts";
 
 export type CoachHintLanguage = "zh" | "en";
@@ -162,6 +169,28 @@ function hintStyle(node: StoryNode, seed: number | undefined): number {
   return base % 3;
 }
 
+const CJK_PATTERN = /[一-鿿]/;
+
+/**
+ * 英文提示的自包含翻译。node.title 已是英文（调用方已通过 storyNodeDisplay
+ * 本地化）则原样使用；否则按节点类型从 EN 翻译表取 title/context，保证
+ * 无论调用方传入已翻译还是原始 node，英文提示都不混中文。
+ */
+function enNodeText(
+  node: StoryNode
+): { title: string; context: string } {
+  if (!CJK_PATTERN.test(node.title)) {
+    return { title: node.title, context: node.context };
+  }
+  let entry: { title: string; context: string } | undefined;
+  if (node.kind === "main") entry = MAIN_NODE_EN[node.id];
+  else if (node.kind === "side") entry = SIDE_NODE_EN[node.id];
+  else if (node.kind === "random") entry = RANDOM_NODE_EN[node.id];
+  else entry = FORK_NODE_EN[node.id] ?? BRANCH_NODE_EN[node.id];
+  if (!entry) return { title: node.title, context: node.context };
+  return { title: entry.title, context: entry.context };
+}
+
 /**
  * Generate a scenario-specific coach hint.
  *
@@ -194,13 +223,16 @@ export function scenarioCoachHint(input: CoachHintInput): string {
     : en
       ? "Coach sees no single ability dominating here; read the relationships before you decide."
       : "教练看到本局没有单一能力主导，先读关系再行动。";
+  const { title, context } = en
+    ? enNodeText(node)
+    : { title: node.title, context: node.context };
   const lead = shell
     ? en
-      ? `This is "${node.title}" (${shell.en}): ${excerpt(node.context, 90)}`
-      : `本局「${node.title}」是${shell.zh}场景：${excerpt(node.context, 44)}`
+      ? `This is "${title}" (${shell.en}): ${excerpt(context, 90)}`
+      : `本局「${title}」是${shell.zh}场景：${excerpt(context, 44)}`
     : en
-      ? `This is "${node.title}" (${kindLabel}): ${excerpt(node.context, 90)}`
-      : `本局「${node.title}」（${kindLabel}）：${excerpt(node.context, 44)}`;
+      ? `This is "${title}" (${kindLabel}): ${excerpt(context, 90)}`
+      : `本局「${title}」（${kindLabel}）：${excerpt(context, 44)}`;
   const style = hintStyle(node, seed);
   if (style === 0) {
     return `${lead} ${ask} ${abilityLine} ${roleNote}`.trim();
