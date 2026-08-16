@@ -287,7 +287,7 @@ export const STORY_NODES: StoryNode[] = [
         label: "先讲事实，再邀请提问",
         summary: "用数据说明现状，把问题开放给所有人，并现场记录。",
         quality: "expert",
-        effects: { communication: 3, mobilize: 2, strategy: 1 },
+        effects: { communication: 3, mobilize: 2, strategy: 2 },
         resources: { energy: -7, trust: 7, influence: 5 },
         feedback:
           "你没有被那句公开质疑激怒，反而把它变成了一个公共议题。沉默者开始说话，反对者也愿意把真实顾虑摆上台面——你让团队看见，分歧可以被讨论，而不是被记仇。",
@@ -492,7 +492,7 @@ export const STORY_NODES: StoryNode[] = [
         label: "用关键结果倒推行动",
         summary: "把目标拆成 3 个关键结果，每个结果配负责人、里程碑和验收标准。",
         quality: "expert",
-        effects: { structure: 3, execution: 2, authority: 1 },
+        effects: { structure: 3, execution: 2, authority: 2 },
         resources: { energy: -8, trust: 4, influence: 6 },
         feedback:
           "你给团队的不是一句口号，而是一张每天都能检查、每周都能校准的作战图。三个关键结果各有人负责、各有里程碑，目标从老板拍脑袋的数字，变成了每个人手里看得见摸得着的活。",
@@ -533,7 +533,7 @@ export const STORY_NODES: StoryNode[] = [
         label: "重排优先级，砍掉非关键项",
         summary: "重新审视管线，停掉三个低价值项目，把火力集中到最大机会。",
         quality: "expert",
-        effects: { execution: 3, structure: 2, authority: 1 },
+        effects: { execution: 3, structure: 2, authority: 2 },
         resources: { energy: -6, trust: 5, influence: 6 },
         feedback:
           "你没有靠更多加班去硬拼数字，而是用取舍把火力集中到最大的机会上。停掉三个低价值项目后，团队第一次感到目标是可以被管理的，而不是只能被命运拖着走。",
@@ -820,7 +820,7 @@ export const STORY_NODES: StoryNode[] = [
         label: "完成交接再上升",
         summary: "把接班人、知识库、风险预案全部落地，并承诺陪跑一个季度。",
         quality: "expert",
-        effects: { stability: 3, deploy: 2, strategy: 1 },
+        effects: { stability: 3, deploy: 2, strategy: 2 },
         resources: { energy: -7, trust: 8, influence: 8 },
         feedback:
           "你没有把晋升当成终点，而是把组织的延续当成责任。接班人、知识库和风险预案一样样落地之后，你的权力在交接中反而变得更加可靠，因为你证明了自己离得开，也留得住。",
@@ -2876,7 +2876,7 @@ export const STORY_NODES: StoryNode[] = [
         label: "增加强制检查节点",
         summary: "用系统卡点保证流程必须被执行。",
         quality: "partial",
-        effects: { authority: 2, execution: 1 },
+        effects: { authority: 2, execution: 1, structure: 1 },
         resources: { energy: -5, trust: -3, influence: 3 },
         feedback: "执行率上升了，但团队开始用绕过系统的方式完成工作，形式大于实质，数据失真。",
         theory: "《韩非子》：法度既立，虽庸主可治。"
@@ -3209,7 +3209,7 @@ export const STORY_NODES: StoryNode[] = [
         label: "先访谈客户内部关键人",
         summary: "找到预算调整的真实决策链，再决定如何回应。",
         quality: "expert",
-        effects: { insight: 3, strategy: 2 },
+        effects: { insight: 3, strategy: 3 },
         resources: { energy: -7, trust: 5, influence: 6 },
         feedback: "你发现砍单来自一位新财务负责人，并找到了重新合作的切口，问题被定位，挽回有方向。",
         theory: "《人物志》：观察人在不同情境中的取舍，才能看见真实动机。"
@@ -3285,7 +3285,7 @@ export const STORY_NODES: StoryNode[] = [
         label: "把方案改成两个可切换版本再公布",
         summary: "保留关键调整，把确定性信息与试探信息分开，观察泄漏路径。",
         quality: "expert",
-        effects: { structure: 3, strategy: 2 },
+        effects: { structure: 3, strategy: 3 },
         resources: { energy: -7, trust: 6, influence: 6 },
         feedback: "你没有先追责，而是让方案本身获得抗泄漏能力，下一次披露有了可控的验证窗口。",
         theory: "《韩非子》：事以密成，语以泄败。"
