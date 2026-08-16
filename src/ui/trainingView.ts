@@ -53,6 +53,8 @@ export function trainingView(
   if (state.stage === "quiz") {
     const question = view.questions[state.step];
     const selected = state.answers[state.step];
+    const answered = selected >= 0;
+    const isCorrect = answered && selected === question.answer;
     const last = state.step === view.questions.length - 1;
     return `
       <header class="topbar">
@@ -74,13 +76,28 @@ export function trainingView(
             ${question.options
               .map(
                 (option, index) => `
-                  <button class="training-option ${selected === index ? "selected" : ""}" data-action="training-option" data-option="${index}">
+                  <button class="training-option ${
+                    selected === index ? "selected" : ""
+                  } ${answered && index === question.answer ? "correct" : ""} ${
+                    answered && selected === index && index !== question.answer ? "wrong" : ""
+                  }" data-action="training-option" data-option="${index}">
                     ${escapeHtml(option.label)}
                   </button>
                 `
               )
               .join("")}
           </div>
+          ${
+            answered
+              ? `
+                <div class="training-instant ${isCorrect ? "correct" : "wrong"}">
+                  <strong>${isCorrect ? (en ? "Correct!" : "答对了！") : (en ? "Not quite — see the correct approach" : "再想想 —— 看看正确做法")}</strong>
+                  <p><strong>${en ? "Correct approach: " : "正确做法："}</strong>${escapeHtml(question.options[question.answer].label)}</p>
+                  <p>${escapeHtml(question.options[question.answer].feedback)}</p>
+                </div>
+              `
+              : ""
+          }
           <div class="training-actions">
             <button data-action="training-prev" ${state.step === 0 ? "disabled" : ""}>${uiString(language, "trainingPrev")}</button>
             ${

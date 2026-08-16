@@ -1971,7 +1971,7 @@ export class AdaptiveGameApp {
         this.trainingStep = 0;
         this.trainingAnswers = Array(
           EXPANDED_TRAINING[this.trainingAbilityId].questions.length
-        ).fill(0);
+        ).fill(-1);
         this.renderTraining();
         return true;
       case "training-option": {
@@ -2032,7 +2032,7 @@ export class AdaptiveGameApp {
         this.trainingStep = 0;
         this.trainingAnswers = Array(
           EXPANDED_TRAINING[this.trainingAbilityId].questions.length
-        ).fill(0);
+        ).fill(-1);
         this.trainingResult = undefined;
         this.audio.ui();
         this.renderTraining();
