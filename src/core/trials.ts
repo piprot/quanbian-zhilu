@@ -1089,10 +1089,15 @@ export function trialRewardExpFor(
   return exp;
 }
 
-export function trialStageLabel(stage: TrialStageDef): string {
-  if (stage.style === "wolf") return "狼人杀式局势判断";
-  if (stage.style === "alliance") return "三国杀式合纵连横";
-  return "独当一面挑战";
+export function trialStageLabel(
+  stage: TrialStageDef,
+  language: "zh" | "en" = "zh"
+): string {
+  if (stage.style === "wolf")
+    return language === "en" ? "Situation-assessment case" : "局势判断情境";
+  if (stage.style === "alliance")
+    return language === "en" ? "Alliance-negotiation case" : "结盟博弈情境";
+  return language === "en" ? "Solo-leadership challenge" : "独当一面挑战";
 }
 
 export function scoreOpenText(

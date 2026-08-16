@@ -46,8 +46,8 @@ export function trialView(
         <section class="trial-hero">
           <div>
             <p class="eyebrow">${uiString(language, "trialTitle")}</p>
-            <h1>${en ? "Grow through battles, not questionnaires" : "不是问卷，是打怪升级"}</h1>
-            <p class="muted">${en ? "Clear gates with ability levels, spend energy on battles, and unlock loot, companions, and MBA cases." : "用能力门槛解锁关卡，消耗精力值挑战守关者，获得道具、同伴和 MBA 高难案例。"}</p>
+            <h1>${en ? "Grow through real scenarios, not questionnaires" : "不是问卷，是实战历练"}</h1>
+            <p class="muted">${en ? "Clear gates with ability levels, spend energy on demanding cases, and unlock tools, allies, and MBA-level cases." : "用能力门槛解锁关卡，消耗精力值挑战高难案例，获得工具、同伴和 MBA 级案例。"}</p>
           </div>
           <div class="trial-energy-panel">
             <span>${uiString(language, "trialEnergy")}</span>
@@ -102,17 +102,17 @@ export function trialView(
           ${
             items.length
               ? `<div class="trial-loot">${items.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>`
-              : `<p class="muted">${en ? "No loot yet. Clear trial stages to collect weapons, allies, and tools." : "还没有战利品，通关试炼会获得武器、同伴和工具。"}</p>`
+              : `<p class="muted">${en ? "No tools yet. Clear trial stages to unlock frameworks, allies, and tools." : "还没有收获，通关试炼会获得方法、同伴和工具。"}</p>`
           }
         </section>
         <section class="trial-unlocks">
           <h2>${en ? "Growth Unlocks" : "成长解锁"}</h2>
           <div class="unlock-list">
-            <span class="unlocked">${en ? "HP: Energy Bar" : "血条：精力值"}</span>
+            <span class="unlocked">${en ? "Stamina: Energy Bar" : "状态：精力值"}</span>
             <span class="${Math.max(...ABILITY_ORDER.map((id) => abilityLevel(save.profile.abilities[id]))) >= 2 ? "unlocked" : "locked"}">${en ? "Skill: Ability Lv.2" : "技能：能力 Lv.2"}</span>
-            <span class="${save.trialCleared.length >= 5 ? "unlocked" : "locked"}">${en ? "Armor: Clear Trial 5" : "防护：通关第 5 关"}</span>
+            <span class="${save.trialCleared.length >= 5 ? "unlocked" : "locked"}">${en ? "Protection: Clear Trial 5" : "防护：通关第 5 关"}</span>
             <span class="${save.trialCleared.length >= 7 ? "unlocked" : "locked"}">${en ? "Ally: Clear Trial 7" : "同伴：通关第 7 关"}</span>
-            <span class="${save.trialCleared.length >= 10 ? "unlocked" : "locked"}">${en ? "Weapon: Clear Trial 10" : "武器：通关第 10 关"}</span>
+            <span class="${save.trialCleared.length >= 10 ? "unlocked" : "locked"}">${en ? "Toolkit: Clear Trial 10" : "工具：通关第 10 关"}</span>
             <span class="${save.trialCleared.length >= 19 ? "unlocked" : "locked"}">${en ? "MBA Cases: Clear All Trials" : "MBA 关卡：通关全部试炼"}</span>
           </div>
         </section>
@@ -133,7 +133,7 @@ export function trialView(
                     <strong>${escapeHtml(stage.name)}</strong>
                     <em>${escapeHtml(stage.boss)}</em>
                   </div>
-                  <p>${trialStageLabel(stage)}</p>
+                  <p>${trialStageLabel(stage, language)}</p>
                   <div class="trial-stage-meta">
                     <span>${uiString(language, "trialGate")}：${escapeHtml(gateText)}</span>
                     <span>${uiString(language, "trialEnergyCost")} ${trialCostFor(save, stage)}</span>
@@ -167,7 +167,7 @@ export function trialView(
         </section>
         <section class="trial-practice">
           <h2>${uiString(language, "trialPractice")}</h2>
-          <p class="muted">${en ? "Write a real reflection; rewards unlock after keyword scoring." : "请完成真实文字修炼，通过关键词评分后才会发放奖励。"}</p>
+          <p class="muted">${en ? "Write a real reflection; rewards unlock after keyword scoring." : "请写下真实反思，通过关键词评分后才会发放奖励。"}</p>
           <div class="practice-list">
             ${PRACTICE_TASKS.map((task) => {
               const done = save.completedPracticeTasks.includes(task.id);
@@ -186,7 +186,7 @@ export function trialView(
                   ${
                     done
                       ? `<span class="practice-done">${uiString(language, "trialCleared")}</span>`
-                      : `<button data-action="practice-task" data-task="${task.id}">${en ? "Complete Mission" : "完成修炼"}</button>`
+                      : `<button data-action="practice-task" data-task="${task.id}">${en ? "Complete Task" : "完成训练"}</button>`
                   }
                 </article>
               `;

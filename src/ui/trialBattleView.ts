@@ -85,7 +85,7 @@ export function trialBattleView(
       <main class="trial-battle-shell" aria-label="${uiString(language, "trialTitle")}">
         <section class="trial-boss-panel">
           <div>
-            <p class="eyebrow">${trialStageLabel(stage)}</p>
+            <p class="eyebrow">${trialStageLabel(stage, language)}</p>
             <h1>${escapeHtml(stage.boss)}</h1>
             <p class="muted">${escapeHtml(stage.name)}</p>
           </div>

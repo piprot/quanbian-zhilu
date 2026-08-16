@@ -121,7 +121,7 @@ export function menuView(
     card("open-leadership-games", "menu-card-10", "03", "领导力游戏", "Leadership Games", "五个精品小游戏：教学、训练、对战、复盘、成就与逐级难度。", "Five polished mini-games with teaching, training, battle, review, achievements, and increasing difficulty."),
     card("open-ability", "menu-card-03", "04", uiString(language, "ability"), "Ability Map", "十项能力、五级段位、经典理论支撑，随时查看你的优势、短板和成长路径。", "Ten abilities, five ranks, and classic theory support let you see strengths, gaps, and growth paths.", 'aria-keyshortcuts="A"'),
     card("open-report", "menu-card-04", "05", uiString(language, "report"), "Review Report", "从游戏表现反推训练建议，把决策反馈迁移回真实工作。", "Turn in-game performance into training advice you can transfer back to real work.", 'aria-keyshortcuts="R"'),
-    card("open-trial", "menu-card-07", "06", uiString(language, "trialTitle"), "Trial Grounds", "消耗精力打怪升级，用能力门槛解锁关卡、战利品和 MBA 高难案例。", "Spend energy, break through gates, collect loot, and unlock MBA cases."),
+    card("open-trial", "menu-card-07", "06", uiString(language, "trialTitle"), "Trial Grounds", "消耗精力挑战高难案例，用能力门槛解锁关卡、工具和 MBA 级案例。", "Spend energy on demanding cases, break through ability gates, and unlock tools and MBA-level cases."),
     card("open-achievements", "menu-card-05", "07", uiString(language, "achievements"), "Achievements", "追踪章节、支线、测评、1v1 与能力段位的完成进度。", "Track chapters, side quests, assessments, duels, and rank milestones."),
     card("open-relations", "menu-card-06", "08", uiString(language, "relations"), "Relations", "查看主线与支线中结识的关键人物，以及关系是否已经转化为组织能力。", "See key people from the campaign and side quests, and whether those relationships became organizational capability.")
   ].join("");

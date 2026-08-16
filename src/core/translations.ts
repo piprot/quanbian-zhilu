@@ -2630,8 +2630,8 @@ export const CHALLENGE_EN: Record<
     description: "Clear 1 growth trial stage"
   },
   practice_1: {
-    title: "Practice Mission",
-    description: "Complete 1 practice mission"
+    title: "Practice Task",
+    description: "Complete 1 practice task"
   },
   story_3: {
     title: "Scenario Streak",

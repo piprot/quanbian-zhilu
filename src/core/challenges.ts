@@ -84,8 +84,8 @@ const CHALLENGE_POOL: Array<ChallengeDef & { target: number; progress(save: Save
   },
   {
     id: "practice_1",
-    title: "行动修炼",
-    description: "完成 1 个修炼任务",
+    title: "行动训练",
+    description: "完成 1 个训练任务",
     target: 1,
     reward: 4,
     category: "trial",
