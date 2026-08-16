@@ -11,7 +11,7 @@
 ## 测试环境
 
 - 线上地址：https://piprot.github.io/quanbian-zhilu/
-- 版本：1.7.30
+- 版本：1.7.37
 - 设备：桌面优先（Chrome / Edge），有条件时补充 iPhone Safari 与 Android Chrome。
 - 准备：浏览器无痕窗口、录屏工具、记事本记录停顿点。
 
