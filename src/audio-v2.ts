@@ -1398,7 +1398,7 @@ export class GameAudioV2 {
     delay: number,
     cutoff: number,
   ): void {
-    if (!this.context || !this.musicGain || this.muted) return;
+    if (!this.context || !this.musicGain) return;
     if (this.activeSources.size >= this.maxConcurrentSources) return;
 
     const ctx = this.context;
@@ -1470,7 +1470,7 @@ export class GameAudioV2 {
     delay: number,
     volume: number,
   ): void {
-    if (!this.context || !this.musicGain || this.muted || !this.noiseBuffer) {
+    if (!this.context || !this.musicGain || !this.noiseBuffer) {
       return;
     }
     if (this.activeSources.size >= this.maxConcurrentSources) return;
@@ -1587,7 +1587,7 @@ export class GameAudioV2 {
       osc.type = config.padWave;
       osc.frequency.value = freq;
       const oscGain = ctx.createGain();
-      oscGain.gain.value = 0.003;
+      oscGain.gain.value = 0.03;
       osc.connect(oscGain);
       oscGain.connect(padFilter);
       osc.start();
@@ -1707,7 +1707,7 @@ export class GameAudioV2 {
    * tension parameter.
    */
   private playPhrase(layer: AmbientLayer): void {
-    if (!this.context || this.muted || !layer.active) return;
+    if (!this.context || !layer.active) return;
 
     const config = SCENE_CONFIGS[layer.scene];
     const chord = config.chords[layer.phraseIndex % config.chords.length];
@@ -1723,7 +1723,7 @@ export class GameAudioV2 {
           freq,
           beatDur * 6,
           config.padWave,
-          0.005,
+          0.05,
           i * 0.04,
           config.padCutoff + cutoffBoost,
         );
@@ -1740,7 +1740,7 @@ export class GameAudioV2 {
             chord[0] / 2,
             noteDur,
             config.bassWave,
-            0.015,
+            0.14,
             i * beatDur,
             300,
           );
@@ -1753,7 +1753,7 @@ export class GameAudioV2 {
           chord[0] / 4,
           beatDur * 0.6,
           "sine",
-          0.012,
+          0.1,
           0,
           260,
         );
@@ -1770,7 +1770,7 @@ export class GameAudioV2 {
           freq,
           arpBeatDur * 1.5,
           "triangle",
-          0.004,
+          0.055,
           i * arpBeatDur,
           2000 + cutoffBoost,
         );
@@ -1794,7 +1794,7 @@ export class GameAudioV2 {
           note * octave,
           beatDur * 2,
           config.melodyWave,
-          0.006,
+          0.09,
           0.3 + i * beatDur * 0.6,
           1500 + cutoffBoost,
         );
@@ -1805,9 +1805,9 @@ export class GameAudioV2 {
     if (this.intensityLayers[4]) {
       config.percussionPattern.forEach((beat, i) => {
         const time = i * beatDur;
-        if (beat[0]) this.playPercussion(layer, "kick", time, 0.025);
-        if (beat[1]) this.playPercussion(layer, "snare", time, 0.018);
-        if (beat[2]) this.playPercussion(layer, "hat", time, 0.012);
+        if (beat[0]) this.playPercussion(layer, "kick", time, 0.07);
+        if (beat[1]) this.playPercussion(layer, "snare", time, 0.05);
+        if (beat[2]) this.playPercussion(layer, "hat", time, 0.035);
       });
     }
 

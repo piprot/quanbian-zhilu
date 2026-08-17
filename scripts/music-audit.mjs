@@ -37,6 +37,31 @@ async function waitForServer() {
   throw new Error("Vite server did not start");
 }
 
+async function readMusicState(page) {
+  return page.evaluate(() => {
+    const audit = window.__musicAudit;
+    const destGains = (audit?.toDestination ?? []).filter(
+      (node) => typeof node?.gain?.value === "number"
+    );
+    const musicGains = destGains.filter(
+      (node) => node.gain.value > 0.3 && node.gain.value < 0.7
+    );
+    const layerNodes = [
+      ...new Set(
+        (audit?.toMusicGain ?? [])
+          .filter((entry) => musicGains.includes(entry.to))
+          .map((entry) => entry.from)
+      )
+    ].filter((node) => typeof node?.gain?.value === "number");
+    return {
+      musicGainValues: musicGains.map((node) => node.gain.value),
+      layerGainValues: layerNodes.map((node) => node.gain.value),
+      musicStorage: localStorage.getItem("adaptive-ascent-music"),
+      contextRunning: (audit?.contexts?.[0]?.state ?? "") === "running"
+    };
+  });
+}
+
 try {
   if (!externalUrl) {
     await waitForServer();
@@ -118,28 +143,7 @@ try {
   await page.locator('[data-action="toggle-music"]').first().click();
   await page.waitForTimeout(900);
 
-  const state = await page.evaluate(() => {
-    const audit = window.__musicAudit;
-    const destGains = (audit?.toDestination ?? []).filter(
-      (node) => typeof node?.gain?.value === "number"
-    );
-    const musicGains = destGains.filter(
-      (node) => node.gain.value > 0.3 && node.gain.value < 0.7
-    );
-    const layerNodes = [
-      ...new Set(
-        (audit?.toMusicGain ?? [])
-          .filter((entry) => musicGains.includes(entry.to))
-          .map((entry) => entry.from)
-      )
-    ].filter((node) => typeof node?.gain?.value === "number");
-    return {
-      musicGainValues: musicGains.map((node) => node.gain.value),
-      layerGainValues: layerNodes.map((node) => node.gain.value),
-      musicStorage: localStorage.getItem("adaptive-ascent-music"),
-      contextRunning: (audit?.contexts?.[0]?.state ?? "") === "running"
-    };
-  });
+  const state = await readMusicState(page);
 
   if (state.musicStorage !== "0") {
     throw new Error(`music toggle did not persist: ${state.musicStorage}`);
@@ -155,6 +159,31 @@ try {
     Math.max(...state.layerGainValues) <= 0.1
   ) {
     throw new Error("ambient layer gain stayed inaudible after unmute");
+  }
+
+  // 声音开关只应控制音效，不应把背景音乐一起关掉。
+  await page.locator('[data-action="toggle-sound"]').first().click();
+  await page.waitForTimeout(500);
+  const sfxMutedState = await readMusicState(page);
+  if (
+    sfxMutedState.layerGainValues.length === 0 ||
+    Math.max(...sfxMutedState.layerGainValues) <= 0.1
+  ) {
+    throw new Error("BGM must keep playing when the sound toggle is off");
+  }
+  await page.locator('[data-action="toggle-sound"]').first().click();
+  await page.waitForTimeout(300);
+
+  // 返回主页再进地图，确认 BGM 在导航后仍持续播放。
+  await page.keyboard.press("h");
+  await page.waitForTimeout(2000);
+  const menuState = await readMusicState(page);
+  if (
+    !menuState.contextRunning ||
+    menuState.layerGainValues.length === 0 ||
+    Math.max(...menuState.layerGainValues) <= 0.1
+  ) {
+    throw new Error("BGM should keep playing after navigation");
   }
   if (errors.length > 0) {
     throw new Error(`Page errors: ${errors.join(" | ")}`);
