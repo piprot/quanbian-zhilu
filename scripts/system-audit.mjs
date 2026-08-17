@@ -68,6 +68,7 @@ const VIEWS = [
   { action: "open-profile", selector: ".narrow-shell" },
   { action: "open-settings", selector: ".settings-shell" },
   { action: "open-coach", selector: ".coach-shell" },
+  { action: "open-lorebook", selector: ".lorebook-shell" },
   { action: "open-leadership-games", selector: ".lg-grid" },
   { action: "open-custom-scenarios", selector: ".custom-workshop-shell" },
   { action: "open-team-academy", selector: ".ta-shell" }

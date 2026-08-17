@@ -136,7 +136,8 @@ export function menuView(
   ].join("");
   const systemCards = [
     card("open-settings", "menu-card-08", "01", uiString(language, "settingsTitle"), "Settings", "统一管理声音、语言、难度、存档数据与操作说明。", "Sound, language, difficulty, save data, and help in one place."),
-    card("open-profile", "menu-card-09", "02", "角色档案", "Role Archives", "空降、创业、高潜三套档案独立保存，随时切换，不再删档。", "Keep every role's save and switch between parachute, founder, and high potential without deleting progress.")
+    card("open-profile", "menu-card-09", "02", "角色档案", "Role Archives", "空降、创业、高潜三套档案独立保存，随时切换，不再删档。", "Keep every role's save and switch between parachute, founder, and high potential without deleting progress."),
+    card("open-lorebook", "menu-card-10", "03", "线索图鉴", "Clue Atlas", "支线弧、随机事件、隐藏路线与 NPC 关系汇总，隐藏内容不再靠猜。", "Side arcs, random events, hidden routes, and NPC relations in one atlas, so hidden content stops being guesswork.")
   ].join("");
   const groups = [
     group("01", "个人训练", "Personal Training", "主线、AI 对练、小游戏与个人复盘，完成从判断到成长的闭环。", "Campaign, AI duels, mini-games and reviews for your personal leadership loop.", personalCards),

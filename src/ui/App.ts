@@ -99,6 +99,7 @@ import {
 } from "../core/coach-plan";
 import {
   adaptiveProgress,
+  adaptiveStageRequirements,
   completeAdaptiveStage
 } from "../core/adaptiveRoute";
 import {
@@ -152,6 +153,7 @@ import { profileView } from "./profileView";
 import { relationsView } from "./relationsView";
 import { trainingView } from "./trainingView";
 import { menuSandboxCaption, menuView } from "./menuView";
+import { lorebookView } from "./lorebookView";
 import {
   customScenarioPlayView,
   customScenariosView,
@@ -215,7 +217,7 @@ const SETTINGS_MIGRATION_KEY = "adaptive-ascent-settings-v2";
 const GUIDE_KEY = "adaptive-ascent-guide-v1";
 const GUIDE_REWARD_KEY = "adaptive-ascent-guide-reward";
 const ACHIEVEMENT_FAVORITE_KEY = "adaptive-ascent-achievement-favorites";
-const APP_VERSION = "1.7.46";
+const APP_VERSION = "1.7.47";
 
 const ACADEMY_DIMENSION_ABILITIES: Record<
   InfluenceKey,
@@ -249,6 +251,7 @@ type View =
   | "hiddenBranch"
   | "training"
   | "coach"
+  | "lorebook"
   | "trial"
   | "trialBattle"
   | "duelLobby"
@@ -296,6 +299,7 @@ export class AdaptiveGameApp {
     localStorage.getItem("adaptive-ascent-lang") === "en" ? "en" : "zh";
   private save: SaveState;
   private view: View = "menu";
+  private previousView?: View;
   private pendingRole: RoleId = "parachute";
   private pendingProfile?: PlayerProfile;
   private assessmentStep = 0;
@@ -675,6 +679,9 @@ export class AdaptiveGameApp {
     if (view !== "duel") {
       this.stopDuelRoundTimer();
     }
+    if (view !== this.view) {
+      this.previousView = this.view;
+    }
     this.view = view;
     window.scrollTo(0, 0);
     const scene =
@@ -789,6 +796,9 @@ export class AdaptiveGameApp {
       case "coach":
         this.renderCoach();
         break;
+      case "lorebook":
+        this.renderLorebook();
+        break;
       case "trial":
         this.renderTrial();
         break;
@@ -803,6 +813,7 @@ export class AdaptiveGameApp {
         break;
     }
     this.wireTrainingLinks();
+    this.renderGlobalChrome();
   }
 
   private renderMenu(): void {
@@ -900,6 +911,97 @@ export class AdaptiveGameApp {
     if (relationGraph) {
       renderRelationGraph(relationGraph, this.save);
     }
+  }
+
+  private renderLorebook(): void {
+    this.root.innerHTML = lorebookView(this.save, this.language);
+  }
+
+  private nextStepPill(): {
+    text: string;
+    label: string;
+    action: View;
+  } | undefined {
+    const en = this.language === "en";
+    if (!this.save.profileCreated) {
+      return {
+        text: en
+          ? "Create your profile and start the 90-day route"
+          : "创建档案，开始 90 天路线",
+        label: en ? "Start" : "开始",
+        action: "profile"
+      };
+    }
+    const adaptive = adaptiveProgress(this.save);
+    const stage = adaptive.done
+      ? undefined
+      : adaptive.route.stages[adaptive.currentIndex];
+    if (stage) {
+      const requirement = adaptiveStageRequirements(
+        this.save,
+        stage,
+        this.language
+      ).join(" · ");
+      return {
+        text: en
+          ? `Route ${adaptive.currentIndex + 1}/${adaptive.route.stages.length} · ${requirement}`
+          : `路线 ${adaptive.currentIndex + 1}/${adaptive.route.stages.length} · ${requirement}`,
+        label: en ? "Go" : "前往",
+        action: "map"
+      };
+    }
+    return {
+      text: en
+        ? "90-day route complete · continue the campaign"
+        : "90 天路线完成 · 继续主线征途",
+      label: en ? "Map" : "地图",
+      action: "map"
+    };
+  }
+
+  private renderGlobalChrome(): void {
+    const en = this.language === "en";
+    if (
+      [
+        "profile",
+        "assessment",
+        "assessmentResult",
+        "chapterTransition",
+        "ending"
+      ].includes(this.view)
+    ) {
+      return;
+    }
+    this.root.querySelector("#global-nav")?.remove();
+    this.root.querySelector("#global-next")?.remove();
+    const nav = document.createElement("div");
+    nav.id = "global-nav";
+    nav.className = "global-nav";
+    nav.setAttribute("role", "navigation");
+    nav.setAttribute("aria-label", en ? "Global navigation" : "全局导航");
+    const backDisabled =
+      !this.previousView || this.previousView === this.view ? "disabled" : "";
+    nav.innerHTML = `
+      <button data-action="go-back" ${backDisabled}>${en ? "Back" : "返回"}</button>
+      ${this.save.profileCreated ? `<button data-action="open-map">${en ? "Map" : "地图"}</button>` : ""}
+      <button data-action="open-menu">${en ? "Home" : "主页"}</button>
+      <button data-action="open-settings">${en ? "Settings" : "设置"}</button>
+      <button data-action="open-lorebook">${en ? "Clues" : "线索"}</button>
+    `;
+    const next = this.nextStepPill();
+    if (next) {
+      const pill = document.createElement("div");
+      pill.id = "global-next";
+      pill.className = "global-next";
+      pill.setAttribute("role", "complementary");
+      pill.setAttribute("aria-label", en ? "Next step" : "下一步");
+      pill.innerHTML = `
+        <span>${escapeHtml(next.text)}</span>
+        <button data-action="go-next">${escapeHtml(next.label)}</button>
+      `;
+      this.root.appendChild(pill);
+    }
+    this.root.appendChild(nav);
   }
 
   private nextActionAdvice(): {
@@ -2110,6 +2212,31 @@ export class AdaptiveGameApp {
           ? "Online mode is disabled in this build."
           : "当前为静态版，未启用云端功能。";
       this.render();
+      return;
+    }
+
+    if (action === "go-back") {
+      this.audio.ui();
+      const target =
+        this.previousView && this.previousView !== this.view
+          ? this.previousView
+          : this.save.profileCreated
+            ? "map"
+            : "menu";
+      this.show(target);
+      return;
+    }
+    if (action === "go-next") {
+      const next = this.nextStepPill();
+      if (next) {
+        this.audio.ui();
+        this.show(next.action);
+      }
+      return;
+    }
+    if (action === "open-lorebook") {
+      this.audio.ui();
+      this.show("lorebook");
       return;
     }
 
