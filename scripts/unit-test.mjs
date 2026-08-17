@@ -121,6 +121,7 @@ import { generateCoachPlan } from "../src/core/coach-plan.ts";
 import { NPCS } from "../src/core/npcs.ts";
 import { NPC_STORIES } from "../src/core/npcStories.ts";
 import { NPC_ARCS } from "../src/core/npcArcs.ts";
+import { reconMoments } from "../src/core/expedition.ts";
 import {
   adaptiveProgress,
   completeAdaptiveStage
@@ -1111,6 +1112,21 @@ taskRoute.adaptiveRoutePassed = [
 assert(
   adaptiveProgress(taskRoute).done,
   "adaptive route should complete after all stages are passed"
+);
+
+// 情报勘察三步应随章节与节点变化，而不是每章复制同一段文案。
+const reconChapterOne = reconMoments(1, "c1n1", 7);
+const reconChapterTwo = reconMoments(2, "c2n1", 7);
+assert(
+  reconChapterOne[0].textZh !== reconChapterTwo[0].textZh &&
+    reconChapterOne[1].textZh !== reconChapterTwo[1].textZh &&
+    reconChapterOne[2].textZh !== reconChapterTwo[2].textZh,
+  "recon survey/talk/decode should differ across chapters"
+);
+assert(
+  reconChapterOne[0].textEn !== reconChapterTwo[0].textEn &&
+    reconChapterOne[1].textEn !== reconChapterTwo[1].textEn,
+  "recon English survey/talk should differ across chapters"
 );
 
 // ---- computeSaveHash 稳定性 ----
