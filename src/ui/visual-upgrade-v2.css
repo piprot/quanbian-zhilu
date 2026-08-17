@@ -3296,6 +3296,35 @@ button:focus-visible,
   letter-spacing: 0;
   color: #f8e2ae;
 }
+.chapter-scene-lead {
+  margin-bottom: 4px;
+  color: #f2c14e;
+  font-weight: 700;
+}
+.training-scenario-strip {
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  border: 1px solid rgba(242, 193, 78, 0.4);
+  border-radius: 8px;
+  background: rgba(242, 193, 78, 0.1);
+}
+.training-scenario-strip strong {
+  color: #f2c14e;
+  margin-right: 8px;
+}
+.training-scenario-strip span {
+  color: #e7eef2;
+  font-weight: 700;
+}
+.training-scenario-strip p {
+  margin: 6px 0 0;
+  color: #9fb3bd;
+}
+.training-scenario-note {
+  margin-top: 4px;
+  color: #f2c14e;
+  font-size: 12px;
+}
 @media (max-width: 760px) {
   .scene-strip {
     height: 92px;

@@ -629,6 +629,8 @@ export function storyView(
                 <div class="chapter-narrative-copy">
                   <span>${en ? "Chapter Story" : "本章剧情"}</span>
                   <h2>${en ? "The story behind this chapter" : "这一章发生了什么"}</h2>
+                  <p class="chapter-scene-lead">${en ? `Live scene · ${escapeHtml(node.title)}` : `情境现场 · ${escapeHtml(node.title)}`}</p>
+                  <p>${escapeHtml(node.context)}</p>
                   <p>${escapeHtml(en ? narrative.en[0] : narrative.zh[0])}</p>
                   <details>
                     <summary>${en ? "Continue the story" : "继续看剧情"}</summary>

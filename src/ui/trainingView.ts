@@ -23,6 +23,7 @@ export interface TrainingViewState {
   step: number;
   answers: number[];
   result: TrainingResult | undefined;
+  scenario?: { title: string; stake: string };
 }
 
 function masteryLabel(
@@ -66,6 +67,11 @@ export function trainingView(
           <div>
             <p class="eyebrow">${uiString(language, "trainingQuiz")}</p>
             <h1>${ability.name} · ${escapeHtml(view.routeTitle)}</h1>
+            ${
+              state.scenario
+                ? `<p class="training-scenario-note">${en ? "Scenario" : "本情境"} · ${escapeHtml(state.scenario.title)}</p>`
+                : ""
+            }
           </div>
           <strong>${state.step + 1} / ${view.questions.length}</strong>
         </section>
@@ -175,6 +181,17 @@ export function trainingView(
         <div>
           <p class="eyebrow">${uiString(language, "trainingTitle")}</p>
           <h1>${escapeHtml(view.routeTitle)}</h1>
+          ${
+            state.scenario
+              ? `
+                <div class="training-scenario-strip">
+                  <strong>${en ? "Scenario" : "本情境"}</strong>
+                  <span>${escapeHtml(state.scenario.title)}</span>
+                  <p>${escapeHtml(state.scenario.stake)}</p>
+                </div>
+              `
+              : ""
+          }
           <p class="muted">${escapeHtml(view.routeSummary)}</p>
           <div class="training-ability-tag" style="--dot:${ABILITIES[state.abilityId].color}">
             <strong>${ability.name} · Lv.${abilityLevel(exp)}</strong>

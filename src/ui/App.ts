@@ -215,7 +215,7 @@ const SETTINGS_MIGRATION_KEY = "adaptive-ascent-settings-v2";
 const GUIDE_KEY = "adaptive-ascent-guide-v1";
 const GUIDE_REWARD_KEY = "adaptive-ascent-guide-reward";
 const ACHIEVEMENT_FAVORITE_KEY = "adaptive-ascent-achievement-favorites";
-const APP_VERSION = "1.7.45";
+const APP_VERSION = "1.7.46";
 
 const ACADEMY_DIMENSION_ABILITIES: Record<
   InfluenceKey,
@@ -335,6 +335,7 @@ export class AdaptiveGameApp {
     firstComplete: boolean;
     answered: boolean[];
   };
+  private trainingScenario?: { title: string; stake: string };
   private storyNodeId?: string;
   private storyHintRevealed = false;
   private replayMode = false;
@@ -1379,7 +1380,8 @@ export class AdaptiveGameApp {
       stage: this.trainingStage,
       step: this.trainingStep,
       answers: this.trainingAnswers,
-      result: this.trainingResult
+      result: this.trainingResult,
+      scenario: this.trainingScenario
     });
     const board = this.root.querySelector<HTMLCanvasElement>("#training-board");
     if (board) {
@@ -2146,6 +2148,23 @@ export class AdaptiveGameApp {
           this.trainingStage =
             actionTarget.dataset.trainingMode === "quiz" ? "quiz" : "story";
           this.trainingStep = 0;
+          if (this.view === "story" && this.storyNodeId) {
+            try {
+              const storyNode = storyNodeDisplay(
+                this.language,
+                this.save,
+                getNodeForRole(this.save.profile.role, this.storyNodeId)
+              );
+              this.trainingScenario = {
+                title: storyNode.title,
+                stake: storyNode.stake
+              };
+            } catch {
+              this.trainingScenario = undefined;
+            }
+          } else {
+            this.trainingScenario = undefined;
+          }
           this.trainingAnswers = Array(
             EXPANDED_TRAINING[abilityId].questions.length
           ).fill(-1);
