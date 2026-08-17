@@ -175,7 +175,7 @@ export function menuView(
           <strong>${summary.total}</strong>
           <span class="rank-caption">${started ? uiString(language, "totalAbility") : en ? "Baseline · grows with decisions" : "初始基线 · 随决策成长"}</span>
           <div class="rank-meter"><i style="width:${Math.min(100, (summary.total / 60) * 100)}%"></i></div>
-          <p title="${en ? "A chapter counts after both main scenarios are completed" : "完成本章全部主线情境后才会计入通关"}">${en ? `Completed ${summary.chapterCount} / 9 chapters` : `已通关 ${summary.chapterCount} / 9 章`}</p>
+          <p title="${en ? "A chapter counts after all 9 main scenarios are completed" : "完成本章全部 9 个主线情境后才会计入通关"}">${en ? `Completed ${summary.chapterCount} / 9 chapters` : `已通关 ${summary.chapterCount} / 9 章`}</p>
         </div>
       </section>
       ${

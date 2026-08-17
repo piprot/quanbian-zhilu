@@ -1,4 +1,5 @@
 import { totalAbilityLevels } from "./abilities.ts";
+import { getChapter } from "./story.ts";
 import type { SaveState } from "./types";
 
 export interface ChallengeDef {
@@ -52,7 +53,11 @@ const CHALLENGE_POOL: Array<ChallengeDef & { target: number; progress(save: Save
     reward: 6,
     category: "chapter",
     progress: (save) =>
-      save.chapterRecords.filter((record) => record.completedNodeIds.length >= 2)
+      save.chapterRecords.filter(
+        (record) =>
+          record.completedNodeIds.length >=
+          getChapter(record.chapterId).nodeIds.length
+      )
         .length
   },
   {

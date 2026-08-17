@@ -110,7 +110,7 @@ export function mapView(
                   <p class="eyebrow">${en ? "Three things to know" : "进入地图前，先记住三件事"}</p>
                   <ol>
                     <li><strong>${en ? "Recon first" : "先勘察"}</strong>${en ? "Complete one recon action to unlock choices." : "先完成一个勘察动作，才能解锁选择。"}</li>
-                    <li><strong>${en ? "Core + Extended" : "核心 + 扩展"}</strong>${en ? "Core 2/2 unlocks the next chapter; 7 extended scenarios add depth and rewards." : "核心 2/2 推进章节，7 个扩展情境提供深度和奖励。"}</li>
+                    <li><strong>${en ? "Full Chapter" : "全章推进"}</strong>${en ? "Complete all 9 scenarios (2 core + 7 extended) to unlock the next chapter." : "完成本章全部 9 个情境（2 核心 + 7 扩展）才能推进下一章。"}</li>
                     <li><strong>${en ? "Guardian verification" : "守护验证"}</strong>${en ? "Repeatedly picking the first option triggers a real trade-off check." : "反复选择第一个方案会触发真实取舍验证。"}</li>
                   </ol>
                   <button class="primary" data-action="dismiss-map-guide">${en ? "Start Recon" : "开始勘察"}</button>
@@ -150,7 +150,7 @@ export function mapView(
             <p class="eyebrow">${uiString(language, "mainQuest")}</p>
             <h1>${uiString(language, "campaignTitle")}</h1>
             <p class="muted">${uiString(language, "mapHint")}</p>
-            <p class="muted chapter-count-hint">${language === "en" ? "Core 2/2 unlocks the next chapter; 7 extended scenarios add optional depth and rewards." : "完成每章前 2 个核心主线即可推进章节；另外 7 个主线扩展情境提供额外深度与奖励。"}</p>
+            <p class="muted chapter-count-hint">${language === "en" ? "Complete all 9 scenarios (2 core + 7 extended) to unlock the next chapter." : "完成本章全部 9 个主线情境（2 核心 + 7 扩展）即可推进下一章。"}</p>
           </div>
           <div class="resource-strip">
             ${resourceChips(language, save.profile)}
@@ -397,7 +397,7 @@ export function mapView(
             </div>
             </div>
             <div class="map-quick-actions">
-              <button class="primary" data-action="open-report">${uiString(language, "viewReport")}</button>
+              <button class="primary" data-action="open-report">${language === "en" ? "Report Center" : "报告中心"}</button>
               <button data-action="open-duel">${uiString(language, "enterDuel")}</button>
               <button data-action="open-ability">${uiString(language, "ability")}</button>
             </div>

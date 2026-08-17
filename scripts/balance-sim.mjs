@@ -1,7 +1,7 @@
 import {
-  CHAPTER_PASS_STARS,
   DEFAULT_SAVE,
   applyStoryChoice,
+  chapterPassStars,
   chapterStarCount,
   isChapterPassed
 } from "../src/core/game.ts";
@@ -35,7 +35,8 @@ function simulateOnce(seed) {
           ?.stars ?? 0,
       count: chapterStarCount(
         save.chapterRecords.find((record) => record.chapterId === chapter.id)
-          ?.stars ?? 0
+          ?.stars ?? 0,
+        chapter.id
       )
     };
     if (chapter.id < CHAPTERS.length) {
@@ -61,8 +62,9 @@ for (let i = 0; i < RUNS; i += 1) {
 
 const chapterStats = CHAPTERS.map((chapter) => {
   const values = results.map((result) => result.stars[chapter.id]);
+  const passStars = chapterPassStars(chapter.id);
   const passRate =
-    values.filter((item) => item.total >= CHAPTER_PASS_STARS).length / RUNS;
+    values.filter((item) => item.total >= passStars).length / RUNS;
   const starDist = [0, 1, 2, 3].map(
     (stars) =>
       values.filter((item) => item.count === stars).length / RUNS
@@ -79,7 +81,7 @@ const chapterStats = CHAPTERS.map((chapter) => {
 
 const summary = {
   runs: RUNS,
-  passThreshold: CHAPTER_PASS_STARS,
+  passThresholds: CHAPTERS.map((chapter) => chapterPassStars(chapter.id)),
   chapters: chapterStats,
   campaignPassRate: Number(
     (

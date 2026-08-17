@@ -99,6 +99,9 @@ jobs:
       - name: System audit
         run: npm run test:system
 
+      - name: Stress smoke
+        run: npm run test:stress
+
   deploy:
     needs: [build, test]
     runs-on: ubuntu-latest

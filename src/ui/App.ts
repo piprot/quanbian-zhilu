@@ -83,6 +83,7 @@ import { ThemeMusic } from "../core/theme-music";
 import { reconMoments } from "../core/expedition";
 import type { LeadershipGamesApp, LeadershipGameId } from "./leadership-games";
 import type { TeamAcademyApp } from "./team-academy";
+import type { InfluenceKey } from "../core/team-academy";
 import {
   CoachWorkshopEngine,
   LiveScenarioRunner,
@@ -210,7 +211,17 @@ const SETTINGS_MIGRATION_KEY = "adaptive-ascent-settings-v2";
 const GUIDE_KEY = "adaptive-ascent-guide-v1";
 const GUIDE_REWARD_KEY = "adaptive-ascent-guide-reward";
 const ACHIEVEMENT_FAVORITE_KEY = "adaptive-ascent-achievement-favorites";
-const APP_VERSION = "1.7.39";
+const APP_VERSION = "1.7.40";
+
+const ACADEMY_DIMENSION_ABILITIES: Record<
+  InfluenceKey,
+  AbilityId[]
+> = {
+  trust: ["communication", "recovery"],
+  connection: ["communication", "insight"],
+  strategy: ["strategy", "structure"],
+  succession: ["authority", "structure", "deploy"]
+};
 
 type View =
   | "menu"
@@ -412,6 +423,8 @@ export class AdaptiveGameApp {
     localStorage.getItem("adaptive-ascent-recovery-code") || "";
   private cloudStatus =
     this.language === "en" ? "Cloud not connected" : "未连接云端";
+  private cloudReady = ONLINE_ENABLED;
+  private cloudStatusChecked = false;
   private cloudEntries: Array<{
     name: string;
     role: string;
@@ -431,7 +444,7 @@ export class AdaptiveGameApp {
   private roundDurationMs = 0;
   private interferenceText?: string;
   private lastTimedOut = false;
-  private energyRestoreUsed = false;
+  private energyRestoreUsed = 0;
   private lastEnergyRestoreChapter = 0;
 
   constructor(root: HTMLElement) {
@@ -960,7 +973,7 @@ export class AdaptiveGameApp {
     }
     if (node.chapterId !== this.lastEnergyRestoreChapter) {
       this.lastEnergyRestoreChapter = node.chapterId;
-      this.energyRestoreUsed = false;
+      this.energyRestoreUsed = 0;
     }
     this.root.innerHTML = storyView(this.save, this.language, {
       storyNodeId: this.storyNodeId,
@@ -1082,6 +1095,64 @@ export class AdaptiveGameApp {
     this.show("leadershipGames");
   }
 
+  private addAcademyAbilityExp(
+    dimension: InfluenceKey | undefined,
+    amount: number
+  ): AbilityId {
+    const group = dimension
+      ? ACADEMY_DIMENSION_ABILITIES[dimension]
+      : ROLES[this.save.profile.role].focusAbilities;
+    const target = group.reduce((best, id) =>
+      abilityLevel(this.save.profile.abilities[id]) <=
+      abilityLevel(this.save.profile.abilities[best])
+        ? id
+        : best
+    );
+    this.save.profile.abilities[target] = Math.min(
+      40,
+      this.save.profile.abilities[target] + amount
+    );
+    return target;
+  }
+
+  private applyAcademyProgress(payload: {
+    kind: "scenario" | "practice" | "homework" | "mentor";
+    correct?: boolean;
+    passed?: boolean;
+    gained?: number;
+    dimension?: InfluenceKey;
+  }): void {
+    if (
+      (payload.kind === "scenario" || payload.kind === "practice") &&
+      payload.correct &&
+      (payload.gained ?? 0) > 0
+    ) {
+      this.addAcademyAbilityExp(undefined, 1);
+      this.persistSave();
+      return;
+    }
+    if (payload.kind === "homework" && payload.passed) {
+      this.addAcademyAbilityExp(payload.dimension ?? "trust", 2);
+      this.save.masteryPoints += 2;
+      this.persistSave();
+      this.showToast(
+        this.language === "en"
+          ? "Academy homework passed: +2 ability, +2 mastery, now feeding your campaign profile."
+          : "训练营作业通过：能力 +2、修炼点 +2，已计入能力图谱。"
+      );
+      return;
+    }
+    if (payload.kind === "mentor" && payload.dimension) {
+      this.addAcademyAbilityExp(payload.dimension, 1);
+      this.persistSave();
+      this.showToast(
+        this.language === "en"
+          ? "Mentor recruited: +1 ability, now feeding your campaign profile."
+          : "导师已加入：能力 +1，已计入能力图谱。"
+      );
+    }
+  }
+
   private async openTeamAcademy(): Promise<void> {
     const { TeamAcademyApp } = await import("./team-academy");
     this.teamAcademy = new TeamAcademyApp(
@@ -1093,7 +1164,8 @@ export class AdaptiveGameApp {
           if (kind === "correct") this.audio.expert();
           else if (kind === "wrong") this.audio.risk();
           else this.audio.ui();
-        }
+        },
+        onProgress: (payload) => this.applyAcademyProgress(payload)
       }
     );
     this.audio.ui();
@@ -1759,8 +1831,51 @@ export class AdaptiveGameApp {
       remoteAnswerCode: this.remoteAnswerCode,
       remoteStatus: this.remoteStatus,
       cloudStatus: this.cloudStatus,
+      cloudReady: this.cloudReady,
       lastRoomId: this.lastRoomId
     });
+    if (!this.cloudStatusChecked) {
+      this.cloudStatusChecked = true;
+      void this.refreshCloudStatus();
+    }
+  }
+
+  private async refreshCloudStatus(): Promise<void> {
+    const serverUrl =
+      (import.meta.env.VITE_ROOM_SERVER_URL as string | undefined) ?? "";
+    if (!ONLINE_ENABLED || !serverUrl) {
+      this.cloudStatus =
+        this.language === "en"
+          ? "Cloud disabled in static build"
+          : "静态版未启用云端";
+      this.cloudReady = false;
+      this.renderDuelLobby();
+      return;
+    }
+    try {
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), 5000);
+      const response = await fetch(
+        `${serverUrl.replace(/\/+$/, "")}/health`,
+        { signal: controller.signal }
+      );
+      window.clearTimeout(timer);
+      this.cloudReady = response.ok;
+      this.cloudStatus = response.ok
+        ? this.language === "en"
+          ? "Server connected"
+          : "服务端已连接"
+        : this.language === "en"
+          ? "Server unhealthy"
+          : "服务端状态异常";
+    } catch {
+      this.cloudReady = false;
+      this.cloudStatus =
+        this.language === "en"
+          ? "Server unreachable · auto-match unavailable"
+          : "服务端不可达 · 自动匹配不可用";
+    }
+    this.renderDuelLobby();
   }
 
   private buildDuelPredictionIntel(): DuelPredictionIntel | undefined {
@@ -3766,18 +3881,18 @@ export class AdaptiveGameApp {
         this.renderStory();
         return true;
       case "energy-restore":
-        if (!this.energyRestoreUsed) {
+        if (this.energyRestoreUsed < 2) {
           this.save.profile.resources.energy = Math.min(
             100,
-            this.save.profile.resources.energy + 25
+            this.save.profile.resources.energy + 40
           );
-          this.energyRestoreUsed = true;
+          this.energyRestoreUsed += 1;
           this.persistSave();
           this.audio.expert();
           this.showToast(
             this.language === "en"
-              ? "Energy restored +25."
-              : "精力已恢复 +25。"
+              ? `Energy restored +40 (${this.energyRestoreUsed}/2 this chapter).`
+              : `精力已恢复 +40（本章 ${this.energyRestoreUsed}/2）。`
           );
           this.renderStory();
         }

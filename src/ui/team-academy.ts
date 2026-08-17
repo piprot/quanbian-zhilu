@@ -21,6 +21,13 @@ import {
 export interface TeamAcademyCallbacks {
   onBack(): void;
   onAudio(kind: "ui" | "correct" | "wrong"): void;
+  onProgress?(payload: {
+    kind: "scenario" | "practice" | "homework" | "mentor";
+    correct?: boolean;
+    passed?: boolean;
+    gained?: number;
+    dimension?: InfluenceKey;
+  }): void;
 }
 
 function esc(value: string): string {
@@ -166,6 +173,11 @@ export class TeamAcademyApp {
         bestWhy: result.bestPath?.why ?? "",
         knowledge: scenario?.knowledge ?? ""
       };
+      this.callbacks.onProgress?.({
+        kind: "scenario",
+        correct: result.correct,
+        gained: result.gained
+      });
       this.callbacks.onAudio(result.correct ? "correct" : "wrong");
       this.render(this.root);
       return;
@@ -209,6 +221,11 @@ export class TeamAcademyApp {
         correct: result.correct,
         explanation: question.explanation
       };
+      this.callbacks.onProgress?.({
+        kind: "practice",
+        correct: result.correct,
+        gained: result.gained
+      });
       this.callbacks.onAudio(result.correct ? "correct" : "wrong");
       this.render(this.root);
       return;
@@ -246,16 +263,28 @@ export class TeamAcademyApp {
       this.states[this.currentRole] = result.state;
       this.persist();
       this.homeworkResult = result;
+      this.callbacks.onProgress?.({
+        kind: "homework",
+        passed: result.passed
+      });
       this.callbacks.onAudio(result.passed ? "correct" : "wrong");
       this.render(this.root);
       return;
     }
     if (action === "ta-mentor") {
+      const previous = this.states[this.currentRole];
       this.states[this.currentRole] = recruitMentor(
         this.states[this.currentRole],
         target.dataset.id ?? ""
       );
       this.persist();
+      const mentor = TEAM_MENTORS.find(
+        (item) => item.id === target.dataset.id
+      );
+      this.callbacks.onProgress?.({
+        kind: "mentor",
+        dimension: mentor?.dimension
+      });
       this.callbacks.onAudio("correct");
       this.render(this.root);
       return;

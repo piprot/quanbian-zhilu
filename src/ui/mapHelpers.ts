@@ -28,7 +28,7 @@ export function canEnterSideNode(nodeId: string, save: SaveState): boolean {
     return isNodeComplete(save, arc.nodes[index - 1]);
   }
   const node = getNode(nodeId);
-  return getChapter(node.chapterId).nodeIds.some((mainId) =>
+  return getChapter(node.chapterId).nodeIds.every((mainId) =>
     isNodeComplete(save, mainId)
   );
 }
@@ -69,7 +69,7 @@ export function sideNodeLockReason(
   const doneMain = mainIds.filter((id) =>
     isNodeComplete(save, id)
   ).length;
-  const chapterReady = mainIds.some((mainId) =>
+  const chapterReady = mainIds.every((mainId) =>
     isNodeComplete(save, mainId)
   );
   return chapterReady

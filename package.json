@@ -10,6 +10,7 @@
     "build:online": "tsc && vite build --mode online && node scripts/stamp-sw.mjs",
     "preview": "vite preview",
     "test": "node scripts/smoke.mjs",
+    "test:stress": "node scripts/stress-smoke.mjs",
     "test:lazy-views": "node scripts/verify-lazy-views.mjs",
     "test:unit": "node --experimental-strip-types scripts/unit-test.mjs",
     "test:academy": "node --experimental-strip-types scripts/team-academy-audit.mjs",

@@ -47,12 +47,12 @@ function runRole(role) {
       const energyLocked = options.some(
         (option) => optionGateFor(save, option, chapterId).kind === "resource"
       );
-      if (energyLocked && !energyRestoreUsedRef.used) {
+      if (energyLocked && energyRestoreUsedRef.used < 2) {
         save.profile.resources.energy = Math.min(
           100,
-          save.profile.resources.energy + 25
+          save.profile.resources.energy + 40
         );
-        energyRestoreUsedRef.used = true;
+        energyRestoreUsedRef.used += 1;
         best = bestEnabledIndex(options, save, chapterId);
       }
     }
@@ -65,7 +65,7 @@ function runRole(role) {
     while (attempts < 3 && !passed) {
       attempts += 1;
       if (attempts > 1) retryChapter(save, chapter.id);
-      const energyRestoreUsed = { used: false };
+      const energyRestoreUsed = { used: 0 };
       const nodes = nodesForChapter(chapter.id).filter(
         (node) => node.kind === "main"
       );

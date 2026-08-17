@@ -3270,12 +3270,31 @@ button:focus-visible,
   font-size: 13px;
 }
 .scene-strip {
+  position: relative;
   height: 132px;
   margin: 0 0 14px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   background-size: cover;
   background-position: center;
+}
+.scene-strip::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 46px;
+  border-radius: 0 0 8px 8px;
+  background: linear-gradient(180deg, transparent, rgba(5, 10, 14, 0.78));
+}
+.scene-strip-caption {
+  position: absolute;
+  left: 12px;
+  bottom: 8px;
+  z-index: 1;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: #f8e2ae;
 }
 @media (max-width: 760px) {
   .scene-strip {

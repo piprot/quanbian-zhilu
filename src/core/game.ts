@@ -8,6 +8,7 @@ import {
   totalAbilityLevels
 } from "./abilities.ts";
 import {
+  getChapter,
   getNode,
   randomEventEligibleCount
 } from "./story.ts";
@@ -51,8 +52,8 @@ export function chapterEconomyScale(chapterId: number): {
 } {
   const chapter = Math.min(9, Math.max(1, chapterId || 1));
   return {
-    neg: Number((1 + (chapter - 1) * 0.12).toFixed(2)),
-    pos: Number(Math.max(0.55, 1 - (chapter - 1) * 0.05).toFixed(2))
+    neg: Number((1 + (chapter - 1) * 0.06).toFixed(2)),
+    pos: Number(Math.max(0.7, 1 - (chapter - 1) * 0.03).toFixed(2))
   };
 }
 
@@ -653,7 +654,7 @@ export function roleSlotSummaries(): RoleSlotSummary[] {
       name: slot?.profile?.name ?? "",
       chapterCount: slot
         ? slot.chapterRecords.filter(
-            (record) => record.completedNodeIds.length >= 2
+            (record) => isChapterComplete(slot, record.chapterId)
           ).length
         : 0,
       masteryPoints: slot?.masteryPoints ?? 0,
@@ -691,7 +692,9 @@ export function globalArchiveStats(): GlobalArchiveStats {
     totalChapters: slots.reduce(
       (sum, slot) =>
         sum +
-        slot.chapterRecords.filter((record) => record.completedNodeIds.length >= 2)
+        slot.chapterRecords.filter((record) =>
+          isChapterComplete(slot, record.chapterId)
+        )
           .length,
       0
     ),
@@ -851,10 +854,10 @@ export function applyStoryChoice(
     if (!save.chapterRecords.some((item) => item.chapterId === node.chapterId)) {
       save.chapterRecords.push(record);
     }
-    if (record.completedNodeIds.length >= 2) {
+    if (isChapterComplete(save, node.chapterId)) {
       const chapterAchievement = `chapter_${node.chapterId}`;
       const firstComplete = !save.achievements.includes(chapterAchievement);
-      const passed = record.stars >= CHAPTER_PASS_STARS;
+      const passed = isChapterPassed(save, node.chapterId);
       if (firstComplete && passed) {
         save.masteryPoints += 10;
         delta.masteryPoints += 10;
@@ -1060,28 +1063,49 @@ export function resourceStrainFor(
   return strain;
 }
 
-/** 导致下一章解锁的最低分数（一星）。 */
-export const CHAPTER_PASS_STARS = 70;
+/** 每章全部主线情境完成后，按总星数评级：1 星约等于 35 分/情境，3 星接近全专家。 */
+export function chapterStarThresholds(chapterId: number): {
+  pass: number;
+  two: number;
+  three: number;
+} {
+  const count = Math.max(1, getChapter(chapterId).nodeIds.length);
+  return {
+    pass: Math.round(count * 35),
+    two: Math.round(count * 75),
+    three: Math.round(count * 100)
+  };
+}
 
-export function chapterStarCount(stars: number): number {
-  if (stars >= 200) return 3;
-  if (stars >= 150) return 2;
-  if (stars >= CHAPTER_PASS_STARS) return 1;
+export function chapterPassStars(chapterId: number): number {
+  return chapterStarThresholds(chapterId).pass;
+}
+
+export function chapterStarCount(stars: number, chapterId = 1): number {
+  const thresholds = chapterStarThresholds(chapterId);
+  if (stars >= thresholds.three) return 3;
+  if (stars >= thresholds.two) return 2;
+  if (stars >= thresholds.pass) return 1;
   return 0;
 }
 
 export function isChapterComplete(save: SaveState, chapterId: number): boolean {
   const record = save.chapterRecords.find((item) => item.chapterId === chapterId);
-  return Boolean(record && record.completedNodeIds.length >= 2);
+  return Boolean(
+    record &&
+      getChapter(chapterId).nodeIds.every((nodeId) =>
+        record.completedNodeIds.includes(nodeId)
+      )
+  );
 }
 
 /** 章节是否达到一星门槛（可解锁下一章、可入座复盘）。 */
 export function isChapterPassed(save: SaveState, chapterId: number): boolean {
   const record = save.chapterRecords.find((item) => item.chapterId === chapterId);
   return Boolean(
-    record &&
-      record.completedNodeIds.length >= 2 &&
-      record.stars >= CHAPTER_PASS_STARS
+    isChapterComplete(save, chapterId) &&
+      record &&
+      record.stars >= chapterPassStars(chapterId)
   );
 }
 

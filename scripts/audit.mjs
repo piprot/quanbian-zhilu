@@ -109,7 +109,7 @@ try {
     await page.click("text=能力图谱");
     await page.waitForSelector("text=综合能力值");
     const abilityOverflow = await overflow(page);
-    await page.click("text=复盘报告");
+    await page.click("[data-action=open-report]");
     await page.waitForSelector("text=领导力轨迹");
     const reportOverflow = await overflow(page);
     await page.click("text=返回主页");

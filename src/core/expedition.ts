@@ -1,3 +1,4 @@
+import { getChapter } from "./story.ts";
 import type { SaveState } from "./types";
 
 export interface PowerStageDef {
@@ -98,7 +99,9 @@ export function reconStatus(save: SaveState): ReconStatus {
   const foundPieces = Math.min(
     totalPieces,
     save.chapterRecords.filter(
-      (record) => record.completedNodeIds.length >= 2
+      (record) =>
+        record.completedNodeIds.length >=
+        getChapter(record.chapterId).nodeIds.length
     ).length
   );
   const currentChapter = save.unlockedChapters.at(-1) ?? 1;

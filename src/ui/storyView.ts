@@ -60,7 +60,7 @@ export interface StoryViewState {
   interferenceText: string | undefined;
   storyHintRevealed: boolean;
   lastTimedOut: boolean;
-  energyRestoreUsed: boolean;
+  energyRestoreUsed: number;
   integrityGateNodeId: string | undefined;
   lastOutcome: ChoiceOutcome | undefined;
   lastOutcomeNodeId: string | undefined;
@@ -660,7 +660,9 @@ export function storyView(
         <section class="story-layout">
           <section class="story-narrative">
             <section class="scenario-panel">
-              <div class="scene-strip" role="img" aria-label="${en ? "Chapter scene" : "章节场景"}" style="background-image:url('./art/chapter-${node.chapterId}.jpg')"></div>
+              <div class="scene-strip" role="img" aria-label="${en ? "Chapter scene" : "章节场景"}" style="background-image:url('./art/chapter-${node.chapterId}.jpg')">
+                <span class="scene-strip-caption">${en ? `Chapter ${node.chapterId} · Live Scene` : `第 ${node.chapterId} 章 · 现场`}</span>
+              </div>
               <div class="scenario-meta">
                 <span>${language === "en" ? `Chapter ${chapter.code} · ${chapter.title}` : `第 ${chapter.code} 章 · ${chapter.title}`}</span>
                 <span>${node.kind === "side" ? uiString(language, "storyKindSide") : node.kind === "branch" ? uiString(language, "storyKindBranch") : node.kind === "random" ? uiString(language, "storyKindRandom") : isExtraMainNode ? (en ? "Extended Main Scenario" : "主线扩展情境") : uiString(language, "storyKindMain")}</span>
@@ -782,11 +784,11 @@ export function storyView(
                         ? `
                           <div class="energy-restore-panel" role="status">
                             <strong>${language === "en" ? "Energy exhausted" : "精力耗尽"}</strong>
-                            <p>${language === "en" ? "Every move needs more energy right now. Take a breath to recover +25 once per chapter." : "当前所有选项都需要更多精力。深呼吸恢复 +25，每章限一次。"}</p>
+                            <p>${language === "en" ? "Every move needs more energy right now. Take a breath to recover +40, up to twice per chapter." : "当前所有选项都需要更多精力。深呼吸恢复 +40，每章最多两次。"}</p>
                             ${
-                              state.energyRestoreUsed
-                                ? `<small>${language === "en" ? "Recovery already used this chapter." : "本章恢复已使用。"}</small>`
-                                : `<button data-action="energy-restore">${language === "en" ? "Breathe & Recover +25" : "深呼吸恢复 +25"}</button>`
+                              state.energyRestoreUsed >= 2
+                                ? `<small>${language === "en" ? `Recovery used ${state.energyRestoreUsed}/2 this chapter.` : `本章恢复已使用 ${state.energyRestoreUsed}/2。`}</small>`
+                                : `<button data-action="energy-restore">${language === "en" ? `Breathe & Recover +40 (${state.energyRestoreUsed}/2)` : `深呼吸恢复 +40（${state.energyRestoreUsed}/2）`}</button>`
                             }
                           </div>
                         `

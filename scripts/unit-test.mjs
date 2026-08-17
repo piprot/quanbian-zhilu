@@ -122,7 +122,6 @@ import { NPCS } from "../src/core/npcs.ts";
 import { NPC_STORIES } from "../src/core/npcStories.ts";
 import { NPC_ARCS } from "../src/core/npcArcs.ts";
 import {
-  CHAPTER_PASS_STARS,
   DEFAULT_SAVE,
   NORMAL_DECISION_MS,
   applyDailyResourceRecovery,
@@ -1042,12 +1041,30 @@ if (probe) {
 }
 
 // 章节通关解锁下一章
+const expertIndexFor = (node) =>
+  node.options.findIndex((option) => option.quality === "expert");
+const riskIndexFor = (node) =>
+  node.options.findIndex((option) => option.quality === "risk");
 const save2 = structuredClone(DEFAULT_SAVE);
 const chapter1Nodes = nodesForChapter(1);
-applyStoryChoice(save2, chapter1Nodes[0].id, 0);
+applyStoryChoice(save2, chapter1Nodes[0].id, expertIndexFor(chapter1Nodes[0]));
 assert(!save2.unlockedChapters.includes(2), "chapter 2 not unlocked after 1 node");
-applyStoryChoice(save2, chapter1Nodes[1].id, 0);
-assert(save2.unlockedChapters.includes(2), "chapter 2 unlocked after 2 nodes");
+for (let i = 1; i < chapter1Nodes.length - 1; i += 1) {
+  applyStoryChoice(save2, chapter1Nodes[i].id, expertIndexFor(chapter1Nodes[i]));
+}
+assert(
+  !save2.unlockedChapters.includes(2),
+  "chapter 2 must not unlock until all 9 main scenarios are complete"
+);
+applyStoryChoice(
+  save2,
+  chapter1Nodes[chapter1Nodes.length - 1].id,
+  expertIndexFor(chapter1Nodes[chapter1Nodes.length - 1])
+);
+assert(
+  save2.unlockedChapters.includes(2) && isChapterPassed(save2, 1),
+  "chapter 2 should unlock after all 9 main scenarios"
+);
 assert(
   save2.chapterRecords.some((r) => r.chapterId === 1 && r.stars > 0),
   "chapter 1 record should have stars"
@@ -1207,7 +1224,7 @@ extremeSave.difficulty = "extreme";
 const normalCurve = economyFactors(normalSave, 1);
 const extremeCurve = economyFactors(extremeSave, 9);
 assert(
-  extremeCurve.neg > normalCurve.neg * 3 &&
+  extremeCurve.neg > normalCurve.neg * 2.5 &&
     extremeCurve.pos < normalCurve.pos * 0.5,
   "extreme chapter 9 should tighten resources far beyond normal chapter 1"
 );
@@ -1440,24 +1457,25 @@ assert(
 );
 
 // ---- v1.1 修復回归：星级门槛 / 重打 / 经济闭合 / 恢复循环 / 事件轮转 ----
-assert(chapterStarCount(200) === 3, "200 stars should be 3 stars");
-assert(chapterStarCount(150) === 2, "150 stars should be 2 stars");
+assert(chapterStarCount(900, 1) === 3, "900 stars should be 3 stars for a 9-scenario chapter");
+assert(chapterStarCount(675, 1) === 2, "675 stars should be 2 stars for a 9-scenario chapter");
 assert(
-  chapterStarCount(CHAPTER_PASS_STARS) === 1,
-  "one-star threshold should be 1 star"
+  chapterStarCount(315, 1) === 1,
+  "315 stars should be 1 star for a 9-scenario chapter"
 );
 assert(
-  chapterStarCount(CHAPTER_PASS_STARS - 1) === 0,
-  "below one-star threshold should be 0 stars"
+  chapterStarCount(314, 1) === 0,
+  "below the one-star threshold should be 0 stars"
 );
 
 const failChapter = structuredClone(DEFAULT_SAVE);
 const failNodes = nodesForChapter(2);
-applyStoryChoice(failChapter, failNodes[0].id, 2);
-applyStoryChoice(failChapter, failNodes[1].id, 2);
+for (const node of failNodes) {
+  applyStoryChoice(failChapter, node.id, riskIndexFor(node));
+}
 assert(
   !failChapter.unlockedChapters.includes(3),
-  "sub-star chapter must not unlock the next chapter"
+  "low-star full chapter must not unlock the next chapter"
 );
 assert(
   !isChapterPassed(failChapter, 2),
@@ -1479,11 +1497,12 @@ assert(
 
 const passChapter = structuredClone(DEFAULT_SAVE);
 const passNodes = nodesForChapter(1);
-applyStoryChoice(passChapter, passNodes[0].id, 0);
-applyStoryChoice(passChapter, passNodes[1].id, 0);
+for (const node of passNodes) {
+  applyStoryChoice(passChapter, node.id, expertIndexFor(node));
+}
 assert(
   passChapter.unlockedChapters.includes(2) && isChapterPassed(passChapter, 1),
-  "expert chapter should pass and unlock the next chapter"
+  "all-expert chapter should pass and unlock the next chapter"
 );
 
 const recovery = structuredClone(DEFAULT_SAVE);

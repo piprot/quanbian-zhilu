@@ -3,7 +3,7 @@ import { recommendedTraining } from "../core/duel";
 import { decisionProfile, profileSummary } from "../core/game";
 import type { Language } from "../core/i18n";
 import { NPCS, npcRelation } from "../core/npcs";
-import { CHAPTERS, SIDE_QUEST_ARCS } from "../core/story";
+import { CHAPTERS, SIDE_QUEST_ARCS, getChapter } from "../core/story";
 import type { SaveState } from "../core/types";
 import {
   abilityDisplay,
@@ -92,7 +92,9 @@ export function buildReportMarkdown(
         (item) => item.chapterId === chapter.id
       );
       const status =
-        record && record.completedNodeIds.length >= 2
+        record &&
+        record.completedNodeIds.length >=
+          getChapter(record.chapterId).nodeIds.length
           ? en
             ? "Complete"
             : "已完成"

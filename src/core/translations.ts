@@ -3224,39 +3224,39 @@ export const ACHIEVEMENT_EN: Record<
   },
   chapter_1: {
     name: "Chapter 1 Complete",
-    description: "Complete both main scenarios in chapter 1"
+    description: "Complete all 9 main scenarios in chapter 1"
   },
   chapter_2: {
     name: "Chapter 2 Complete",
-    description: "Complete both main scenarios in chapter 2"
+    description: "Complete all 9 main scenarios in chapter 2"
   },
   chapter_3: {
     name: "Chapter 3 Complete",
-    description: "Complete both main scenarios in chapter 3"
+    description: "Complete all 9 main scenarios in chapter 3"
   },
   chapter_4: {
     name: "Chapter 4 Complete",
-    description: "Complete both main scenarios in chapter 4"
+    description: "Complete all 9 main scenarios in chapter 4"
   },
   chapter_5: {
     name: "Chapter 5 Complete",
-    description: "Complete both main scenarios in chapter 5"
+    description: "Complete all 9 main scenarios in chapter 5"
   },
   chapter_6: {
     name: "Chapter 6 Complete",
-    description: "Complete both main scenarios in chapter 6"
+    description: "Complete all 9 main scenarios in chapter 6"
   },
   chapter_7: {
     name: "Chapter 7 Complete",
-    description: "Complete both main scenarios in chapter 7"
+    description: "Complete all 9 main scenarios in chapter 7"
   },
   chapter_8: {
     name: "Chapter 8 Complete",
-    description: "Complete both main scenarios in chapter 8"
+    description: "Complete all 9 main scenarios in chapter 8"
   },
   chapter_9: {
     name: "Chapter 9 Complete",
-    description: "Complete both main scenarios in chapter 9"
+    description: "Complete all 9 main scenarios in chapter 9"
   },
   chapter_master_1: {
     name: "Chapter 1 Explorer",

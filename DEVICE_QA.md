@@ -37,6 +37,7 @@
 - `npm run test:device-screenshots`：360x800 / 720x1280 / 1080x2400 / 1024x768 / 844x390 横屏，中英文、1.5x 字体菜单/地图/剧情/报告截图与溢出检查
 - `npm run test:accessibility`：axe-core 桌面/手机 8 视图无障碍审计，0 严重违规
 - `npm run test:rtc`：两个本地浏览器页面完成 WebRTC 远程对局
+- `npm run test:stress`：多视图导航 + 刷新恢复压力冒烟
 - `npm run test:server`：服务端端到端
 - `npm run content-audit`：内容完整性
 

@@ -331,7 +331,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   ...Array.from({ length: 9 }, (_, index) => ({
     id: `chapter_${index + 1}`,
     name: `第 ${index + 1} 章完成`,
-    description: `完成第 ${index + 1} 章的两个主线情境`,
+    description: `完成第 ${index + 1} 章全部 9 个主线情境`,
     icon: String(index + 15).padStart(2, "0")
   })),
   ...Array.from({ length: 9 }, (_, index) => ({
@@ -459,16 +459,21 @@ export function isAchievementUnlocked(save: SaveState, id: string): boolean {
   }
   if (id.startsWith("chapter_")) {
     const chapterId = Number(id.split("_")[1]);
+    const record = save.chapterRecords.find(
+      (item) => item.chapterId === chapterId
+    );
     return Boolean(
-      save.chapterRecords.find(
-        (record) =>
-          record.chapterId === chapterId &&
-          record.completedNodeIds.length >= 2
-      )
+      record &&
+        getChapter(chapterId).nodeIds.every((nodeId) =>
+          record.completedNodeIds.includes(nodeId)
+        )
     );
   }
   if (id === "perfect_chapter") {
-    return save.chapterRecords.some((record) => record.stars >= 220);
+    return save.chapterRecords.some(
+      (record) =>
+        record.stars >= getChapter(record.chapterId).nodeIds.length * 100
+    );
   }
   if (id === "all_side") {
     const arcNodes = SIDE_QUEST_ARCS.flatMap((arc) => arc.nodes);
@@ -492,12 +497,14 @@ export function isAchievementUnlocked(save: SaveState, id: string): boolean {
     return totalAbilityLevels(save.profile.abilities) >= 38;
   }
   if (id === "role_ending") {
+    const record = save.chapterRecords.find(
+      (item) => item.chapterId === 9
+    );
     return Boolean(
-      save.chapterRecords.find(
-        (record) =>
-          record.chapterId === 9 &&
-          record.completedNodeIds.length >= 2
-      )
+      record &&
+        getChapter(9).nodeIds.every((nodeId) =>
+          record.completedNodeIds.includes(nodeId)
+        )
     );
   }
   if (id === "master") {

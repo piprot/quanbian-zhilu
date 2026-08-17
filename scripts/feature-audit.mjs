@@ -59,8 +59,18 @@ try {
       save.chapterRecords = [
         {
           chapterId: 1,
-          completedNodeIds: ["c1n1", "c1n2"],
-          stars: 220
+          completedNodeIds: [
+            "c1n1",
+            "c1n2",
+            "c1n3",
+            "c1n4",
+            "c1n5",
+            "c1n6",
+            "c1n7",
+            "c1n8",
+            "c1n9"
+          ],
+          stars: 900
         }
       ];
       save.unlockedChapters = [1, 2];

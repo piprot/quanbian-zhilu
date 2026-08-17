@@ -57,12 +57,21 @@ async function chooseBestEnabled(page) {
   try {
     await options.first().waitFor({ state: "visible", timeout: 3000 });
   } catch {
-    const restore = page
-      .locator('button[data-action="energy-restore"]')
+    const explore = page
+      .locator('[data-action="expedition-explore"]:not([disabled])')
       .first();
-    await restore.waitFor({ state: "visible", timeout: 10000 });
-    await restore.click();
-    await page.waitForTimeout(300);
+    if (await explore.isVisible().catch(() => false)) {
+      await explore.click();
+      await page.waitForTimeout(300);
+    }
+    if ((await options.first().isVisible().catch(() => false)) === false) {
+      const restore = page
+        .locator('button[data-action="energy-restore"]')
+        .first();
+      await restore.waitFor({ state: "visible", timeout: 10000 });
+      await restore.click();
+      await page.waitForTimeout(300);
+    }
   }
   const count = await options.count();
   let best = null;
@@ -186,6 +195,7 @@ async function runRole(browser, role) {
     await page.locator('button[data-action="assessment-skip"]').click();
     await clickByText(page, "进入主线");
 
+    let campaignPassed = false;
     for (let chapter = 1; chapter <= 9; chapter += 1) {
       let attempts = 0;
       let passed = false;
@@ -194,6 +204,10 @@ async function runRole(browser, role) {
         await page
           .locator('main[aria-label="主线地图"]')
           .waitFor({ timeout: 10000 });
+        await page
+          .locator(`[data-action="select-chapter"][data-chapter="${chapter}"]`)
+          .first()
+          .click();
         if (attempts > 1) {
           const replayButton = page
             .locator('button[data-action="retry-chapter"]')
@@ -205,14 +219,30 @@ async function runRole(browser, role) {
               .waitFor({ timeout: 10000 });
           }
         }
-        for (let nodeIndex = 0; nodeIndex < 2; nodeIndex += 1) {
+        for (let nodeIndex = 0; nodeIndex < 9; nodeIndex += 1) {
           const nodeButton = page
             .locator('main[aria-label="主线地图"] .node-row:not([disabled])')
             .filter({
-              has: page.locator("em", { hasText: /^主线情境$/ })
+              has: page.locator("em", { hasText: /主线/ })
             })
             .first();
-          await nodeButton.waitFor({ timeout: 10000 });
+          if ((await nodeButton.count()) === 0) {
+            issues.push(
+              `debug: no enabled main node at index ${nodeIndex}; nodeRows=${await page
+                .locator('main[aria-label="主线地图"] .node-row')
+                .count()
+                .catch(() => -1)} enabled=${await page
+                .locator('main[aria-label="主线地图"] .node-row:not([disabled])')
+                .count()
+                .catch(() => -1)} list=${(await page
+                .locator(".node-list")
+                .innerText()
+                .catch(() => ""))
+                .replace(/\n+/g, " | ")
+                .slice(0, 400)}`
+            );
+            break;
+          }
           await nodeButton.click();
           await page
             .locator('main[aria-label="剧情情境"]')
@@ -239,6 +269,17 @@ async function runRole(browser, role) {
               )
               .count()) > 0;
           const chosen = await chooseBestEnabled(page);
+          if ((await page.locator(".integrity-gate").count()) > 0) {
+            const costCorrect = page.locator('[data-cost="correct"]').first();
+            if (await costCorrect.isVisible().catch(() => false)) {
+              await costCorrect.click();
+            } else {
+              await page
+                .locator(".integrity-gate [data-ability]")
+                .first()
+                .click();
+            }
+          }
           await page.locator(".outcome-panel").waitFor({ timeout: 10000 });
           const feedback = await page
             .locator(".outcome-panel p")
@@ -276,6 +317,17 @@ async function runRole(browser, role) {
               .innerText();
             branchVisited.push(branchTitle);
             await chooseBestEnabled(page);
+            if ((await page.locator(".integrity-gate").count()) > 0) {
+              const costCorrect = page.locator('[data-cost="correct"]').first();
+              if (await costCorrect.isVisible().catch(() => false)) {
+                await costCorrect.click();
+              } else {
+                await page
+                  .locator(".integrity-gate [data-ability]")
+                  .first()
+                  .click();
+              }
+            }
             await page.locator(".outcome-panel").waitFor({ timeout: 10000 });
             await continueAfterSubOutcome(page, branchVisited);
           }
@@ -323,6 +375,20 @@ async function runRole(browser, role) {
               .join(" | ")}`
           );
           issues.push(
+            `debug: nodeRows=${await page
+              .locator('main[aria-label="主线地图"] .node-row')
+              .count()
+              .catch(() => -1)} enabled=${await page
+              .locator('main[aria-label="主线地图"] .node-row:not([disabled])')
+              .count()
+              .catch(() => -1)} list=${(await page
+              .locator(".node-list")
+              .innerText()
+              .catch(() => ""))
+              .replace(/\n+/g, " | ")
+              .slice(0, 300)}`
+          );
+          issues.push(
             `save=${JSON.stringify(
               await page
                 .evaluate(() => {
@@ -349,6 +415,24 @@ async function runRole(browser, role) {
         issues.push(`chapter ${chapter} failed after retries`);
         break;
       }
+      campaignPassed = chapter === 9;
+    }
+
+    if (campaignPassed) {
+      // 章节全部通关后，从报告中心打开角色结局。
+      await page
+        .locator('[data-action="open-report"]')
+        .first()
+        .waitFor({ timeout: 10000 });
+      await page.locator('[data-action="open-report"]').first().click();
+      await page
+        .locator('[data-action="open-ending"]')
+        .first()
+        .waitFor({ timeout: 10000 });
+      await page.locator('[data-action="open-ending"]').first().click();
+      await page
+        .locator("text=结局时间线")
+        .waitFor({ timeout: 10000 });
     }
 
     const ending = await page.locator("body").innerText();
@@ -406,7 +490,7 @@ try {
       result.issues.length > 0 ||
       result.ending.includes("FAILED") ||
       result.ending.includes("NOT FOUND") ||
-      result.visited.length !== 18
+      result.visited.length !== 81
   );
   if (bad.length > 0) {
     console.error("ROLE CAMPAIGN AUDIT FAILED");

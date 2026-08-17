@@ -21,6 +21,7 @@ export interface DuelLobbyState {
   remoteAnswerCode: string;
   remoteStatus: string;
   cloudStatus: string;
+  cloudReady: boolean;
   lastRoomId: string;
 }
 
@@ -179,7 +180,7 @@ function remoteLobbyMarkup(language: Language, state: DuelLobbyState): string {
         <div class="remote-match online-only">
           <h2>${en ? "Cloud Auto-Match" : "云端自动匹配"}</h2>
           <p>${en ? "Connect to the room server and match automatically without exchanging invite codes. The server must be deployed or running locally first." : "连接服务端后自动匹配对手，不需要手动交换邀请码。需先部署或本地运行房间服务器。"}</p>
-          <button class="primary" data-action="cloud-match" ${ONLINE_ENABLED ? "" : "disabled"} title="${ONLINE_ENABLED ? "" : (en ? "Static build: online service not enabled" : "静态版未启用在线服务")}">${en ? "Start Matching" : "开始匹配"}${ONLINE_ENABLED ? "" : (en ? " (static locked)" : "（静态版锁定）")}</button>
+          <button class="primary" data-action="cloud-match" ${ONLINE_ENABLED && state.cloudReady ? "" : "disabled"} title="${ONLINE_ENABLED ? (state.cloudReady ? "" : (en ? "Server not connected" : "服务端未连接")) : (en ? "Static build: online service not enabled" : "静态版未启用在线服务")}">${en ? "Start Matching" : "开始匹配"}${ONLINE_ENABLED ? (state.cloudReady ? "" : (en ? " (offline)" : "（未连接）")) : (en ? " (static locked)" : "（静态版锁定）")}</button>
           ${
             state.lastRoomId
               ? `<button data-action="cloud-reconnect">${uiString(language, "reconnectRoom")} · ${state.lastRoomId}</button>`

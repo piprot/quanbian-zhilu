@@ -162,7 +162,7 @@ export function abilityView(save: SaveState, language: "zh" | "en"): string {
           </div>
         </div>
         <canvas class="radar" id="ability-radar"></canvas>
-        <button class="primary" data-action="open-report">${uiString(language, "viewReport")}</button>
+        <button class="primary" data-action="open-report">${language === "en" ? "Report Center" : "报告中心"}</button>
       </section>
       ${
         (() => {
@@ -556,8 +556,8 @@ export function reportView(
     );
     return {
       chapter,
-      stars: record ? chapterStarCount(record.stars) : 0,
-      done: Boolean(record && record.completedNodeIds.length >= 2)
+      stars: record ? chapterStarCount(record.stars, chapter.id) : 0,
+      done: isChapterComplete(save, chapter.id)
     };
   });
   return `
