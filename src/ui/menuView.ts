@@ -116,7 +116,7 @@ export function menuView(
           <p>${uiString(language, "resumeHint")}</p>
         </button>`
       : "",
-    card("open-map", "menu-card-01", "01", uiString(language, "mainQuest"), "Campaign", "九章权力架构，18 个真实职场情境，每一次选择都在改变你的能力图谱。", "Nine chapters of power, 18 real workplace scenarios, and choices that reshape your ability map.", 'aria-keyshortcuts="M"'),
+    card("open-map", "menu-card-01", "01", uiString(language, "mainQuest"), "Campaign", "九章权力架构，81 个真实职场情境（18 核心 + 63 扩展），每一次选择都在改变你的能力图谱。", "Nine chapters of power, 81 real workplace scenarios (18 core + 63 extended), and choices that reshape your ability map.", 'aria-keyshortcuts="M"'),
     card("open-duel", "menu-card-02", "02", uiString(language, "duel"), "1v1 Duel", "AI 陪练、本地双人或远程对战，用情境高尔夫基准判断谁更能应对复杂局势。", "AI practice, local duo, or remote duels use scenario-golf baselines to judge who handles complexity better.", 'aria-keyshortcuts="D"'),
     card("open-leadership-games", "menu-card-10", "03", "领导力游戏", "Leadership Games", "五个精品小游戏：教学、训练、对战、复盘、成就与逐级难度。", "Five polished mini-games with teaching, training, battle, review, achievements, and increasing difficulty."),
     card("open-ability", "menu-card-03", "04", uiString(language, "ability"), "Ability Map", "十项能力、五级段位、经典理论支撑，随时查看你的优势、短板和成长路径。", "Ten abilities, five ranks, and classic theory support let you see strengths, gaps, and growth paths.", 'aria-keyshortcuts="A"'),
@@ -127,8 +127,8 @@ export function menuView(
   ].join("");
   const groupCards = [
     card("open-team-academy", "menu-card-10", "01", "团队管理训练营", "Team Academy", "三类角色、108 个情境，用情境→公式→练习→作业闭环提升团队管理能力。", "Three roles, 108 scenarios, and a scenario-to-homework learning loop for team management."),
-    card("open-duel", "menu-card-02", "02", "双人/远程对练", "Local & Remote Duels", "本地双人轮流、远程邀请码对战，用对决大厅直接开房间。", "Take turns on one device or duel remotely with invite codes from the same lobby."),
-    card("open-leadership-games", "menu-card-10", "03", "领导力对战", "Leadership Battle", "教学、训练、对战与复盘一体，适合两人或小组轮流上场。", "Teach, train, battle, and review together, built for pairs and small groups.")
+    card("open-duel", "menu-card-02", "02", "双人/远程对练", "Local & Remote Duels", "本地双人轮流、远程邀请码对战，进入大厅后自动切到远程模式。", "Take turns on one device or duel remotely with invite codes; opens the remote tab in the lobby.", 'data-duel-mode="remote"'),
+    card("open-leadership-games", "menu-card-10", "03", "领导力对战", "Leadership Battle", "五个小游戏的对战模式：适合两人或小组轮流上场，进入后选「对战」。", "Battle mode for all five mini-games, built for pairs and small groups; choose Battle after entering.", 'data-games-mode="battle"')
   ].join("");
   const trainerCards = [
     card("open-coach", "menu-card-10", "01", "教练工作坊", "Coach Workshop", "导入学员存档，对比小组雷达，找出决策盲区，生成可执行的工作坊流程。", "Import team saves, compare group radar, surface decision blind spots, and plan a facilitated workshop."),
@@ -165,6 +165,7 @@ export function menuView(
           <div class="hero-actions">
             ${!started ? `<button class="hero-start-hint" data-action="open-profile">${en ? "New here? Create a profile and make your first decision" : "新玩家从这里开始：创建档案，完成第一次选择"}</button>` : ""}
             ${!started ? `<button class="trial-now" data-action="start-trial-chapter">${en ? "Play Chapter 1 now" : "立即试玩第一章"}</button>` : ""}
+            ${!started ? `<p class="muted trial-note">${en ? "Trial skips the 30-question assessment and starts from the initial baseline. Create a profile to take the full assessment." : "试玩跳过 30 题测评，使用初始基线；正式建档后可补测能力画像。"}</p>` : ""}
             <button class="primary" data-action="${started ? "open-map" : "open-profile"}">${started ? uiString(language, "menuContinue") : uiString(language, "createProfile")}</button>
             <button data-action="open-duel">${uiString(language, "enterDuel")}</button>
           </div>

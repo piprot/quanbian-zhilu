@@ -5527,7 +5527,7 @@ details.fold[open] .intel-head small::after {
 
 /* 地图移动端折叠 */
 .map-collapse-toggle {
-  display: none;
+  display: block;
   width: 100%;
   margin-bottom: 10px;
   padding: 10px 12px;
@@ -5536,11 +5536,19 @@ details.fold[open] .intel-head small::after {
   border: 1px solid #3c5462;
   color: #e7eef2;
 }
+.map-extras {
+  display: none;
+}
+.map-extras[hidden] {
+  display: none;
+}
+.map-shell.map-detail-open .map-extras {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
 @media (max-width: 760px) {
-  .map-collapse-toggle {
-    display: block;
-  }
   .map-side .mobile-collapse {
     display: none;
   }

@@ -75,8 +75,8 @@ export function sideNodeLockReason(
   return chapterReady
     ? (language === "en" ? "Available" : "可接取")
     : language === "en"
-      ? `Finish this chapter's main scenarios first (${doneMain}/${mainIds.length})`
-      : `需先完成本章主线情境（${doneMain}/${mainIds.length}）`;
+      ? `Finish Chapter ${getChapter(node.chapterId).code} main scenarios first (${doneMain}/${mainIds.length})`
+      : `需先完成第 ${getChapter(node.chapterId).code} 章主线情境（${doneMain}/${mainIds.length}）`;
 }
 
 export function questArcMarkup(

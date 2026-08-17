@@ -100,6 +100,9 @@ try {
   await page.click("text=返回地图");
   await page.waitForSelector("text=九章权力架构");
 
+  // 刷新恢复：完成首章核心情境后，进度必须跨刷新保留。
+  await page.reload({ waitUntil: "networkidle" });
+  await page.waitForSelector("text=继续主线");
   await page.click("text=进入 1v1");
   await page.waitForSelector("text=谁能在复杂局势中做出更好的判断");
   await page.click("text=开始对战");

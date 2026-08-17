@@ -202,7 +202,7 @@ const SETTINGS_MIGRATION_KEY = "adaptive-ascent-settings-v2";
 const GUIDE_KEY = "adaptive-ascent-guide-v1";
 const GUIDE_REWARD_KEY = "adaptive-ascent-guide-reward";
 const ACHIEVEMENT_FAVORITE_KEY = "adaptive-ascent-achievement-favorites";
-const APP_VERSION = "1.7.37";
+const APP_VERSION = "1.7.38";
 
 type View =
   | "menu"
@@ -2097,6 +2097,16 @@ export class AdaptiveGameApp {
     switch (action) {
       case "open-duel":
         this.audio.ui();
+        const requestedDuelMode = actionTarget.dataset.duelMode as
+          | DuelMode
+          | undefined;
+        if (
+          requestedDuelMode === "ai" ||
+          requestedDuelMode === "local" ||
+          requestedDuelMode === "remote"
+        ) {
+          this.duelMode = requestedDuelMode;
+        }
         this.show("duelLobby");
         return true;
       case "open-duel-lobby":

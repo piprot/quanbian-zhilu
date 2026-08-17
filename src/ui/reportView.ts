@@ -573,6 +573,12 @@ export function reportView(
           <p class="eyebrow">${uiString(language, "reportTitle")}</p>
           <h1>${save.profile.name} · ${uiString(language, "leadershipTrajectory")}</h1>
           <p class="muted">${language === "en" ? `Rank: ${rankName(language, summary.rank)} · Total Ability: ${summary.total} · Campaign ${summary.chapterCount}/9` : `段位：${rankName(language, summary.rank)} · 综合能力值：${summary.total} · 主线 ${summary.chapterCount}/9`}</p>
+          <div class="report-related">
+            <span>${language === "en" ? "Report Center" : "报告中心"}</span>
+            <button data-action="open-ability">${language === "en" ? "Ability Map" : "能力图谱"}</button>
+            <button data-action="open-coach">${language === "en" ? "Coach Workshop" : "教练工作坊"}</button>
+            <button data-action="open-trial">${language === "en" ? "Trial Grounds" : "成长试炼"}</button>
+          </div>
         </div>
         <div class="duel-stats">
           <span><strong>${save.duelWins}</strong> ${language === "en" ? "Wins" : "胜"}</span>

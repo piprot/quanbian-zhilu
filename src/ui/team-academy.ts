@@ -315,6 +315,7 @@ export class TeamAcademyApp {
           <p class="eyebrow">${en ? "Three roles, one management system" : "三类角色，一套管理系统"}</p>
           <h1>${esc(en ? course.titleEn : course.titleZh)}</h1>
           <p class="muted">${esc(en ? course.summary : course.summary)}</p>
+          <p class="muted">${en ? "Academy influence maps back to the campaign's ten abilities and the five-dimension leadership model, so progress here feeds your overall profile." : "训练营影响力会映射回主线的十项能力与五维领导力模型，训练成果计入整体档案。"}</p>
           <div class="ta-roles">${roleTabs}</div>
         </section>
         <section class="ta-panel">

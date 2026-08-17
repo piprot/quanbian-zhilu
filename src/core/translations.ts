@@ -3258,6 +3258,42 @@ export const ACHIEVEMENT_EN: Record<
     name: "Chapter 9 Complete",
     description: "Complete both main scenarios in chapter 9"
   },
+  chapter_master_1: {
+    name: "Chapter 1 Explorer",
+    description: "Complete all 9 main scenarios in chapter 1"
+  },
+  chapter_master_2: {
+    name: "Chapter 2 Explorer",
+    description: "Complete all 9 main scenarios in chapter 2"
+  },
+  chapter_master_3: {
+    name: "Chapter 3 Explorer",
+    description: "Complete all 9 main scenarios in chapter 3"
+  },
+  chapter_master_4: {
+    name: "Chapter 4 Explorer",
+    description: "Complete all 9 main scenarios in chapter 4"
+  },
+  chapter_master_5: {
+    name: "Chapter 5 Explorer",
+    description: "Complete all 9 main scenarios in chapter 5"
+  },
+  chapter_master_6: {
+    name: "Chapter 6 Explorer",
+    description: "Complete all 9 main scenarios in chapter 6"
+  },
+  chapter_master_7: {
+    name: "Chapter 7 Explorer",
+    description: "Complete all 9 main scenarios in chapter 7"
+  },
+  chapter_master_8: {
+    name: "Chapter 8 Explorer",
+    description: "Complete all 9 main scenarios in chapter 8"
+  },
+  chapter_master_9: {
+    name: "Chapter 9 Explorer",
+    description: "Complete all 9 main scenarios in chapter 9"
+  },
   perfect_chapter: {
     name: "Expert-Level Chapter",
     description: "Earn three stars in any chapter"

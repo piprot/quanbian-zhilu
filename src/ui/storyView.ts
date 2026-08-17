@@ -571,7 +571,10 @@ export function storyView(
       ? 2
       : 1;
   const explorationReady =
-    state.replayMode || showingOutcome || explorationFound.length > 0;
+    state.replayMode ||
+    showingOutcome ||
+    explorationFound.length > 0 ||
+    decisionCount > 0;
   const relevantAbilities = [
     ...new Set(
       node.options.flatMap((option) =>
@@ -657,6 +660,7 @@ export function storyView(
         <section class="story-layout">
           <section class="story-narrative">
             <section class="scenario-panel">
+              <div class="scene-strip" role="img" aria-label="${en ? "Chapter scene" : "章节场景"}" style="background-image:url('./art/chapter-${node.chapterId}.jpg')"></div>
               <div class="scenario-meta">
                 <span>${language === "en" ? `Chapter ${chapter.code} · ${chapter.title}` : `第 ${chapter.code} 章 · ${chapter.title}`}</span>
                 <span>${node.kind === "side" ? uiString(language, "storyKindSide") : node.kind === "branch" ? uiString(language, "storyKindBranch") : node.kind === "random" ? uiString(language, "storyKindRandom") : isExtraMainNode ? (en ? "Extended Main Scenario" : "主线扩展情境") : uiString(language, "storyKindMain")}</span>
@@ -795,7 +799,7 @@ export function storyView(
                           ${!showingOutcome && !state.replayMode ? explorationPanelMarkup(save, language, node) : ""}
                           ${
                             !explorationReady && !showingOutcome && !state.replayMode
-                              ? `<p class="exploration-lock-note">${en ? "Complete one recon action to unlock the choices." : "先完成一个勘察动作，才能解锁选择。"}</p>`
+                              ? `<p class="exploration-lock-note">${en ? "First scenario only: complete one recon action to unlock the choices." : "仅首个情境需要：先完成一个勘察动作，才能解锁选择。"}</p>`
                               : ""
                           }
                           <div class="option-list">

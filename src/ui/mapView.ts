@@ -81,6 +81,10 @@ export function mapView(
   const extraDoneCount = Math.max(0, mainDoneCount - coreDoneCount);
   const chapterDone = isChapterComplete(save, chapter.id);
   const chapterPassed = isChapterPassed(save, chapter.id);
+  const visibleArcs = SIDE_QUEST_ARCS.filter((arc) => {
+    const started = arc.nodes.some((id) => isNodeComplete(save, id));
+    return started || getNode(arc.nodes[0]).chapterId === chapter.id;
+  });
   const availableRandom = nextRandomEvent({
     ...save,
     role: save.profile.role,
@@ -160,7 +164,8 @@ export function mapView(
               <span class="chapter-code">${language === "en" ? `Chapter ${chapter.code}` : `第 ${chapter.code} 章`}</span>
               <h2>${chapterDisplay(language, chapter).title}</h2>
               <p>${chapterDisplay(language, chapter).subtitle}</p>
-              <p class="chapter-main-progress">${language === "en" ? `Core ${coreDoneCount} / 2 · Extended ${extraDoneCount} / 7` : `核心 ${coreDoneCount} / 2 · 扩展 ${extraDoneCount} / 7`}</p>
+              <p class="chapter-main-progress">${language === "en" ? `Core ${coreDoneCount} / 2 · Extended ${extraDoneCount} / 7 · All ${mainDoneCount} / 9` : `核心 ${coreDoneCount} / 2 · 扩展 ${extraDoneCount} / 7 · 全情境 ${mainDoneCount} / 9`}</p>
+              <p class="muted chapter-master-note">${language === "en" ? "Finish all 9 scenarios in a chapter to claim chapter mastery." : "完成本章全部 9 个情境，可达成「章节大师」。"}</p>
             </div>
             <div class="expedition-chapter-card" style="--civ:${stageForChapter(chapter.id).color}">
               <span>${language === "en" ? `Stage · ${stageForChapter(chapter.id).nameEn}` : `阶段 · ${stageForChapter(chapter.id).nameZh}`}</span>
@@ -192,11 +197,17 @@ export function mapView(
                 : ""
             }
             ${chapterTrainingMarkup(language, save, chapter.id)}
-            <section class="quest-board">
-              <h3>${uiString(language, "sideQuestArcsTitle")}</h3>
-              <p class="muted">${uiString(language, "sideQuestHint")}</p>
-              ${SIDE_QUEST_ARCS.map((arc) => questArcMarkup(arc, save, language)).join("")}
-            </section>
+            ${
+              visibleArcs.length
+                ? `
+                  <section class="quest-board">
+                    <h3>${uiString(language, "sideQuestArcsTitle")}</h3>
+                    <p class="muted">${uiString(language, "sideQuestHint")}</p>
+                    ${visibleArcs.map((arc) => questArcMarkup(arc, save, language)).join("")}
+                  </section>
+                `
+                : ""
+            }
           </div>
           <aside class="map-side">
             <button
@@ -220,6 +231,7 @@ export function mapView(
               }
             </div>
             ${npcCameoMarkup(language, save, chapter.id)}
+            <div class="map-extras" ${state.mapDetailOpen ? "" : "hidden"}>
             <div class="mini-panel power-panel">
               <h3>${language === "en" ? "Power Structure" : "权力架构"}</h3>
               <div class="power-track">
@@ -238,12 +250,14 @@ export function mapView(
             <div class="mini-panel investment-panel">
               <h3>${language === "en" ? "Reinvest in the Organization" : "组织再投资"}</h3>
               <p class="muted">${language === "en" ? "Spend 25 organizational resources to gain trust, influence, and mastery; every third investment upgrades production capacity." : "消耗 25 点组织资源，换取信任、影响力和修炼点；每 3 次触发一次产能升级。"}</p>
+              <p class="muted">${language === "en" ? "Return: +8 trust, +6 influence, +1 mastery; every 3rd investment upgrades all resources +10." : "投资回报：信任 +8、影响力 +6、修炼点 +1；第 3/6/9 次触发产能升级（全部资源 +10）。"}</p>
               <p class="muted">${language === "en" ? `Invested ${save.organizationInvestments ?? 0} times` : `已投资 ${save.organizationInvestments ?? 0} 次`}</p>
               <button data-action="organizational-invest" ${save.profile.resources.capital < 25 ? "disabled" : ""}>${language === "en" ? "Invest 25" : "投资 25"}</button>
             </div>
             <div class="mini-panel production-panel">
               <h3>${language === "en" ? "Daily Production" : "每日产能"}</h3>
               <p class="muted">${language === "en" ? "Complete 3 decisions today, then claim resources." : "今天完成 3 次决策后领取资源奖励。"}</p>
+              <p class="muted">${language === "en" ? "Counts main/side story decisions only; duels and random events do not count here." : "仅统计主线/支线剧情决策；1v1 与随机事件不计入。"}</p>
               <div class="production-progress">
                 <span style="width:${Math.min(100, ((save.productionCount ?? 0) / 3) * 100)}%"></span>
               </div>
@@ -261,6 +275,7 @@ export function mapView(
             <div>${difficultySelector(save, language)}</div>
             <div class="challenge-panel">
               <h3>${uiString(language, "dailyTitle")}</h3>
+              <p class="muted">${language === "en" ? "Counting rules: one finished duel = 1, one random event = 1, story decisions feed Daily Production." : "计数口径：完整 1v1 一局 +1；随机事件处理 +1；剧情决策计入每日产能。"}</p>
               ${dailyChallenges(save)
                 .map(
                   (challenge) => {
@@ -332,6 +347,7 @@ export function mapView(
             </div>
             <div class="event-book-panel mobile-collapse">
               <h3>${language === "en" ? "Event Log" : "事件簿"}</h3>
+              <p class="muted">${language === "en" ? "○ triggerable · ✓ done · role/difficulty-locked events need another profile or difficulty." : "○ 可触发 · ✓ 已完成 · 限角色/限难度 需切换档案或难度档位。"}</p>
               <p class="muted">${
                 language === "en"
                   ? `Completed ${save.completedRandomEvents.length} / ${randomEventEligibleCount(save)} random events for your role and difficulty`
@@ -354,6 +370,7 @@ export function mapView(
                   } catch {
                     // keep id
                   }
+                  const metaTitle = `${title}${meta?.chapterId ? (language === "en" ? ` · Chapter ${meta.chapterId}` : ` · 第 ${meta.chapterId} 章`) : ""}${roleLocked ? (language === "en" ? " · role-only" : " · 限角色") : ""}${difficultyLocked ? (language === "en" ? " · difficulty-only" : " · 限难度") : ""}`;
                   const lockLabel = roleLocked
                     ? language === "en"
                       ? "role-only"
@@ -363,7 +380,7 @@ export function mapView(
                         ? "difficulty-only"
                         : "限难度"
                       : "";
-                  return `<span class="${done ? "done" : ""}" title="${escapeAttr(title)}">${done ? "✓" : "○"}${escapeHtml(title)}${lockLabel ? `<em>${lockLabel}</em>` : ""}</span>`;
+                  return `<span class="${done ? "done" : ""}" title="${escapeAttr(metaTitle)}">${done ? "✓" : "○"}${escapeHtml(title)}${lockLabel ? `<em>${lockLabel}</em>` : ""}</span>`;
                 }).join("")}
               </div>
             </div>
@@ -375,6 +392,7 @@ export function mapView(
             <div class="mini-panel mobile-collapse">
               <h3>${uiString(language, "unlockedTitle")}</h3>
               <p>${save.unlockedChapters.map((id) => chapterDisplay(language, getChapter(id)).title).join(language === "en" ? ", " : "、")}</p>
+            </div>
             </div>
             <div class="map-quick-actions">
               <button class="primary" data-action="open-report">${uiString(language, "viewReport")}</button>

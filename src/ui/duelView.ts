@@ -46,6 +46,11 @@ function remoteLobbyMarkup(language: Language, state: DuelLobbyState): string {
   return `
       <div class="remote-lobby">
         ${
+          !ONLINE_ENABLED
+            ? `<p class="online-disabled-note" role="status">${en ? "Static build: cloud matchmaking, cloud saves, and leaderboards are unavailable. Manual invite-code remote duels still work." : "当前为静态版：云端匹配、云存档与排行榜不可用；手动邀请码远程对战仍可使用。"}</p>`
+            : ""
+        }
+        ${
           !import.meta.env.VITE_TURN_URL
             ? `<p class="experimental-note">${en ? "Experimental: without a TURN server, strict NAT networks may not connect." : "实验性功能：未配置 TURN，严格 NAT 下可能无法建立连接。"}</p>`
             : ""
@@ -92,7 +97,7 @@ function remoteLobbyMarkup(language: Language, state: DuelLobbyState): string {
         <div class="remote-match online-only">
           <h2>${en ? "Cloud Auto-Match" : "云端自动匹配"}</h2>
           <p>${en ? "Connect to the room server and match automatically without exchanging invite codes. The server must be deployed or running locally first." : "连接服务端后自动匹配对手，不需要手动交换邀请码。需先部署或本地运行房间服务器。"}</p>
-          <button class="primary" data-action="cloud-match" ${ONLINE_ENABLED ? "" : "disabled"} title="${ONLINE_ENABLED ? "" : (en ? "Demo locked in static build" : "静态版演示锁定")}">${en ? "Start Matching" : "开始匹配"}${ONLINE_ENABLED ? "" : (en ? " (Demo)" : "（演示）")}</button>
+          <button class="primary" data-action="cloud-match" ${ONLINE_ENABLED ? "" : "disabled"} title="${ONLINE_ENABLED ? "" : (en ? "Static build: online service not enabled" : "静态版未启用在线服务")}">${en ? "Start Matching" : "开始匹配"}${ONLINE_ENABLED ? "" : (en ? " (static locked)" : "（静态版锁定）")}</button>
           ${
             state.lastRoomId
               ? `<button data-action="cloud-reconnect">${uiString(language, "reconnectRoom")} · ${state.lastRoomId}</button>`
@@ -328,7 +333,7 @@ export function duelPredictMarkup(
         <img class="duel-predict-bg" src="${artAsset("duel-match")}" alt="" aria-hidden="true" onerror="this.style.display='none'" />
         <p class="eyebrow">${uiString(language, "duelPredict")}</p>
         <h1>${en ? "Bet on the opponent's style before the reveal" : "揭晓前，先押注对手风格"}</h1>
-        <p class="muted">${en ? "Hit the opponent's actual style this round for a +20% score bonus (minimum +2)." : "押中对方本回合的实际风格，获得本回合 20% 分数加成（至少 +2 分）。"}<br />${escapeHtml(nodeView.stake)}</p>
+        <p class="muted">${en ? "Hit the opponent's actual style this round for a +20% score bonus (minimum +2). Style is not random: AI opponents follow their shown archetype, while local opponents behave like real players. Use hints, not luck." : "押中对方本回合的实际风格，获得本回合 20% 分数加成（至少 +2 分）。风格不是随机数：AI 陪练遵循其显示的画像，本地双人则反映真人倾向。依据线索判断，而不是碰运气。"}<br />${escapeHtml(nodeView.stake)}</p>
         ${duelMode === "local" ? `<p class="muted duel-local-note">${uiString(language, "duelLocalBetNote")}</p>` : ""}
         <div class="duel-predict-options">
           ${

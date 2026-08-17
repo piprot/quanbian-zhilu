@@ -1,5 +1,6 @@
 import { totalAbilityLevels } from "./abilities.ts";
 import {
+  getChapter,
   randomEventPoolTotal,
   SIDE_QUEST_ARCS
 } from "./story.ts";
@@ -333,65 +334,71 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     description: `完成第 ${index + 1} 章的两个主线情境`,
     icon: String(index + 15).padStart(2, "0")
   })),
+  ...Array.from({ length: 9 }, (_, index) => ({
+    id: `chapter_master_${index + 1}`,
+    name: `第 ${index + 1} 章全境探索`,
+    description: `完成第 ${index + 1} 章全部 9 个主线情境`,
+    icon: String(index + 24).padStart(2, "0")
+  })),
   {
     id: "perfect_chapter",
     name: "专家级章节",
     description: "任一章达到三星评价",
-    icon: "24"
+    icon: "33"
   },
   {
     id: "all_side",
     name: "支线收集者",
     description: "完成全部 9 个支线任务",
-    icon: "25"
+    icon: "34"
   },
   {
     id: "side_trust_rebuild",
     name: "信任重建者",
     description: "完成“信任重建”支线剧情弧",
-    icon: "26"
+    icon: "35"
   },
   {
     id: "side_resilience",
     name: "韧性组织者",
     description: "完成“韧性组织”支线剧情弧",
-    icon: "27"
+    icon: "36"
   },
   {
     id: "duel_winner",
     name: "第一场胜利",
     description: "赢得一场 1v1 对决",
-    icon: "28"
+    icon: "37"
   },
   {
     id: "duel_ten",
     name: "常驻对决者",
     description: "累计完成 10 场 1v1 对决",
-    icon: "29"
+    icon: "38"
   },
   {
     id: "rank_leader",
     name: "变革者",
     description: "综合能力值达到 38",
-    icon: "30"
+    icon: "39"
   },
   {
     id: "role_ending",
     name: "角色结局",
     description: "完成第九章并解锁角色结局",
-    icon: "31"
+    icon: "40"
   },
   {
     id: "master",
     name: "执权者",
     description: "综合能力值达到 48",
-    icon: "32"
+    icon: "41"
   },
   {
     id: "side_power_boundaries",
     name: "权力边界守卫者",
     description: "完成“权力边界”支线剧情弧",
-    icon: "33"
+    icon: "42"
   }
 ];
 
@@ -437,6 +444,18 @@ export function isAchievementUnlocked(save: SaveState, id: string): boolean {
   }
   if (id === "random_collector") {
     return save.completedRandomEvents.length >= randomEventPoolTotal();
+  }
+  if (id.startsWith("chapter_master_")) {
+    const chapterId = Number(id.slice("chapter_master_".length));
+    const record = save.chapterRecords.find(
+      (item) => item.chapterId === chapterId
+    );
+    return Boolean(
+      record &&
+        getChapter(chapterId).nodeIds.every((nodeId) =>
+          record.completedNodeIds.includes(nodeId)
+        )
+    );
   }
   if (id.startsWith("chapter_")) {
     const chapterId = Number(id.split("_")[1]);
