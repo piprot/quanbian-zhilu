@@ -46,7 +46,7 @@ import {
   roleMove
 } from "./display";
 import { escapeHtml, formatDelta } from "./escape";
-import { chapterArtStyle } from "./assets";
+import { artAsset, chapterArtStyle } from "./assets";
 import { storyNodeDisplay } from "./nodeView";
 import {
   optionCostSummary,
@@ -726,6 +726,7 @@ export function storyView(
                 sceneNpc
                   ? `
                     <div class="npc-scene-quote" style="--dot:${npcAvatarColor(sceneNpc.id)}">
+                      <img class="npc-scene-portrait" src="${artAsset(`npc-${sceneNpc.id}.svg`)}" alt="" loading="lazy" onerror="this.style.display='none'" />
                       <span>${escapeHtml(npcDisplay(language, sceneNpc).name)}</span>
                       <p>${escapeHtml(
                         language === "en"

@@ -122,6 +122,10 @@ import { NPCS } from "../src/core/npcs.ts";
 import { NPC_STORIES } from "../src/core/npcStories.ts";
 import { NPC_ARCS } from "../src/core/npcArcs.ts";
 import {
+  adaptiveProgress,
+  completeAdaptiveStage
+} from "../src/core/adaptiveRoute.ts";
+import {
   DEFAULT_SAVE,
   NORMAL_DECISION_MS,
   applyDailyResourceRecovery,
@@ -1068,6 +1072,45 @@ assert(
 assert(
   save2.chapterRecords.some((r) => r.chapterId === 1 && r.stars > 0),
   "chapter 1 record should have stars"
+);
+
+// 90 天引领路线：默认从第 1 阶段开始，任务完成或能力达标均可推进。
+const adaptiveSave = structuredClone(DEFAULT_SAVE);
+adaptiveSave.profile.role = "parachute";
+assert(
+  adaptiveProgress(adaptiveSave).currentIndex === 0 &&
+    !adaptiveProgress(adaptiveSave).done,
+  "adaptive route should start at stage 1"
+);
+const masterRoute = structuredClone(adaptiveSave);
+masterRoute.profile.abilities.insight = 40;
+assert(
+  completeAdaptiveStage(masterRoute, "diagnose", "mastery"),
+  "mastery pass should advance a stage when focus ability is Lv.4+"
+);
+assert(
+  masterRoute.adaptiveRoutePassed.includes("diagnose") &&
+    masterRoute.masteryPoints === DEFAULT_SAVE.masteryPoints + 2,
+  "mastery pass should persist stage and award mastery"
+);
+const taskRoute = structuredClone(adaptiveSave);
+for (const node of nodesForChapter(1)) {
+  applyStoryChoice(taskRoute, node.id, expertIndexFor(node));
+}
+assert(
+  completeAdaptiveStage(taskRoute, "diagnose", "task"),
+  "completed chapter should satisfy the first adaptive stage task"
+);
+taskRoute.adaptiveRoutePassed = [
+  "diagnose",
+  "build",
+  "align",
+  "hold",
+  "certify"
+];
+assert(
+  adaptiveProgress(taskRoute).done,
+  "adaptive route should complete after all stages are passed"
 );
 
 // ---- computeSaveHash 稳定性 ----

@@ -170,6 +170,7 @@ export const DEFAULT_SAVE: SaveState = {
   leadershipBestLevel: {},
   leadershipBestStars: {},
   reviewCards: [],
+  adaptiveRoutePassed: [],
   dimensionExp: {
     credibility: 0,
     empathy: 0,
@@ -445,6 +446,9 @@ function normalizeSave(save: SaveState): SaveState {
         ? save.leadershipBestStars
         : {},
     reviewCards: normalizeReviewCards(save.reviewCards),
+    adaptiveRoutePassed: Array.isArray(save.adaptiveRoutePassed)
+      ? save.adaptiveRoutePassed
+      : [],
     dimensionExp: {
       credibility: clamp(
         Number(save.dimensionExp?.credibility) || 0,

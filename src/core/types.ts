@@ -218,6 +218,8 @@ export interface SaveState {
   leadershipBestStars?: Record<string, number>;
   /** SM-2 间隔复习卡：未选专家项的决策进入到期回练队列。 */
   reviewCards?: ReviewCard[];
+  /** 90 天引领路线已通关的阶段 id。 */
+  adaptiveRoutePassed?: string[];
   /** Five-dimension leadership model experience. */
   dimensionExp: Record<LeadershipDimension, number>;
   /** Team morale affected by resilience and adversity choices. */

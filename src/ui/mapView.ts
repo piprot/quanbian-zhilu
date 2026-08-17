@@ -36,6 +36,12 @@ import {
   rankName,
   resourceChips
 } from "./display";
+import {
+  adaptiveProgress,
+  adaptiveStageMasteryReady,
+  adaptiveStageRequirements,
+  adaptiveStageTasksDone
+} from "../core/adaptiveRoute";
 import { escapeAttr, escapeHtml } from "./escape";
 import { artAsset, chapterArtStyle } from "./assets";
 import {
@@ -82,6 +88,16 @@ export function mapView(
   const extraDoneCount = Math.max(0, mainDoneCount - coreDoneCount);
   const chapterDone = isChapterComplete(save, chapter.id);
   const chapterPassed = isChapterPassed(save, chapter.id);
+  const adaptive = adaptiveProgress(save);
+  const adaptiveStage = adaptive.done
+    ? undefined
+    : adaptive.route.stages[adaptive.currentIndex];
+  const adaptiveTasksDone = adaptiveStage
+    ? adaptiveStageTasksDone(save, adaptiveStage)
+    : false;
+  const adaptiveMasteryReady = adaptiveStage
+    ? adaptiveStageMasteryReady(save, adaptiveStage)
+    : false;
   const visibleArcs = SIDE_QUEST_ARCS.filter((arc) => {
     const started = arc.nodes.some((id) => isNodeComplete(save, id));
     return started || getNode(arc.nodes[0]).chapterId === chapter.id;
@@ -229,7 +245,27 @@ export function mapView(
               ${
                 state.nextAdvice.action
                   ? `<button data-action="${state.nextAdvice.action}" ${state.nextAdvice.ability ? `data-ability="${state.nextAdvice.ability}"` : ""}>${uiString(language, "nextStepAction")}</button>`
-                  : ""
+                : ""
+              }
+            </div>
+            <div class="mini-panel adaptive-route-panel">
+              <h3>${en ? adaptive.route.titleEn : adaptive.route.titleZh}</h3>
+              <p class="muted">${en ? `Stage ${adaptive.currentIndex + 1} / ${adaptive.route.stages.length}` : `阶段 ${adaptive.currentIndex + 1} / ${adaptive.route.stages.length}`}</p>
+              ${
+                adaptive.done
+                  ? `<p class="adaptive-route-done">${en ? "90-day route complete" : "90 天引领路线已完成"}</p>`
+                  : adaptiveStage
+                    ? `
+                      <strong>${en ? adaptiveStage.titleEn : adaptiveStage.titleZh}</strong>
+                      <p class="muted">${escapeHtml(
+                        adaptiveStageRequirements(save, adaptiveStage, language).join(" · ")
+                      )}</p>
+                      <div class="adaptive-route-actions">
+                        <button data-action="adaptive-task" ${adaptiveTasksDone ? "" : "disabled"}>${en ? "Complete Stage" : "完成本关"}</button>
+                        <button data-action="adaptive-pass" ${adaptiveMasteryReady ? "" : "disabled"} title="${en ? "Requires all focus abilities at Lv.4+" : "需本关焦点能力全部 Lv.4 以上"}">${en ? "I Know This · Skip" : "我已掌握，跳过"}</button>
+                      </div>
+                    `
+                    : ""
               }
             </div>
             ${npcCameoMarkup(language, save, chapter.id)}

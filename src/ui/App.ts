@@ -98,6 +98,10 @@ import {
   type CoachPlan
 } from "../core/coach-plan";
 import {
+  adaptiveProgress,
+  completeAdaptiveStage
+} from "../core/adaptiveRoute";
+import {
   ASSESSMENT_QUESTIONS,
   certificationLevel
 } from "../core/assessment";
@@ -211,7 +215,7 @@ const SETTINGS_MIGRATION_KEY = "adaptive-ascent-settings-v2";
 const GUIDE_KEY = "adaptive-ascent-guide-v1";
 const GUIDE_REWARD_KEY = "adaptive-ascent-guide-reward";
 const ACHIEVEMENT_FAVORITE_KEY = "adaptive-ascent-achievement-favorites";
-const APP_VERSION = "1.7.40";
+const APP_VERSION = "1.7.41";
 
 const ACADEMY_DIMENSION_ABILITIES: Record<
   InfluenceKey,
@@ -3909,6 +3913,36 @@ export class AdaptiveGameApp {
       case "claim-production":
         this.claimProduction();
         return true;
+      case "adaptive-task": {
+        const adaptive = adaptiveProgress(this.save);
+        const stage = adaptive.route.stages[adaptive.currentIndex];
+        if (stage && completeAdaptiveStage(this.save, stage.id, "task")) {
+          this.persistSave();
+          this.audio.expert();
+          this.showToast(
+            this.language === "en"
+              ? `90-day stage complete: ${stage.titleEn}`
+              : `90 天阶段完成：${stage.titleZh}`
+          );
+          this.renderMap();
+        }
+        return true;
+      }
+      case "adaptive-pass": {
+        const adaptive = adaptiveProgress(this.save);
+        const stage = adaptive.route.stages[adaptive.currentIndex];
+        if (stage && completeAdaptiveStage(this.save, stage.id, "mastery")) {
+          this.persistSave();
+          this.audio.expert();
+          this.showToast(
+            this.language === "en"
+              ? `Mastery pass: ${stage.titleEn}`
+              : `已掌握跳过：${stage.titleZh}`
+          );
+          this.renderMap();
+        }
+        return true;
+      }
       case "claim-duel-bonus":
         this.claimDuelBonus();
         return true;
