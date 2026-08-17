@@ -1,7 +1,7 @@
 import { aiArchetype, type DuelEngine } from "../core/duel";
 import { profileSummary } from "../core/game";
 import { uiString, type Language } from "../core/i18n";
-import type { SaveState, StoryNode } from "../core/types";
+import type { AiArchetype, SaveState, StoryNode } from "../core/types";
 import { aiArchetypeLabel, rankName } from "./display";
 import { artAsset } from "./assets";
 import { storyNodeDisplay } from "./nodeView";
@@ -39,6 +39,88 @@ export interface DuelResultState {
   predictionHistory: boolean[];
   predictionBonusTotal: number;
   rematchAction: "ai" | "local" | undefined;
+}
+
+export interface DuelPredictionIntel {
+  archetype?: AiArchetype;
+  archetypeLabel: string;
+  hint: string;
+  bias: { expert: number; partial: number; risk: number };
+  history: Array<"expert" | "partial" | "risk">;
+}
+
+/** AI 画像与真人默认的风格倾向，供押注面板显示情报。 */
+export function predictionStyleBias(archetype?: AiArchetype): {
+  expert: number;
+  partial: number;
+  risk: number;
+} {
+  if (archetype === "executor") {
+    return { expert: 0.7, partial: 0.24, risk: 0.06 };
+  }
+  if (archetype === "gambler") {
+    return { expert: 0.46, partial: 0.24, risk: 0.3 };
+  }
+  if (archetype === "builder") {
+    return { expert: 0.62, partial: 0.3, risk: 0.08 };
+  }
+  return { expert: 0.5, partial: 0.3, risk: 0.2 };
+}
+
+function predictionIntelMarkup(
+  language: Language,
+  intel: DuelPredictionIntel
+): string {
+  const en = language === "en";
+  const max = Math.max(0.01, ...Object.values(intel.bias));
+  const bars = (Object.entries(intel.bias) as Array<
+    [keyof typeof intel.bias, number]
+  >)
+    .map(([key, value]) => {
+      const label =
+        key === "expert"
+          ? en
+            ? "Expert"
+            : "专家式"
+          : key === "partial"
+            ? en
+              ? "Balanced"
+              : "稳健式"
+            : en
+              ? "Risk"
+              : "冒险式";
+      return `
+        <div class="intel-bar">
+          <span>${label}</span>
+          <i><em style="width:${Math.round((value / max) * 100)}%"></em></i>
+          <b>${Math.round(value * 100)}%</b>
+        </div>
+      `;
+    })
+    .join("");
+  const counts = { expert: 0, partial: 0, risk: 0 };
+  for (const quality of intel.history) {
+    counts[quality] += 1;
+  }
+  const historyText =
+    intel.history.length === 0
+      ? en
+        ? "First round: no history yet, use the profile and the scenario clue."
+        : "首回合暂无历史：先看对手画像与情境线索。"
+      : en
+        ? `Last ${intel.history.length} rounds: expert ${counts.expert} · balanced ${counts.partial} · risk ${counts.risk}`
+        : `最近 ${intel.history.length} 回合：专家式 ${counts.expert} · 稳健式 ${counts.partial} · 冒险式 ${counts.risk}`;
+  return `
+    <section class="duel-intel-panel" aria-label="${en ? "Prediction intel" : "押注情报"}">
+      <div class="intel-head">
+        <span>${en ? "INTEL" : "情报"}</span>
+        <strong>${escapeHtml(intel.archetypeLabel)}</strong>
+      </div>
+      <p class="muted">${escapeHtml(intel.hint)}</p>
+      <div class="intel-bars">${bars}</div>
+      <p class="intel-history">${historyText}</p>
+    </section>
+  `;
 }
 
 function remoteLobbyMarkup(language: Language, state: DuelLobbyState): string {
@@ -325,7 +407,8 @@ export function duelResultMarkup(
 export function duelPredictMarkup(
   language: Language,
   nodeView: StoryNode,
-  duelMode: DuelMode
+  duelMode: DuelMode,
+  intel?: DuelPredictionIntel
 ): string {
   const en = language === "en";
   return `
@@ -335,6 +418,7 @@ export function duelPredictMarkup(
         <h1>${en ? "Bet on the opponent's style before the reveal" : "揭晓前，先押注对手风格"}</h1>
         <p class="muted">${en ? "Hit the opponent's actual style this round for a +20% score bonus (minimum +2). Style is not random: AI opponents follow their shown archetype, while local opponents behave like real players. Use hints, not luck." : "押中对方本回合的实际风格，获得本回合 20% 分数加成（至少 +2 分）。风格不是随机数：AI 陪练遵循其显示的画像，本地双人则反映真人倾向。依据线索判断，而不是碰运气。"}<br />${escapeHtml(nodeView.stake)}</p>
         ${duelMode === "local" ? `<p class="muted duel-local-note">${uiString(language, "duelLocalBetNote")}</p>` : ""}
+        ${intel ? predictionIntelMarkup(language, intel) : ""}
         <div class="duel-predict-options">
           ${
             (

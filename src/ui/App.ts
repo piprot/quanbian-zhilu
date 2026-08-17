@@ -129,7 +129,13 @@ import {
   readAnalyticsEvents,
   trackEvent
 } from "../core/analytics";
-import { rankName, abilityDisplay, roleDisplay, qualityLabel } from "./display";
+import {
+  rankName,
+  abilityDisplay,
+  roleDisplay,
+  qualityLabel,
+  aiArchetypeLabel
+} from "./display";
 import { buildReportMarkdown, downloadText, encodeSaveLink } from "./export";
 import { artAsset, chapterArtStyle } from "./assets";
 import { storyNodeDisplay } from "./nodeView";
@@ -162,7 +168,9 @@ import {
   duelRevealMarkup,
   duelRoundResultMarkup,
   type DuelMode,
-  type DuelQuality
+  type DuelQuality,
+  type DuelPredictionIntel,
+  predictionStyleBias
 } from "./duelView";
 import {
   primaryAbilityForOption,
@@ -202,7 +210,7 @@ const SETTINGS_MIGRATION_KEY = "adaptive-ascent-settings-v2";
 const GUIDE_KEY = "adaptive-ascent-guide-v1";
 const GUIDE_REWARD_KEY = "adaptive-ascent-guide-reward";
 const ACHIEVEMENT_FAVORITE_KEY = "adaptive-ascent-achievement-favorites";
-const APP_VERSION = "1.7.38";
+const APP_VERSION = "1.7.39";
 
 type View =
   | "menu"
@@ -1755,6 +1763,70 @@ export class AdaptiveGameApp {
     });
   }
 
+  private buildDuelPredictionIntel(): DuelPredictionIntel | undefined {
+    const engine = this.duelEngine;
+    if (!engine) {
+      return undefined;
+    }
+    const predictingIndex =
+      this.duelMode === "local"
+        ? (this.hotSeatTurn as 0 | 1)
+        : this.duelMode === "remote"
+          ? this.remotePlayerIndex
+          : 0;
+    const opponentIndex = predictingIndex === 0 ? 1 : 0;
+    const opponent = engine.players[opponentIndex];
+    const archetype =
+      this.duelMode === "ai"
+        ? (opponent.archetype ?? "builder")
+        : undefined;
+    const history = engine.roundResults.map((round) => {
+      const pick = round.picks[opponentIndex];
+      return round.node.options[pick].quality;
+    }) as DuelPredictionIntel["history"];
+    const base = predictionStyleBias(archetype);
+    let bias = { ...base };
+    if (history.length > 0) {
+      const counts = { expert: 0, partial: 0, risk: 0 };
+      for (const quality of history) {
+        counts[quality] += 1;
+      }
+      const size = history.length;
+      bias = {
+        expert: base.expert * 0.4 + (counts.expert / size) * 0.6,
+        partial: base.partial * 0.4 + (counts.partial / size) * 0.6,
+        risk: base.risk * 0.4 + (counts.risk / size) * 0.6
+      };
+    }
+    const archetypeLabel = archetype
+      ? aiArchetypeLabel(this.language, archetype)
+      : this.language === "en"
+        ? "Human opponent · profile building"
+        : "真人对手 · 画像构建中";
+    const hint = archetype
+      ? this.language === "en"
+        ? archetype === "executor"
+          ? "Prefers expert moves and rarely takes risks; pressure rounds may still force a bold move."
+          : archetype === "gambler"
+            ? "Loves high-risk rounds and will intentionally create risk windows."
+            : "Builds alliances and steady progress; balanced choices appear more often."
+        : archetype === "executor"
+          ? "偏好专家式，风险选择很少；压力回合仍可能被迫冒险。"
+          : archetype === "gambler"
+            ? "偏爱冒险式，会主动制造高风险回合。"
+            : "偏好稳健推进与结盟，稳健式出现频率更高。"
+      : this.language === "en"
+        ? "No fixed profile yet. Track their previous rounds and adapt your bet."
+        : "暂无固定画像。记录对方前几回合的选择，再调整押注。";
+    return {
+      archetype,
+      archetypeLabel,
+      hint,
+      bias,
+      history
+    };
+  }
+
   private renderDuel(): void {
     const engine = this.duelEngine;
     const en = this.language === "en";
@@ -1859,7 +1931,8 @@ export class AdaptiveGameApp {
       this.root.innerHTML = duelPredictMarkup(
         this.language,
         nodeView,
-        this.duelMode
+        this.duelMode,
+        this.buildDuelPredictionIntel()
       );
       return;
     }

@@ -125,7 +125,6 @@ import {
   CHAPTER_PASS_STARS,
   DEFAULT_SAVE,
   NORMAL_DECISION_MS,
-  PRESSURE_FACTORS,
   applyDailyResourceRecovery,
   applyDailyTrialRecovery,
   applyStoryChoice,
@@ -134,8 +133,11 @@ import {
   buildAiProfile,
   buyTrialEnergy,
   buyTrialEnergyWithInfluence,
+  chapterEconomyScale,
   chapterStarCount,
   computeSaveHash,
+  dailyRecoveryFor,
+  economyFactors,
   decisionWindowMs,
   deleteRoleSlot,
   hireTrialAlly,
@@ -993,6 +995,7 @@ if (probe) {
   const res = probe.options[0].resources;
   const beforeN = { ...saveNormal.profile.resources };
   const beforeH = { ...saveHard.profile.resources };
+  const hardFactor = economyFactors(saveHard, probe.chapterId);
   applyStoryChoice(saveNormal, probe.id, 0);
   applyStoryChoice(saveHard, probe.id, 0);
   const production =
@@ -1014,7 +1017,7 @@ if (probe) {
             Math.min(
               100,
               beforeH[resource] +
-                Math.round(d * 1.4) +
+                Math.round(d * hardFactor.neg) +
                 (production[resource] || 0)
             )
           )
@@ -1023,7 +1026,7 @@ if (probe) {
             Math.min(
               100,
               beforeH[resource] +
-                Math.round(d * 0.7) +
+                Math.round(d * hardFactor.pos) +
                 (production[resource] || 0)
             )
           );
@@ -1140,9 +1143,9 @@ for (const chapter of CHAPTERS) {
   );
 }
 
-// ---- D1/D2：难度档位驱动资源缩放（effectiveDifficulty 以 save.difficulty 为准）----
+// ---- D1/D2：难度 × 章节 驱动资源缩放（effectiveDifficulty 以 save.difficulty 为准）----
 // 覆盖 extreme 档（PRESSURE_FACTORS.extreme = neg:1.8 / pos:0.5），并验证
-// normal / pressure / extreme 三档缩放系数与 PRESSURE_FACTORS 一致。
+// normal / pressure / extreme 三档缩放系数与 economyFactors 一致。
 const probe2 =
   probe ??
   (() => {
@@ -1162,7 +1165,7 @@ for (const difficulty of ["normal", "pressure", "extreme"]) {
   s.difficulty = difficulty;
   const before = { ...s.profile.resources };
   applyStoryChoice(s, probe2.id, 0);
-  const factor = PRESSURE_FACTORS[difficulty];
+  const factor = economyFactors(s, probe2.chapterId);
   const production =
     probe2.options[0].quality === "expert"
       ? { trust: 1, influence: 1 }
@@ -1186,6 +1189,40 @@ for (const difficulty of ["normal", "pressure", "extreme"]) {
     );
   }
 }
+
+// 章节经济曲线：第 1 章保持 1:1，越往后消耗越重、收益越窄。
+const curve1 = chapterEconomyScale(1);
+const curve5 = chapterEconomyScale(5);
+const curve9 = chapterEconomyScale(9);
+assert(curve1.neg === 1 && curve1.pos === 1, "chapter 1 economy should be 1:1");
+assert(curve5.neg > curve1.neg, "chapter 5 costs should be heavier than chapter 1");
+assert(curve9.neg > curve5.neg, "chapter 9 costs should be heavier than chapter 5");
+assert(curve9.pos < curve5.pos, "chapter 9 gains should be narrower than chapter 5");
+
+// 难度 × 章节：extreme 第 9 章必须显著高于 normal 第 1 章。
+const normalSave = structuredClone(DEFAULT_SAVE);
+normalSave.difficulty = "normal";
+const extremeSave = structuredClone(DEFAULT_SAVE);
+extremeSave.difficulty = "extreme";
+const normalCurve = economyFactors(normalSave, 1);
+const extremeCurve = economyFactors(extremeSave, 9);
+assert(
+  extremeCurve.neg > normalCurve.neg * 3 &&
+    extremeCurve.pos < normalCurve.pos * 0.5,
+  "extreme chapter 9 should tighten resources far beyond normal chapter 1"
+);
+
+// 每日恢复量按难度收紧。
+const recoveryNormal = dailyRecoveryFor(normalSave);
+const recoveryPressure = dailyRecoveryFor(
+  structuredClone({ ...DEFAULT_SAVE, difficulty: "pressure" })
+);
+const recoveryExtreme = dailyRecoveryFor(extremeSave);
+assert(
+  recoveryNormal.energy > recoveryPressure.energy &&
+    recoveryPressure.energy > recoveryExtreme.energy,
+  "daily recovery should scale down with difficulty"
+);
 
 // normalizeSave 必须保留 pressure / extreme（D1：难度选择写入后能正确持久化）
 const normalizedExtreme = (function () {
@@ -1249,7 +1286,7 @@ assert(
 const strainSave = structuredClone(DEFAULT_SAVE);
 strainSave.profile.resources.energy = 12;
 assert(
-  resourceStrainFor(strainSave, expensiveOption) > 0,
+  resourceStrainFor(strainSave, expensiveOption, 1) > 0,
   "low energy should produce resource strain"
 );
 

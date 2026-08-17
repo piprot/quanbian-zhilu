@@ -31,15 +31,15 @@ export function difficultySelector(save: SaveState, language: Language): string 
   const note =
     save.difficulty === "normal"
       ? language === "en"
-        ? "Active: no resource scaling, no story timer, standard trial energy, untimed duels"
-        : "已生效：资源不缩放、剧情无时限、试炼精力标准、对决不强制计时"
+        ? "Active: no extra difficulty scaling, no story timer, standard trial energy, untimed duels. Chapter curve still applies (Chapter 9 costs ~1.96x)."
+        : "已生效：难度不额外缩放、剧情无时限、试炼精力标准、对决不强制计时；章节曲线仍生效（第 9 章消耗约 ×1.96）"
       : save.difficulty === "pressure"
         ? language === "en"
-          ? "Active: 1.4x resource losses, story/duel rounds from 22s (scaled by text length), 1.15x trial energy, more disruptions"
-          : "已生效：资源损耗 1.4 倍、剧情/对决 22 秒起（随文本长度增加）、试炼精力 1.15 倍、干扰更多"
+          ? "Active: 1.4x resource losses, story/duel rounds from 22s (scaled by text length), 1.15x trial energy, more disruptions. Chapter curve stacks (Chapter 9 costs ~2.74x)."
+          : "已生效：资源损耗 1.4 倍、剧情/对决 22 秒起（随文本长度增加）、试炼精力 1.15 倍、干扰更多；叠加章节曲线后第 9 章消耗约 ×2.74"
         : language === "en"
-          ? "Active: 1.8x resource losses, story/duel rounds from 14s (scaled by text length), 1.3x trial energy, frequent disruptions"
-          : "已生效：资源损耗 1.8 倍、剧情/对决 14 秒起（随文本长度增加）、试炼精力 1.3 倍、干扰频繁";
+          ? "Active: 1.8x resource losses, story/duel rounds from 14s (scaled by text length), 1.3x trial energy, frequent disruptions. Chapter curve stacks (Chapter 9 costs ~3.53x)."
+          : "已生效：资源损耗 1.8 倍、剧情/对决 14 秒起（随文本长度增加）、试炼精力 1.3 倍、干扰频繁；叠加章节曲线后第 9 章消耗约 ×3.53";
   return `
     <div class="mini-panel difficulty-panel">
       <h3>${uiString(language, "difficultyLabel")} <span class="diff-active">${language === "en" ? "Active" : "已生效"}</span></h3>

@@ -1,4 +1,5 @@
 import {
+  economyFactors,
   isChapterComplete,
   isChapterPassed,
   isNodeComplete,
@@ -134,7 +135,7 @@ export function mapView(
         </section>
         ${
           state.resourceRecoveryNote
-            ? `<div class="recovery-banner" role="status">${language === "en" ? "Daily resource recovery applied: +10 energy, +4 trust, +3 influence, +3 capital. Refreshes once per day when entering the map." : "今日资源恢复已生效：精力+10、信任+4、影响力+3、组织资源+3；每天首次进入地图时自动恢复一次。"}</div>`
+            ? `<div class="recovery-banner" role="status">${language === "en" ? "Daily resource recovery applied. Amounts scale with difficulty; refreshes once per day when entering the map." : "今日资源恢复已生效；恢复量随难度调整，每天首次进入地图时自动恢复一次。"}</div>`
             : ""
         }
         ${
@@ -166,6 +167,7 @@ export function mapView(
               <p>${chapterDisplay(language, chapter).subtitle}</p>
               <p class="chapter-main-progress">${language === "en" ? `Core ${coreDoneCount} / 2 · Extended ${extraDoneCount} / 7 · All ${mainDoneCount} / 9` : `核心 ${coreDoneCount} / 2 · 扩展 ${extraDoneCount} / 7 · 全情境 ${mainDoneCount} / 9`}</p>
               <p class="muted chapter-master-note">${language === "en" ? "Finish all 9 scenarios in a chapter to claim chapter mastery." : "完成本章全部 9 个情境，可达成「章节大师」。"}</p>
+              <p class="muted chapter-economy-note">${language === "en" ? `Chapter ${chapter.code} economy: costs ×${economyFactors(save, chapter.id).neg} · gains ×${economyFactors(save, chapter.id).pos}` : `第 ${chapter.code} 章经济：消耗 ×${economyFactors(save, chapter.id).neg} · 收益 ×${economyFactors(save, chapter.id).pos}`}</p>
             </div>
             <div class="expedition-chapter-card" style="--civ:${stageForChapter(chapter.id).color}">
               <span>${language === "en" ? `Stage · ${stageForChapter(chapter.id).nameEn}` : `阶段 · ${stageForChapter(chapter.id).nameZh}`}</span>

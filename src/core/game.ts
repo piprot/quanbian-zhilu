@@ -44,6 +44,31 @@ export const PRESSURE_FACTORS: Record<
   extreme: { neg: 1.8, pos: 0.5 }
 };
 
+/** 章节经济曲线：越靠后，资源损耗越重、正面收益越窄，逼玩家提前规划投资与恢复。 */
+export function chapterEconomyScale(chapterId: number): {
+  neg: number;
+  pos: number;
+} {
+  const chapter = Math.min(9, Math.max(1, chapterId || 1));
+  return {
+    neg: Number((1 + (chapter - 1) * 0.12).toFixed(2)),
+    pos: Number(Math.max(0.55, 1 - (chapter - 1) * 0.05).toFixed(2))
+  };
+}
+
+/** 难度 × 章节 的最终经济系数：第 1 章标准档保持 1:1，之后逐章收紧。 */
+export function economyFactors(
+  save: SaveState,
+  chapterId: number
+): { neg: number; pos: number } {
+  const difficulty = PRESSURE_FACTORS[effectiveDifficulty(save)];
+  const chapter = chapterEconomyScale(chapterId);
+  return {
+    neg: Number((difficulty.neg * chapter.neg).toFixed(2)),
+    pos: Number((difficulty.pos * chapter.pos).toFixed(2))
+  };
+}
+
 /** 各难度档位的每回合决策时限（毫秒）。标准档不计时（返回 0）。 */
 export function roundDurationMsForDifficulty(
   difficulty: "normal" | "pressure" | "extreme"
@@ -94,7 +119,7 @@ export const DEFAULT_SAVE: SaveState = {
     name: "你",
     role: "highPotential",
     abilities: createDefaultAbilities(),
-    resources: { energy: 75, trust: 60, influence: 40, capital: 45 }
+    resources: { energy: 72, trust: 56, influence: 38, capital: 40 }
   },
   chapterRecords: [],
   unlockedChapters: [1],
@@ -724,7 +749,7 @@ export function applyStoryChoice(
   }
   const node = getNode(nodeId);
   const option = node.options[optionIndex];
-  const outcome = buildOutcome(save, option, optionIndex);
+  const outcome = buildOutcome(save, option, optionIndex, node.chapterId);
 
   const delta: NonNullable<DecisionRecord["delta"]> = {
     abilities: {},
@@ -745,13 +770,7 @@ export function applyStoryChoice(
   for (const [resource, resourceDelta] of Object.entries(option.resources) as Array<
     [ResourceKey, number]
   >) {
-    const effectiveDifficulty =
-      save.difficulty !== "normal"
-        ? save.difficulty
-        : save.highPressureMode
-          ? "pressure"
-          : "normal";
-    const factor = PRESSURE_FACTORS[effectiveDifficulty];
+    const factor = economyFactors(save, node.chapterId);
     const adjustedDelta =
       resourceDelta < 0
         ? Math.round(resourceDelta * factor.neg)
@@ -883,7 +902,8 @@ export function applyStoryChoice(
 function buildOutcome(
   save: SaveState,
   option: StoryOption,
-  optionIndex: number
+  optionIndex: number,
+  chapterId: number
 ): ChoiceOutcome {
   const gainedAbilityIds = (Object.entries(option.effects) as Array<
     [AbilityId, number]
@@ -897,7 +917,7 @@ function buildOutcome(
     1
   );
   const unlockBonus = relevantLevel >= 5 ? 14 : relevantLevel >= 3 ? 8 : 0;
-  const strain = resourceStrainFor(save, option);
+  const strain = resourceStrainFor(save, option, chapterId);
   return {
     option,
     optionIndex,
@@ -979,7 +999,7 @@ export function optionGateFor(
   option: StoryOption,
   chapterId: number
 ): OptionGate {
-  const factor = PRESSURE_FACTORS[effectiveDifficulty(save)];
+  const factor = economyFactors(save, chapterId);
   for (const [key, needed] of Object.entries(
     optionResourceRequirement(option)
   ) as Array<[ResourceKey, number]>) {
@@ -1023,9 +1043,10 @@ export function optionGateFor(
 
 export function resourceStrainFor(
   save: SaveState,
-  option: StoryOption
+  option: StoryOption,
+  chapterId: number
 ): number {
-  const factor = PRESSURE_FACTORS[effectiveDifficulty(save)];
+  const factor = economyFactors(save, chapterId);
   let strain = 0;
   for (const [key, delta] of Object.entries(option.resources ?? {}) as Array<
     [ResourceKey, number]
@@ -1273,29 +1294,47 @@ export function applyDailyTrialRecovery(save: SaveState): boolean {
   return true;
 }
 
+/** 每日资源恢复量按难度收紧：高压少回、极限更少，让恢复本身成为资源决策。 */
+export function dailyRecoveryFor(save: SaveState): {
+  energy: number;
+  trust: number;
+  influence: number;
+  capital: number;
+} {
+  const difficulty = effectiveDifficulty(save);
+  if (difficulty === "extreme") {
+    return { energy: 6, trust: 2, influence: 2, capital: 1 };
+  }
+  if (difficulty === "pressure") {
+    return { energy: 8, trust: 3, influence: 2, capital: 2 };
+  }
+  return { energy: 10, trust: 4, influence: 3, capital: 3 };
+}
+
 /** 主线资源（精力、信任、影响力、组织资源）每日低额恢复一次，让资源环有可感知的恢复路径。 */
 export function applyDailyResourceRecovery(save: SaveState): boolean {
   const today = todayDateKey();
   if (save.lastResourceDate === today) {
     return false;
   }
+  const recovery = dailyRecoveryFor(save);
   save.profile.resources.energy = clamp(
-    save.profile.resources.energy + 10,
+    save.profile.resources.energy + recovery.energy,
     0,
     100
   );
   save.profile.resources.trust = clamp(
-    save.profile.resources.trust + 4,
+    save.profile.resources.trust + recovery.trust,
     0,
     100
   );
   save.profile.resources.influence = clamp(
-    save.profile.resources.influence + 3,
+    save.profile.resources.influence + recovery.influence,
     0,
     100
   );
   save.profile.resources.capital = clamp(
-    save.profile.resources.capital + 3,
+    save.profile.resources.capital + recovery.capital,
     0,
     100
   );

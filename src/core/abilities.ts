@@ -131,7 +131,7 @@ export const ROLES: Record<RoleId, RoleDef> = {
       recovery: 1,
       communication: 1
     },
-    startingResources: { energy: 80, trust: 35, influence: 60, capital: 50 }
+    startingResources: { energy: 78, trust: 34, influence: 58, capital: 46 }
   },
   founder: {
     id: "founder",
@@ -147,7 +147,7 @@ export const ROLES: Record<RoleId, RoleDef> = {
       recovery: 2,
       strategy: 1
     },
-    startingResources: { energy: 90, trust: 40, influence: 45, capital: 35 }
+    startingResources: { energy: 88, trust: 38, influence: 44, capital: 32 }
   },
   highPotential: {
     id: "highPotential",
@@ -163,7 +163,7 @@ export const ROLES: Record<RoleId, RoleDef> = {
       structure: 2,
       deploy: 1
     },
-    startingResources: { energy: 75, trust: 60, influence: 40, capital: 45 }
+    startingResources: { energy: 72, trust: 56, influence: 38, capital: 40 }
   }
 };
 
