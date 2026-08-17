@@ -215,7 +215,7 @@ const SETTINGS_MIGRATION_KEY = "adaptive-ascent-settings-v2";
 const GUIDE_KEY = "adaptive-ascent-guide-v1";
 const GUIDE_REWARD_KEY = "adaptive-ascent-guide-reward";
 const ACHIEVEMENT_FAVORITE_KEY = "adaptive-ascent-achievement-favorites";
-const APP_VERSION = "1.7.42";
+const APP_VERSION = "1.7.43";
 
 const ACADEMY_DIMENSION_ABILITIES: Record<
   InfluenceKey,

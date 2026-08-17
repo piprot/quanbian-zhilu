@@ -3403,3 +3403,276 @@ button:focus-visible,
   color: #f2c14e;
   font-weight: 700;
 }
+
+/* =========================================================================
+   9.9 场景动效（评估后落地）
+   原则：200-520ms、仅 opacity/transform/filter、尊重 reduced-motion。
+   ========================================================================= */
+:root {
+  --motion-fast: 180ms;
+  --motion-base: 320ms;
+  --motion-slow: 520ms;
+  --motion-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --motion-ease-out: cubic-bezier(0.2, 0.8, 0.3, 1.05);
+}
+
+@keyframes vu-chapter-current {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(242, 193, 78, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.45);
+  }
+}
+.chapter-badge.current {
+  animation: vu-chapter-current 1.6s var(--motion-ease-soft) infinite;
+}
+
+@keyframes vu-stamp-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-8deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.12) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+.node-row.done .node-state,
+.quest-node.done > span:first-child {
+  animation: vu-stamp-pop var(--motion-base) var(--motion-ease-out) both;
+}
+
+@keyframes vu-panel-slide {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.map-shell.map-detail-open .map-extras > * {
+  animation: vu-panel-slide var(--motion-base) var(--motion-ease) both;
+}
+.map-shell.map-detail-open .map-extras > :nth-child(2) {
+  animation-delay: 60ms;
+}
+.map-shell.map-detail-open .map-extras > :nth-child(3) {
+  animation-delay: 120ms;
+}
+.map-shell.map-detail-open .map-extras > :nth-child(4) {
+  animation-delay: 180ms;
+}
+
+@keyframes vu-ready-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(65, 199, 192, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(65, 199, 192, 0.4);
+  }
+}
+.adaptive-route-actions button:not(:disabled) {
+  animation: vu-ready-pulse 1.6s var(--motion-ease-soft) infinite;
+}
+
+@keyframes vu-find-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.exploration-findings p {
+  animation: vu-find-in var(--motion-base) var(--motion-ease) both;
+}
+
+.option-card {
+  transition:
+    transform var(--motion-fast) var(--motion-ease),
+    box-shadow var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) var(--motion-ease);
+}
+.option-card:not(.locked):hover {
+  transform: translateY(-2px);
+}
+.option-card.locked:active {
+  transform: translateX(-3px);
+}
+
+@keyframes vu-portrait-in {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes vu-quote-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.npc-scene-quote {
+  animation: vu-quote-in var(--motion-slow) var(--motion-ease) both;
+}
+.npc-scene-portrait {
+  animation: vu-portrait-in var(--motion-base) var(--motion-ease) both;
+}
+
+@keyframes vu-kenburns {
+  from {
+    background-position: 20% 30%;
+    transform: scale(1.02);
+  }
+  to {
+    background-position: 80% 70%;
+    transform: scale(1.08);
+  }
+}
+.scene-strip {
+  animation: vu-kenburns 14s var(--motion-ease-soft) infinite alternate;
+}
+
+@keyframes vu-round-in {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.duel-round-result .round-result-grid article {
+  animation: vu-round-in var(--motion-base) var(--motion-ease) both;
+}
+.duel-round-result .round-result-grid article:nth-child(2) {
+  animation-delay: 120ms;
+}
+.duel-predict-options button {
+  transition:
+    transform var(--motion-fast) var(--motion-ease),
+    box-shadow var(--motion-fast) var(--motion-ease);
+}
+.duel-predict-options button:hover {
+  transform: translateY(-2px);
+}
+
+@keyframes vu-feedback-correct {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  60% {
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes vu-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+.ta-feedback.correct {
+  animation: vu-feedback-correct var(--motion-base) var(--motion-ease-out) both;
+}
+.ta-feedback.wrong {
+  animation: vu-shake var(--motion-base) var(--motion-ease) both;
+}
+
+@keyframes vu-mentor-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(242, 193, 78, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 3px rgba(242, 193, 78, 0.45);
+  }
+}
+.ta-mentor.active {
+  animation: vu-mentor-glow 2s var(--motion-ease-soft) infinite;
+}
+
+@keyframes vu-radar-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes vu-trusted-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.radar,
+.relation-graph {
+  animation: vu-radar-in var(--motion-slow) var(--motion-ease) both;
+}
+.npc-card.trusted {
+  animation: vu-trusted-in var(--motion-base) var(--motion-ease) both;
+}
+
+@keyframes vu-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.app-toast {
+  animation: vu-toast-in var(--motion-base) var(--motion-ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chapter-badge.current,
+  .scene-strip,
+  .adaptive-route-actions button:not(:disabled),
+  .ta-mentor.active,
+  .npc-card.trusted {
+    animation: none !important;
+  }
+}
