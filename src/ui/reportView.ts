@@ -123,7 +123,7 @@ function abilityCard(save: SaveState, language: "zh" | "en", id: AbilityId): str
         })()
       }
       <div class="ability-sources">${detail.sources.slice(0, 2).map((source) => `<span>${escapeHtml(source)}</span>`).join("")}</div>
-      <button class="ability-practice-button" data-action="open-training" data-ability="${id}">${language === "en" ? "Enter Practice" : "进入修炼"}</button>
+      <button class="ability-practice-button" data-action="open-training" data-ability="${id}" data-training-mode="story">${language === "en" ? "Enter Practice" : "进入修炼"}</button>
     </div>
   `;
 }
@@ -345,7 +345,7 @@ function wrongAnswerMarkup(save: SaveState, language: "zh" | "en"): string {
               ? `<p class="expert-ref">${language === "en" ? "Expert baseline" : "专家基准"}：${escapeHtml(expert.label)} · ${escapeHtml(expert.theory)}</p>`
               : ""
           }
-          <button data-action="open-training" data-ability="${focus}">${language === "en" ? "Train This Ability" : "训练该能力"}</button>
+          <button data-action="open-training" data-ability="${focus}" data-training-mode="quiz">${language === "en" ? "Train This Ability" : "训练该能力"}</button>
         </div>
       `;
     })

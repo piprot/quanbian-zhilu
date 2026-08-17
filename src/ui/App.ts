@@ -215,7 +215,7 @@ const SETTINGS_MIGRATION_KEY = "adaptive-ascent-settings-v2";
 const GUIDE_KEY = "adaptive-ascent-guide-v1";
 const GUIDE_REWARD_KEY = "adaptive-ascent-guide-reward";
 const ACHIEVEMENT_FAVORITE_KEY = "adaptive-ascent-achievement-favorites";
-const APP_VERSION = "1.7.43";
+const APP_VERSION = "1.7.44";
 
 const ACADEMY_DIMENSION_ABILITIES: Record<
   InfluenceKey,
@@ -1367,6 +1367,7 @@ export class AdaptiveGameApp {
             this.language === "en" ? "Start Training" : "进入训练";
           button.dataset.action = "open-training";
           button.dataset.ability = id;
+          button.dataset.trainingMode = "quiz";
           card.appendChild(button);
         }
       });
@@ -2142,7 +2143,8 @@ export class AdaptiveGameApp {
               ? this.view
               : "ability";
           this.trainingAbilityId = abilityId;
-          this.trainingStage = "story";
+          this.trainingStage =
+            actionTarget.dataset.trainingMode === "quiz" ? "quiz" : "story";
           this.trainingStep = 0;
           this.trainingAnswers = Array(
             EXPANDED_TRAINING[abilityId].questions.length

@@ -746,7 +746,7 @@ export function storyView(
                   <code>${escapeHtml(lessonExtra.formula.expression)}</code>
                   <p>${escapeHtml(lessonExtra.roleApplications[save.profile.role])}</p>
                 </details>
-                <button data-action="open-training" data-ability="${chapterFocusAbility}">${en ? "Enter Practice" : "进入修炼"}</button>
+                <button data-action="open-training" data-ability="${chapterFocusAbility}" data-training-mode="story">${en ? "Enter Practice" : "进入修炼"}</button>
               </section>
             </section>
           </section>
