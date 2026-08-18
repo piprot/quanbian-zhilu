@@ -142,6 +142,10 @@
   font-size: 12px;
   line-height: 1.5;
 }
+.ta-scenario-seq {
+  color: #f2c14e !important;
+  font-weight: 700;
+}
 
 .ta-formula {
   padding: 12px 14px;

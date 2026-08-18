@@ -399,6 +399,9 @@ export class TeamAcademyApp {
     const scenarioIndex = lesson
       ? lesson.scenarioIds.indexOf(scenario.id)
       : 0;
+    const lessonIndex = courseFor(this.currentRole).lessons.findIndex(
+      (item) => item.scenarioIds.includes(scenario.id)
+    );
     const nextId = lesson?.scenarioIds[scenarioIndex + 1];
     const result = this.scenarioResult
       ? `<div class="ta-feedback ${this.scenarioResult.correct ? "correct" : "wrong"}">
@@ -430,7 +433,7 @@ export class TeamAcademyApp {
       </header>
       <main class="ta-shell ta-scenario-play" aria-label="${esc(scenario.title)}">
         <section class="ta-play-hero">
-          <p class="eyebrow">${en ? `Level ${scenario.level} · Scenario ${scenarioIndex + 1}/4` : `第 ${scenario.level} 关 · 情境 ${scenarioIndex + 1}/4`}</p>
+          <p class="eyebrow">${en ? `Lesson ${lessonIndex + 1} · Scenario ${scenarioIndex + 1}/4` : `第 ${lessonIndex + 1} 课 · 情境 ${scenarioIndex + 1}/4`}</p>
           <h1>${esc(scenario.title)}</h1>
           <p>${esc(scenario.situation)}</p>
         </section>
@@ -516,8 +519,13 @@ export class TeamAcademyApp {
               .map((scenario) => {
                 const done = state.completedScenarios.includes(scenario.id);
                 const score = state.scenarioScores[scenario.id] ?? 0;
+                const scenarioIndex = lesson.scenarioIds.indexOf(scenario.id);
+                const lessonIndex = courseFor(this.currentRole).lessons.findIndex(
+                  (item) => item.id === lesson.id
+                );
                 return `
                   <button class="ta-scenario-card ${done ? "done" : ""}" data-action="ta-scenario" data-scenario="${scenario.id}">
+                    <span class="ta-scenario-seq">${en ? `Lesson ${lessonIndex + 1} · Scenario ${scenarioIndex + 1}/4` : `第 ${lessonIndex + 1} 课 · 情境 ${scenarioIndex + 1}/4`}</span>
                     <strong>${esc(scenario.title)}</strong>
                     <span>${done ? (en ? "Done" : "已完成") : (en ? "Not started" : "未开始")}</span>
                   </button>
