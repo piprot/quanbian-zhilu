@@ -11,7 +11,8 @@ import { escapeAttr, escapeHtml } from "./escape";
 export function profileView(
   save: SaveState,
   language: Language,
-  pendingRole: RoleId
+  pendingRole: RoleId,
+  pendingPerspective?: "male" | "female"
 ): string {
   const en = language === "en";
   return `
@@ -84,6 +85,16 @@ export function profileView(
             <span>${en ? "Your Name" : "你的名字"}</span>
             <input name="playerName" maxlength="12" placeholder="${en ? "e.g. Alex" : "例如：林远"}" value="${escapeAttr(save.profile.name === "你" ? "" : save.profile.name)}" />
           </label>
+          <label class="field">
+            <span>${en ? "Title / Alias (optional)" : "名号（可选）"}</span>
+            <input name="playerTitle" maxlength="12" placeholder="${en ? "e.g. The Strategist" : "例如：运筹帷幄者"}" value="${escapeAttr(save.profile.title ?? "")}" />
+          </label>
+          <div class="perspective-row">
+            <span>${en ? "Perspective" : "视角"}</span>
+            <button type="button" class="${pendingPerspective === "male" ? "selected" : ""}" data-action="set-perspective" data-perspective="male">${en ? "Male" : "男性视角"}</button>
+            <button type="button" class="${pendingPerspective === "female" ? "selected" : ""}" data-action="set-perspective" data-perspective="female">${en ? "Female" : "女性视角"}</button>
+            <small>${en ? "Affects a few narrative details only." : "仅影响少量叙事细节。"}</small>
+          </div>
           <div class="role-grid">
             ${(Object.values(ROLES) as Array<(typeof ROLES)[RoleId]>)
               .map(

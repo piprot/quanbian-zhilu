@@ -4,10 +4,6 @@ import { escapeHtml } from "./escape";
 
 // 设置页需要从 App 读到的少量 UI 态（不属于存档或语言）。
 export interface SettingsState {
-  muted: boolean;
-  musicMuted: boolean;
-  musicVolume: number;
-  sfxVolume: number;
   version: string;
 }
 
@@ -66,36 +62,8 @@ export function settingsView(
       </section>
       <section class="settings-grid">
         <div class="settings-panel">
-          <h2>${en ? "Audio & Language" : "声音与语言"}</h2>
-          <button data-action="toggle-sound">${state.muted ? uiString(language, "soundOff") : uiString(language, "soundOn")}</button>
-          <button data-action="toggle-music">${state.musicMuted ? uiString(language, "musicOff") : uiString(language, "musicOn")}</button>
-          <label class="field">
-            <span>${uiString(language, "musicVolume")}</span>
-            <select data-select="music-volume">
-              <option value="0" ${state.musicVolume === 0 ? "selected" : ""}>0</option>
-              <option value="25" ${state.musicVolume === 25 ? "selected" : ""}>25</option>
-              <option value="50" ${state.musicVolume === 50 ? "selected" : ""}>50</option>
-              <option value="75" ${state.musicVolume === 75 ? "selected" : ""}>75</option>
-              <option value="100" ${state.musicVolume === 100 ? "selected" : ""}>100</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>${en ? "SFX Volume" : "音效音量"}</span>
-            <select data-select="sfx-volume">
-              <option value="0" ${state.sfxVolume === 0 ? "selected" : ""}>0</option>
-              <option value="25" ${state.sfxVolume === 25 ? "selected" : ""}>25</option>
-              <option value="50" ${state.sfxVolume === 50 ? "selected" : ""}>50</option>
-              <option value="75" ${state.sfxVolume === 75 ? "selected" : ""}>75</option>
-              <option value="100" ${state.sfxVolume === 100 ? "selected" : ""}>100</option>
-            </select>
-          </label>
-          <button data-action="preview-sfx">${en ? "Preview SFX" : "试听音效"}</button>
+          <h2>${en ? "Language" : "语言"}</h2>
           <button data-action="toggle-language">${uiString(language, "language")}</button>
-          ${
-            state.musicVolume === 0 || state.sfxVolume === 0
-              ? `<p class="muted volume-zero-note">${en ? "Volume is 0: audio stays silent while toggles are on." : "音量为 0：开关虽为开，当前仍无声。"}</p>`
-              : ""
-          }
         </div>
         <div class="settings-panel">
           <h2>${uiString(language, "difficultyLabel")}</h2>

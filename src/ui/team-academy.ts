@@ -20,7 +20,6 @@ import {
 
 export interface TeamAcademyCallbacks {
   onBack(): void;
-  onAudio(kind: "ui" | "correct" | "wrong"): void;
   onProgress?(payload: {
     kind: "scenario" | "practice" | "homework" | "mentor";
     correct?: boolean;
@@ -129,7 +128,6 @@ export class TeamAcademyApp {
       this.questionIndex = 0;
       this.lastAnswer = undefined;
       this.homeworkResult = undefined;
-      this.callbacks.onAudio("ui");
       this.render(this.root);
       return;
     }
@@ -140,14 +138,12 @@ export class TeamAcademyApp {
       this.lastAnswer = undefined;
       this.scenarioResult = undefined;
       this.homeworkResult = undefined;
-      this.callbacks.onAudio("ui");
       this.render(this.root);
       return;
     }
     if (action === "ta-scenario") {
       this.currentScenarioId = target.dataset.scenario;
       this.scenarioResult = undefined;
-      this.callbacks.onAudio("ui");
       this.render(this.root);
       return;
     }
@@ -178,14 +174,12 @@ export class TeamAcademyApp {
         correct: result.correct,
         gained: result.gained
       });
-      this.callbacks.onAudio(result.correct ? "correct" : "wrong");
       this.render(this.root);
       return;
     }
     if (action === "ta-scenario-back") {
       this.currentScenarioId = undefined;
       this.scenarioResult = undefined;
-      this.callbacks.onAudio("ui");
       this.render(this.root);
       return;
     }
@@ -199,7 +193,6 @@ export class TeamAcademyApp {
       if (!next) return;
       this.currentScenarioId = next;
       this.scenarioResult = undefined;
-      this.callbacks.onAudio("ui");
       this.render(this.root);
       return;
     }
@@ -226,7 +219,6 @@ export class TeamAcademyApp {
         correct: result.correct,
         gained: result.gained
       });
-      this.callbacks.onAudio(result.correct ? "correct" : "wrong");
       this.render(this.root);
       return;
     }
@@ -243,7 +235,6 @@ export class TeamAcademyApp {
         this.render(this.root);
         return;
       }
-      this.callbacks.onAudio("ui");
       this.render(this.root);
       return;
     }
@@ -267,7 +258,6 @@ export class TeamAcademyApp {
         kind: "homework",
         passed: result.passed
       });
-      this.callbacks.onAudio(result.passed ? "correct" : "wrong");
       this.render(this.root);
       return;
     }
@@ -285,14 +275,12 @@ export class TeamAcademyApp {
         kind: "mentor",
         dimension: mentor?.dimension
       });
-      this.callbacks.onAudio("correct");
       this.render(this.root);
       return;
     }
     if (action === "ta-reset") {
       this.states[this.currentRole] = createTeamAcademyState(this.currentRole);
       this.persist();
-      this.callbacks.onAudio("ui");
       this.render(this.root);
     }
   }

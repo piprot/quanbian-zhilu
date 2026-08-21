@@ -4101,7 +4101,23 @@ export function getChapter(id: number): ChapterDef {
   return chapter;
 }
 
+const DYNAMIC_NODES = new Map<string, StoryNode>();
+
+export function registerDynamicNode(node: StoryNode): void {
+  DYNAMIC_NODES.set(node.id, node);
+}
+
+export function unregisterDynamicNode(id: string): void {
+  DYNAMIC_NODES.delete(id);
+}
+
+export function hasDynamicNode(id: string): boolean {
+  return DYNAMIC_NODES.has(id);
+}
+
 export function getNode(id: string): StoryNode {
+  const dynamic = DYNAMIC_NODES.get(id);
+  if (dynamic) return dynamic;
   const node = STORY_NODES.find((item) => item.id === id);
   if (!node) {
     throw new Error(`Missing story node ${id}`);

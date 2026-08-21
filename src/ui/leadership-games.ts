@@ -45,7 +45,6 @@ export interface LeadershipGamesCallbacks {
     achievements: string[],
     branch: string
   ): void;
-  onAudio(kind: "ui" | "win" | "lose" | "choose"): void;
   getProgress(gameId: LeadershipGameId): {
     maxLevel: number;
     achievements: string[];
@@ -246,7 +245,6 @@ export class LeadershipGamesApp {
       ];
       this.state = applyDecisionChessMove(this.state as DecisionChessState, to);
       this.finishIfDone();
-      this.callbacks.onAudio("choose");
       this.render(this.root);
       return;
     }
@@ -254,7 +252,6 @@ export class LeadershipGamesApp {
       const choice = target.dataset.choice as GameTheoryChoice;
       this.state = applyGameTheoryChoice(this.state as GameTheoryState, choice);
       this.finishIfDone();
-      this.callbacks.onAudio("choose");
       this.render(this.root);
       return;
     }
@@ -271,7 +268,6 @@ export class LeadershipGamesApp {
         allocation as ResourceAllocationState["multipliers"]
       );
       this.finishIfDone();
-      this.callbacks.onAudio("choose");
       this.render(this.root);
       return;
     }
@@ -284,7 +280,6 @@ export class LeadershipGamesApp {
         taskId
       );
       this.finishIfDone();
-      this.callbacks.onAudio("choose");
       this.render(this.root);
       return;
     }
@@ -295,7 +290,6 @@ export class LeadershipGamesApp {
         optionIndex
       );
       this.finishIfDone();
-      this.callbacks.onAudio("choose");
       this.render(this.root);
     }
   }
@@ -342,7 +336,6 @@ export class LeadershipGamesApp {
     } else {
       this.state = createCrisisCommand(mode, options);
     }
-    this.callbacks.onAudio("ui");
     this.render(this.root);
   }
 
@@ -367,7 +360,6 @@ export class LeadershipGamesApp {
         achievements,
         branch
       );
-      this.callbacks.onAudio(won ? "win" : "lose");
     }
   }
 

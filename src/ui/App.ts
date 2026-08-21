@@ -2,8 +2,19 @@ import {
   ABILITIES,
   ABILITY_ORDER,
   ROLES,
-  abilityLevel
+  abilityLevel,
+  weakestAbilities
 } from "../core/abilities";
+import {
+  generateAiScenario,
+  validateAiScenario,
+  type AiDifficulty
+} from "../core/aiScenario";
+import { recommendAiScenario } from "../core/scenario-router";
+import {
+  coachStudentSummary,
+  type CoachStudentSummary
+} from "../core/coach-analytics";
 import {
   ACHIEVEMENTS,
   isAchievementUnlocked
@@ -50,7 +61,6 @@ import {
   resetSave,
   decisionWindowMs,
   DEFAULT_SAVE,
-  normalizeVolume,
   retryChapter,
   resolveCloudConflict,
   roleSlotSummaries,
@@ -64,7 +74,8 @@ import {
   forkNodeForRoute,
   getChapter,
   getNode,
-  getNodeForRole
+  getNodeForRole,
+  registerDynamicNode
 } from "../core/story";
 import type {
   AbilityId,
@@ -78,8 +89,6 @@ import type {
 } from "../core/types";
 import { ManualRtcPeer, type RtcMessage } from "../net/rtc";
 import { RoomClient, type RoomServerMessage } from "../net/roomClient";
-import { GameAudioV2 } from "../audio-v2";
-import { ThemeMusic } from "../core/theme-music";
 import { reconMoments } from "../core/expedition";
 import type { LeadershipGamesApp, LeadershipGameId } from "./leadership-games";
 import type { TeamAcademyApp } from "./team-academy";
@@ -154,6 +163,10 @@ import { relationsView } from "./relationsView";
 import { trainingView } from "./trainingView";
 import { menuSandboxCaption, menuView } from "./menuView";
 import { lorebookView } from "./lorebookView";
+import { historyMirrorView } from "./historyMirrorView";
+import { aiScenarioView } from "./aiScenarioView";
+import { coachDashboardView } from "./coachDashboardView";
+import { groupHallView } from "./groupHallView";
 import {
   customScenarioPlayView,
   customScenariosView,
@@ -183,7 +196,11 @@ import {
   primaryAbilityForOption,
   storyOptionOrder
 } from "./storyMarkup";
-import { renderAbilityRadar, renderGroupRadar } from "./charts";
+import {
+  renderAbilityRadar,
+  renderGroupRadar,
+  renderXpCurve
+} from "./charts";
 import { renderPowerBoard } from "./art";
 import { renderTrainingBoard } from "./trainingArt";
 import {
@@ -213,11 +230,10 @@ import {
 const ONLINE_ENABLED = import.meta.env.VITE_ENABLE_ONLINE === "true";
 const DUEL_SNAPSHOT_KEY = "adaptive-ascent-duel-snapshot-v1";
 const SAVE_BACKUP_HINT_KEY = "adaptive-ascent-backup-hint-dismissed";
-const SETTINGS_MIGRATION_KEY = "adaptive-ascent-settings-v2";
 const GUIDE_KEY = "adaptive-ascent-guide-v1";
 const GUIDE_REWARD_KEY = "adaptive-ascent-guide-reward";
 const ACHIEVEMENT_FAVORITE_KEY = "adaptive-ascent-achievement-favorites";
-const APP_VERSION = "1.7.48";
+const APP_VERSION = "2.0.0";
 
 const ACADEMY_DIMENSION_ABILITIES: Record<
   InfluenceKey,
@@ -252,6 +268,10 @@ type View =
   | "training"
   | "coach"
   | "lorebook"
+  | "historyMirrors"
+  | "aiScenario"
+  | "coachDashboard"
+  | "groupHall"
   | "trial"
   | "trialBattle"
   | "duelLobby"
@@ -259,9 +279,6 @@ type View =
 
 export class AdaptiveGameApp {
   private root: HTMLElement;
-  private audio = new GameAudioV2();
-  private themeMusic = new ThemeMusic();
-  private themeMusicPlaying = false;
   private coachEngine = new CoachWorkshopEngine();
   private coachReport?: WorkshopReport;
   private coachPlan?: CoachPlan;
@@ -269,15 +286,6 @@ export class AdaptiveGameApp {
   private coachChallenge?: CoachChallenge;
   private coachPlanStep: "goal" | "challenge" | "plan" = "goal";
   private coachPlanChecks: Record<string, boolean> = {};
-  private muted = localStorage.getItem("adaptive-ascent-muted") === "1";
-  private musicMuted =
-    localStorage.getItem("adaptive-ascent-music") === "1";
-  private musicVolume = normalizeVolume(
-    Number(localStorage.getItem("adaptive-ascent-music-volume") || 60)
-  );
-  private sfxVolume = normalizeVolume(
-    Number(localStorage.getItem("adaptive-ascent-sfx-volume") || 90)
-  );
   private fontScale = Number(
     localStorage.getItem("adaptive-ascent-font-scale") || 1
   );
@@ -302,8 +310,27 @@ export class AdaptiveGameApp {
   private previousView?: View;
   private pendingRole: RoleId = "parachute";
   private pendingProfile?: PlayerProfile;
+  private pendingPerspective?: "male" | "female";
   private assessmentStep = 0;
   private assessmentAnswers: number[] = [];
+  private aiAbilityId: AbilityId = "communication";
+  private aiDifficulty: AiDifficulty = "medium";
+  private coachStudents: CoachStudentSummary[] = [];
+  private coachSelectedIndex = 0;
+  private coachLoading = false;
+  private coachError?: string;
+  private groupConnected = false;
+  private groupRoomId?: string;
+  private groupPlayers: Array<{ name: string; picked?: boolean }> = [];
+  private groupCapacity = 4;
+  private groupRounds = 3;
+  private groupRound?: number;
+  private groupNode?: StoryNode;
+  private groupPicked?: number;
+  private groupDistribution?: number[];
+  private groupRevealPlayers?: Array<{ name: string; pick: number }>;
+  private groupEnded = false;
+  private groupError?: string;
   private selectedChapter = 1;
   private mapDetailOpen = false;
   private trainingAbilityId: AbilityId = "insight";
@@ -376,6 +403,8 @@ export class AdaptiveGameApp {
   private lastUnlockedAchievement?: string;
   private lastOutcome?: ChoiceOutcome;
   private lastOutcomeNodeId?: string;
+  private storyDecisionStartedAt = 0;
+  private lastStoryRenderedNodeId?: string;
   private duelMode: DuelMode = "ai";
   private duelRounds = 3;
   private duelRematchAction: "ai" | "local" | undefined = undefined;
@@ -424,7 +453,6 @@ export class AdaptiveGameApp {
   private duelRoundTickId?: number;
   private duelRoundDeadline = 0;
   private duelTimedOutThisRound = false;
-  private duelWarningPlayed = new Set<number>();
   private resourceRecoveryNote = false;
   private roomClient?: RoomClient;
   private cloudToken = localStorage.getItem("adaptive-ascent-cloud-token") || "";
@@ -461,17 +489,6 @@ export class AdaptiveGameApp {
     document.querySelector("#app-loading")?.remove();
     document.documentElement.classList.toggle("online-off", !ONLINE_ENABLED);
     document.documentElement.lang = this.language;
-    this.audio.setMuted(this.muted);
-    if (localStorage.getItem(SETTINGS_MIGRATION_KEY) !== "1") {
-      if (this.musicVolume === 0) this.musicVolume = 60;
-      if (this.sfxVolume === 0) this.sfxVolume = 90;
-      localStorage.setItem("adaptive-ascent-music-volume", String(this.musicVolume));
-      localStorage.setItem("adaptive-ascent-sfx-volume", String(this.sfxVolume));
-      localStorage.setItem(SETTINGS_MIGRATION_KEY, "1");
-    }
-    this.audio.setSfxVolume(this.sfxVolume);
-    this.audio.setMusicMuted(this.musicMuted);
-    this.audio.setMusicVolume(this.musicVolume);
     document.documentElement.style.fontSize = `${this.fontScale * 100}%`;
     this.save = loadSave();
     if (this.save.profileCreated) {
@@ -559,10 +576,6 @@ export class AdaptiveGameApp {
     if (!view) return;
     if (view === "map" && !this.save.profileCreated) return;
     event.preventDefault();
-    this.audio.unlock();
-    this.audio.ensure();
-    this.audio.startAmbientIfIdle();
-    this.audio.ui();
     this.show(view);
   }
 
@@ -684,34 +697,6 @@ export class AdaptiveGameApp {
     }
     this.view = view;
     window.scrollTo(0, 0);
-    const scene =
-      view === "story"
-        ? "story"
-        : view === "leadershipGames"
-          ? "menu"
-        : view === "dualReview"
-          ? "menu"
-        : view === "customScenarios" || view === "customScenarioPlay"
-          ? "menu"
-        : view === "teamAcademy"
-          ? "menu"
-        : view === "duel"
-          ? "duel"
-          : view === "training" || view === "trial" || view === "trialBattle"
-            ? "training"
-            : view === "ending"
-              ? "victory"
-              : "menu";
-    this.audio.setAmbientScene(scene);
-    if (view === "ending") {
-      if (!this.themeMusicPlaying) {
-        this.themeMusic.play();
-        this.themeMusicPlaying = true;
-      }
-    } else if (this.themeMusicPlaying) {
-      this.themeMusic.stop();
-      this.themeMusicPlaying = false;
-    }
     this.render();
   }
 
@@ -799,6 +784,18 @@ export class AdaptiveGameApp {
       case "lorebook":
         this.renderLorebook();
         break;
+      case "historyMirrors":
+        this.renderHistoryMirrors();
+        break;
+      case "aiScenario":
+        this.renderAiScenario();
+        break;
+      case "coachDashboard":
+        this.renderCoachDashboard();
+        break;
+      case "groupHall":
+        this.renderGroupHall();
+        break;
       case "trial":
         this.renderTrial();
         break;
@@ -820,7 +817,6 @@ export class AdaptiveGameApp {
     const showBackupHint =
       localStorage.getItem(`${SAVE_BACKUP_HINT_KEY}-${APP_VERSION}`) !== "1";
     this.root.innerHTML = menuView(this.save, this.language, {
-      muted: this.muted,
       latestDecision: this.latestDecisionText(),
       dueReviewBanner: this.dueReviewBanner(),
       guideSteps: this.guideSteps(),
@@ -842,7 +838,8 @@ export class AdaptiveGameApp {
     this.root.innerHTML = profileView(
       this.save,
       this.language,
-      this.pendingRole
+      this.pendingRole,
+      this.pendingPerspective
     );
   }
 
@@ -853,8 +850,7 @@ export class AdaptiveGameApp {
     }
     this.root.innerHTML = assessmentView(this.pendingProfile, this.language, {
       assessmentStep: this.assessmentStep,
-      selected: this.assessmentAnswers[this.assessmentStep],
-      muted: this.muted
+      selected: this.assessmentAnswers[this.assessmentStep]
     });
     const assessmentArt =
       this.root.querySelector<HTMLCanvasElement>("#assessment-art");
@@ -873,8 +869,7 @@ export class AdaptiveGameApp {
   private renderAssessmentResult(): void {
     this.root.innerHTML = assessmentResultView(
       this.save,
-      this.language,
-      this.muted
+      this.language
     );
     const radar =
       this.root.querySelector<HTMLCanvasElement>("#assessment-result-radar");
@@ -915,6 +910,53 @@ export class AdaptiveGameApp {
 
   private renderLorebook(): void {
     this.root.innerHTML = lorebookView(this.save, this.language);
+  }
+
+  private renderHistoryMirrors(): void {
+    this.root.innerHTML = historyMirrorView(this.language);
+  }
+
+  private renderAiScenario(): void {
+    this.root.innerHTML = aiScenarioView(this.save, this.language, {
+      selectedAbility: this.aiAbilityId,
+      difficulty: this.aiDifficulty
+    });
+  }
+
+  private renderCoachDashboard(): void {
+    const students = this.coachStudents.length
+      ? this.coachStudents
+      : [coachStudentSummary(this.save)];
+    const selected =
+      students[this.coachSelectedIndex] ?? students[0];
+    this.root.innerHTML = coachDashboardView(this.language, {
+      students,
+      selectedIndex: this.coachSelectedIndex,
+      local: coachStudentSummary(this.save),
+      loading: this.coachLoading,
+      error: this.coachError
+    });
+    const radar = this.root.querySelector<HTMLCanvasElement>("#coach-radar");
+    if (radar && selected) renderAbilityRadar(radar, selected.abilities);
+    const curve = this.root.querySelector<HTMLCanvasElement>("#coach-curve");
+    if (curve && selected) renderXpCurve(curve, selected.history);
+  }
+
+  private renderGroupHall(): void {
+    this.root.innerHTML = groupHallView(this.language, {
+      connected: this.groupConnected,
+      roomId: this.groupRoomId,
+      players: this.groupPlayers,
+      capacity: this.groupCapacity,
+      round: this.groupRound,
+      rounds: this.groupRounds,
+      node: this.groupNode,
+      picked: this.groupPicked,
+      distribution: this.groupDistribution,
+      revealPlayers: this.groupRevealPlayers,
+      ended: this.groupEnded,
+      error: this.groupError
+    });
   }
 
   private nextStepPill(): {
@@ -1070,6 +1112,10 @@ export class AdaptiveGameApp {
       return;
     }
     const node = getNodeForRole(this.save.profile.role, this.storyNodeId);
+    if (this.lastStoryRenderedNodeId !== node.id) {
+      this.lastStoryRenderedNodeId = node.id;
+      this.storyDecisionStartedAt = Date.now();
+    }
     let scenarioSeed = this.save.scenarioSeed;
     if (scenarioSeed === undefined) {
       scenarioSeed = Math.floor(Math.random() * 1_000_000) + 1;
@@ -1168,7 +1214,6 @@ export class AdaptiveGameApp {
           : "产能升级：全部资源 +10。";
     }
     this.persistSave();
-    this.audio.playCoins();
     this.showToast(message);
     this.renderMap();
   }
@@ -1186,12 +1231,6 @@ export class AdaptiveGameApp {
           achievements,
           branch
         ),
-      onAudio: (kind) => {
-        if (kind === "ui") this.audio.ui();
-        else if (kind === "win") this.audio.win();
-        else if (kind === "lose") this.audio.lose();
-        else this.audio.choose();
-      },
       getProgress: (gameId) => ({
         maxLevel: Math.min(
           3,
@@ -1200,7 +1239,6 @@ export class AdaptiveGameApp {
         achievements: this.save.leadershipAchievements?.[gameId] ?? []
       })
     });
-    this.audio.ui();
     this.show("leadershipGames");
   }
 
@@ -1269,15 +1307,9 @@ export class AdaptiveGameApp {
       this.language,
       {
         onBack: () => this.show("menu"),
-        onAudio: (kind) => {
-          if (kind === "correct") this.audio.expert();
-          else if (kind === "wrong") this.audio.risk();
-          else this.audio.ui();
-        },
         onProgress: (payload) => this.applyAcademyProgress(payload)
       }
     );
-    this.audio.ui();
     this.show("teamAcademy");
   }
 
@@ -1416,7 +1448,6 @@ export class AdaptiveGameApp {
     this.root.innerHTML = chapterTransitionView(
       this.save,
       this.language,
-      this.muted,
       this.pendingChapterTransition,
       this.pendingForkNodeId
     );
@@ -1432,7 +1463,6 @@ export class AdaptiveGameApp {
 
   private renderReport(): void {
     this.root.innerHTML = reportView(this.save, this.language, {
-      muted: this.muted,
       accountName: this.cloudAccountName,
       token: this.cloudToken,
       recoveryCode: this.cloudRecoveryCode,
@@ -1508,7 +1538,6 @@ export class AdaptiveGameApp {
         ? "Leadership Training Demo Group"
         : "领导力训练演示小组"
     );
-    this.audio.expert();
     this.renderCoach();
   }
 
@@ -1541,7 +1570,6 @@ export class AdaptiveGameApp {
       this.coachReport = this.coachEngine.generateReport(
         this.language === "en" ? "Imported Group" : "导入小组"
       );
-      this.audio.expert();
       this.renderCoach();
       this.showToast(
         this.language === "en"
@@ -1549,7 +1577,6 @@ export class AdaptiveGameApp {
           : `已导入 ${parsed.length} 名学员。`
       );
     } catch {
-      this.audio.risk();
       this.showToast(
         this.language === "en"
           ? "Invalid JSON. Expected [{ name, data }] with exported saves."
@@ -1920,10 +1947,6 @@ export class AdaptiveGameApp {
 
   private renderSettings(): void {
     this.root.innerHTML = settingsView(this.save, this.language, {
-      muted: this.muted,
-      musicMuted: this.musicMuted,
-      musicVolume: this.musicVolume,
-      sfxVolume: this.sfxVolume,
       version: APP_VERSION
     });
   }
@@ -1987,6 +2010,135 @@ export class AdaptiveGameApp {
           : "服务端不可达 · 自动匹配不可用";
     }
     this.renderDuelLobby();
+  }
+
+  private async generateAiScenarioNow(): Promise<void> {
+    const abilityId = this.aiAbilityId;
+    const difficulty = this.aiDifficulty;
+    const chapterId = this.save.unlockedChapters.at(-1) ?? 1;
+    const seed = (Date.now() % 100000) + this.save.playCount;
+    const serverUrl =
+      (import.meta.env.VITE_ROOM_SERVER_URL as string | undefined) ?? "";
+    let node: StoryNode | null = null;
+    if (ONLINE_ENABLED && serverUrl) {
+      try {
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), 10000);
+        const response = await fetch(
+          `${serverUrl.replace(/\/+$/, "")}/api/ai-scenario`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              role: this.save.profile.role,
+              abilities: this.save.profile.abilities,
+              abilityId,
+              difficulty,
+              chapterId,
+              seed,
+              language: this.language === "en" ? "en" : "zh"
+            }),
+            signal: controller.signal
+          }
+        );
+        window.clearTimeout(timer);
+        if (response.ok) {
+          const data = (await response.json()) as { node?: unknown };
+          if (data?.node && validateAiScenario(data.node).length === 0) {
+            node = data.node as StoryNode;
+          }
+        }
+      } catch {
+        // Server unavailable: fall back to the validated local template.
+      }
+    }
+    if (!node) {
+      node = generateAiScenario({
+        role: this.save.profile.role,
+        abilities: this.save.profile.abilities,
+        abilityId,
+        difficulty,
+        chapterId,
+        seed,
+        language: this.language === "en" ? "en" : "zh"
+      });
+    }
+    registerDynamicNode(node);
+    this.replayMode = false;
+    this.storyNodeId = node.id;
+    this.storyHintRevealed = false;
+    this.pendingBranchNodeId = undefined;
+    this.pendingChapterTransition = undefined;
+    this.lastUnlockedAchievement = undefined;
+    this.lastOutcome = undefined;
+    this.lastOutcomeNodeId = undefined;
+    this.interferenceText = undefined;
+    this.show("story");
+    this.startRoundTimer();
+  }
+
+  private async refreshCoachDashboard(): Promise<void> {
+    const serverUrl =
+      (import.meta.env.VITE_ROOM_SERVER_URL as string | undefined) ?? "";
+    this.coachLoading = true;
+    this.coachError = undefined;
+    this.coachStudents = [];
+    this.coachSelectedIndex = 0;
+    if (ONLINE_ENABLED && serverUrl) {
+      try {
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), 8000);
+        const response = await fetch(
+          `${serverUrl.replace(/\/+$/, "")}/api/coach/students`,
+          { signal: controller.signal }
+        );
+        window.clearTimeout(timer);
+        if (response.ok) {
+          const data = (await response.json()) as {
+            students?: Array<{ save?: unknown }>;
+          };
+          this.coachStudents = (data.students ?? [])
+            .map((student) =>
+              student.save
+                ? coachStudentSummary(student.save as Parameters<typeof coachStudentSummary>[0])
+                : null
+            )
+            .filter(
+              (summary): summary is CoachStudentSummary => summary !== null
+            );
+        }
+      } catch {
+        this.coachError =
+          this.language === "en"
+            ? "Coach server unreachable. Showing local profile only."
+            : "教练服务不可达，仅展示本机档案。";
+      }
+    } else {
+      this.coachError =
+        this.language === "en"
+          ? "Online server is disabled in this build. Showing local profile only."
+          : "当前构建未启用在线服务，仅展示本机档案。";
+    }
+    if (!this.coachStudents.length) {
+      this.coachStudents = [coachStudentSummary(this.save)];
+    }
+    this.coachLoading = false;
+    if (this.view === "coachDashboard") this.renderCoachDashboard();
+  }
+
+  private async connectGroupHall(): Promise<void> {
+    try {
+      await this.ensureCloudClient();
+      this.groupConnected = true;
+      this.groupError = undefined;
+    } catch {
+      this.groupConnected = false;
+      this.groupError =
+        this.language === "en"
+          ? "Group service unreachable. Start the server or enable online mode."
+          : "群策服务不可达，请先启动服务端或启用在线模式。";
+    }
+    if (this.view === "groupHall") this.renderGroupHall();
   }
 
   private buildDuelPredictionIntel(): DuelPredictionIntel | undefined {
@@ -2094,16 +2246,13 @@ export class AdaptiveGameApp {
       if (!this.duelRecorded) {
         this.duelRecorded = true;
         if (this.duelMode === "local") {
-          this.audio.round();
         } else {
           const humanWon =
             (this.duelMode === "ai" && engine.winnerIndex === 0) ||
             (this.duelMode === "remote" &&
               engine.winnerIndex === this.remotePlayerIndex);
           if (humanWon) {
-            this.audio.win();
           } else {
-            this.audio.lose();
           }
           const delta = Math.abs(engine.scores[0] - engine.scores[1]);
           const playerIndex =
@@ -2193,9 +2342,6 @@ export class AdaptiveGameApp {
     if (!action) {
       return;
     }
-    this.audio.unlock();
-    this.audio.ensure();
-    this.audio.startAmbientIfIdle();
 
     if (this.view === "leadershipGames" && action.startsWith("lg-")) {
       this.leadershipGames?.handleAction(action, actionTarget);
@@ -2216,7 +2362,6 @@ export class AdaptiveGameApp {
     }
 
     if (action === "go-back") {
-      this.audio.ui();
       const target =
         this.previousView && this.previousView !== this.view
           ? this.previousView
@@ -2229,14 +2374,133 @@ export class AdaptiveGameApp {
     if (action === "go-next") {
       const next = this.nextStepPill();
       if (next) {
-        this.audio.ui();
         this.show(next.action);
       }
       return;
     }
     if (action === "open-lorebook") {
-      this.audio.ui();
       this.show("lorebook");
+      return;
+    }
+    if (action === "open-history-mirrors") {
+      this.show("historyMirrors");
+      return;
+    }
+    if (action === "open-ai-scenario") {
+      this.aiAbilityId =
+        weakestAbilities(this.save.profile.abilities, 1)[0] ?? "communication";
+      this.aiDifficulty = "medium";
+      this.show("aiScenario");
+      return;
+    }
+    if (action === "ai-scenario-ability") {
+      const abilityId = actionTarget.dataset.ability as AbilityId | undefined;
+      if (abilityId && ABILITIES[abilityId]) {
+        this.aiAbilityId = abilityId;
+        this.renderAiScenario();
+      }
+      return;
+    }
+    if (action === "ai-scenario-difficulty") {
+      const difficulty = actionTarget.dataset.difficulty as
+        | AiDifficulty
+        | undefined;
+      if (
+        difficulty === "easy" ||
+        difficulty === "medium" ||
+        difficulty === "hard"
+      ) {
+        this.aiDifficulty = difficulty;
+        this.renderAiScenario();
+      }
+      return;
+    }
+    if (action === "ai-scenario-auto") {
+      const auto = recommendAiScenario(this.save);
+      this.aiAbilityId = auto.abilityId;
+      this.aiDifficulty = auto.difficulty;
+      this.renderAiScenario();
+      this.showToast(auto.reason);
+      return;
+    }
+    if (action === "ai-scenario-generate") {
+      void this.generateAiScenarioNow();
+      return;
+    }
+    if (action === "open-coach-dashboard") {
+      this.coachLoading = true;
+      this.coachError = undefined;
+      this.show("coachDashboard");
+      void this.refreshCoachDashboard();
+      return;
+    }
+    if (action === "coach-dashboard-refresh") {
+      void this.refreshCoachDashboard();
+      return;
+    }
+    if (action === "coach-dashboard-select") {
+      const index = Number(actionTarget.dataset.index);
+      if (Number.isInteger(index) && index >= 0) {
+        this.coachSelectedIndex = index;
+        this.renderCoachDashboard();
+      }
+      return;
+    }
+    if (action === "open-group-hall") {
+      this.groupError = undefined;
+      this.show("groupHall");
+      void this.connectGroupHall();
+      return;
+    }
+    if (action === "group-capacity") {
+      const capacity = Number(actionTarget.dataset.capacity);
+      if ([2, 4, 6, 8].includes(capacity)) {
+        this.groupCapacity = capacity;
+        this.renderGroupHall();
+      }
+      return;
+    }
+    if (action === "group-create") {
+      const nameInput = this.root.querySelector<HTMLInputElement>(
+        "input[name='group-name']"
+      );
+      const name =
+        nameInput?.value.trim() ||
+        this.save.profile.name ||
+        (this.language === "en" ? "Player" : "玩家");
+      this.roomClient?.createGroupRoom(name, this.groupCapacity);
+      return;
+    }
+    if (action === "group-join") {
+      const roomInput = this.root.querySelector<HTMLInputElement>(
+        "input[name='group-room-id']"
+      );
+      const nameInput = this.root.querySelector<HTMLInputElement>(
+        "input[name='group-name']"
+      );
+      const roomId = roomInput?.value.trim().toUpperCase() ?? "";
+      if (!roomId) {
+        this.groupError =
+          this.language === "en"
+            ? "Enter the 4-digit room code first."
+            : "请先输入 4 位房间号。";
+        this.renderGroupHall();
+        return;
+      }
+      const name =
+        nameInput?.value.trim() ||
+        this.save.profile.name ||
+        (this.language === "en" ? "Player" : "玩家");
+      this.roomClient?.joinGroupRoom(roomId, name);
+      return;
+    }
+    if (action === "group-pick") {
+      const optionIndex = Number(actionTarget.dataset.option);
+      if ([0, 1, 2].includes(optionIndex)) {
+        this.groupPicked = optionIndex;
+        this.roomClient?.groupPick(optionIndex);
+        this.renderGroupHall();
+      }
       return;
     }
 
@@ -2266,7 +2530,6 @@ export class AdaptiveGameApp {
       case "open-training": {
         const abilityId = actionTarget.dataset.ability as AbilityId | undefined;
         if (abilityId && EXPANDED_TRAINING[abilityId]) {
-          this.audio.ui();
           this.trainingReturnView =
             this.view === "report" || this.view === "assessmentResult"
               ? this.view
@@ -2301,7 +2564,6 @@ export class AdaptiveGameApp {
         return true;
       }
       case "training-back":
-        this.audio.ui();
         this.show(
           this.trainingReturnView === "training"
             ? "ability"
@@ -2309,7 +2571,6 @@ export class AdaptiveGameApp {
         );
         return true;
       case "training-start-quiz":
-        this.audio.trainingStart();
         this.trainingStage = "quiz";
         this.trainingStep = 0;
         this.trainingAnswers = Array(
@@ -2323,9 +2584,7 @@ export class AdaptiveGameApp {
           actionTarget.dataset.option
         );
         if (Number(actionTarget.dataset.option) === trainingQuestion.answer) {
-          this.audio.trainingCorrect();
         } else {
-          this.audio.ui();
         }
         this.renderTraining();
         return true;
@@ -2335,12 +2594,10 @@ export class AdaptiveGameApp {
           EXPANDED_TRAINING[this.trainingAbilityId].questions.length - 1,
           this.trainingStep + 1
         );
-        this.audio.ui();
         this.renderTraining();
         return true;
       case "training-prev":
         this.trainingStep = Math.max(0, this.trainingStep - 1);
-        this.audio.ui();
         this.renderTraining();
         return true;
       case "training-submit": {
@@ -2361,11 +2618,8 @@ export class AdaptiveGameApp {
         this.trainingResult = { ...result, answered: scored.answered };
         this.trainingStage = "result";
         if (result.correct === scored.total) {
-          this.audio.trainingMastery();
         } else if (result.correct >= 1) {
-          this.audio.trainingCorrect();
         } else {
-          this.audio.risk();
         }
         this.renderTraining();
         return true;
@@ -2377,7 +2631,6 @@ export class AdaptiveGameApp {
           EXPANDED_TRAINING[this.trainingAbilityId].questions.length
         ).fill(-1);
         this.trainingResult = undefined;
-        this.audio.ui();
         this.renderTraining();
         return true;
       default:
@@ -2397,11 +2650,18 @@ export class AdaptiveGameApp {
       case "start-without-assessment":
         this.startWithoutAssessment();
         return true;
+      case "set-perspective": {
+        const perspective = actionTarget.dataset.perspective;
+        if (perspective === "male" || perspective === "female") {
+          this.pendingPerspective = perspective;
+          this.renderProfile();
+        }
+        return true;
+      }
       case "assessment-option":
         this.assessmentAnswers[this.assessmentStep] = Number(
           actionTarget.dataset.option
         );
-        this.audio.ui();
         this.renderAssessment();
         return true;
       case "assessment-next":
@@ -2410,12 +2670,10 @@ export class AdaptiveGameApp {
           ASSESSMENT_QUESTIONS.length - 1,
           this.assessmentStep + 1
         );
-        this.audio.ui();
         this.renderAssessment();
         return true;
       case "assessment-prev":
         this.assessmentStep = Math.max(0, this.assessmentStep - 1);
-        this.audio.ui();
         this.renderAssessment();
         return true;
       case "assessment-submit":
@@ -2426,7 +2684,6 @@ export class AdaptiveGameApp {
         this.finishProfile(false);
         return true;
       case "start-campaign":
-        this.audio.ui();
         this.show("map");
         return true;
       default:
@@ -2438,7 +2695,6 @@ export class AdaptiveGameApp {
   private handleDuelClick(action: string, actionTarget: HTMLElement): boolean {
     switch (action) {
       case "open-duel":
-        this.audio.ui();
         const requestedDuelMode = actionTarget.dataset.duelMode as
           | DuelMode
           | undefined;
@@ -2452,7 +2708,6 @@ export class AdaptiveGameApp {
         this.show("duelLobby");
         return true;
       case "open-duel-lobby":
-        this.audio.ui();
         this.cleanupRemote();
         this.show("duelLobby");
         return true;
@@ -2527,7 +2782,6 @@ export class AdaptiveGameApp {
               optionIndex: ownOption
             });
           }
-          this.audio.duelPick();
           this.renderDuel();
           return true;
         }
@@ -2538,7 +2792,6 @@ export class AdaptiveGameApp {
           : 0;
         this.duelPredictionHistory.push(bonus > 0);
         this.duelPredictionBonusTotal += bonus;
-        this.audio.duelPick();
         this.maybeRevealDuelRound();
         return true;
       }
@@ -2558,7 +2811,6 @@ export class AdaptiveGameApp {
   ): boolean {
     switch (action) {
       case "open-trial":
-        this.audio.ui();
         this.activeTrialId = undefined;
         this.trialAnswerResult = undefined;
         this.lastTrialAnswer = undefined;
@@ -2586,7 +2838,6 @@ export class AdaptiveGameApp {
         const stageId = actionTarget.dataset.stage ?? "";
         const stage = TRIAL_STAGES.find((item) => item.id === stageId);
         if (stage && canEnterTrial(this.save, stage)) {
-          this.audio.trainingStart();
           this.activeTrialId = stage.id;
           this.trialAnswerResult = undefined;
           this.lastTrialAnswer = undefined;
@@ -2620,12 +2871,10 @@ export class AdaptiveGameApp {
           100,
           this.trialFactionSuspicion + 5
         );
-        this.audio.ui();
         this.renderTrialBattle();
         return true;
       case "trial-ally":
         this.trialAllyChoice = actionTarget.dataset.ally;
-        this.audio.ui();
         this.renderTrialBattle();
         return true;
       case "trial-suspect":
@@ -2655,7 +2904,6 @@ export class AdaptiveGameApp {
             );
           }
         }
-        this.audio.ui();
         this.renderTrialBattle();
         return true;
       case "trial-intel":
@@ -2677,7 +2925,6 @@ export class AdaptiveGameApp {
             );
           }
         }
-        this.audio.ui();
         this.renderTrialBattle();
         return true;
       case "trial-betrayal":
@@ -2699,7 +2946,6 @@ export class AdaptiveGameApp {
             );
           }
         }
-        this.audio.ui();
         this.renderTrialBattle();
         return true;
       case "trial-submit-summary": {
@@ -2725,7 +2971,6 @@ export class AdaptiveGameApp {
           }
         }
         if (!submitTrialSummary(this.save, activeStage.id, summary)) {
-          this.audio.risk();
           return true;
         }
         const keywordMap: Record<string, string[]> = {
@@ -2796,9 +3041,7 @@ export class AdaptiveGameApp {
           activeStage.dimension
         );
         if (correct) {
-          this.audio.trainingMastery();
         } else {
-          this.audio.risk();
         }
         this.renderTrialBattle();
         return true;
@@ -2889,15 +3132,12 @@ export class AdaptiveGameApp {
           activeStage.dimension
         );
         if (correct) {
-          this.audio.trainingMastery();
         } else {
-          this.audio.risk();
         }
         this.renderTrialBattle();
         return true;
       }
       case "trial-next":
-        this.audio.ui();
         this.activeTrialId = undefined;
         this.trialAnswerResult = undefined;
         this.lastTrialAnswer = undefined;
@@ -2925,7 +3165,6 @@ export class AdaptiveGameApp {
         const task = PRACTICE_TASKS.find((item) => item.id === taskId);
         if (task && !this.save.completedPracticeTasks.includes(task.id)) {
           this.activePracticeTaskId = task.id;
-          this.audio.trainingCorrect();
           this.renderTrial();
         }
         return true;
@@ -2959,7 +3198,6 @@ export class AdaptiveGameApp {
           )
         ) {
           this.activePracticeTaskId = undefined;
-          this.audio.trainingMastery();
           this.renderTrial();
           this.showToast(
             this.language === "en"
@@ -2967,7 +3205,6 @@ export class AdaptiveGameApp {
               : `修炼得分 ${practiceScore}/100 · 命中关键词：${matchedKeywords.join("、") || "无"} · 奖励：+${task.rewardEnergy} 精力、+${task.rewardExp} 修炼点`
           );
         } else {
-          this.audio.risk();
           this.showToast(
             this.language === "en"
               ? `Score ${practiceScore}/100 · Missing: ${missingKeywords.join(", ") || "none"} · Add concrete output that covers: ${missingKeywords.join(", ") || "the keywords"}`
@@ -2978,31 +3215,26 @@ export class AdaptiveGameApp {
       }
       case "trial-rest":
         if (applyDailyTrialRecovery(this.save)) {
-          this.audio.trainingCorrect();
           this.renderTrial();
         }
         return true;
       case "trial-buy-energy":
         if (buyTrialEnergy(this.save)) {
-          this.audio.trainingCorrect();
           this.renderTrial();
         }
         return true;
       case "trial-buy-energy-influence":
         if (buyTrialEnergyWithInfluence(this.save)) {
-          this.audio.trainingCorrect();
           this.renderTrial();
         }
         return true;
       case "trial-invest-accelerator":
         if (investTrialAccelerator(this.save)) {
-          this.audio.trainingCorrect();
           this.renderTrial();
         }
         return true;
       case "trial-hire-ally":
         if (hireTrialAlly(this.save)) {
-          this.audio.trainingCorrect();
           this.renderTrial();
         }
         return true;
@@ -3016,40 +3248,6 @@ export class AdaptiveGameApp {
     actionTarget: HTMLElement
   ): boolean {
     switch (action) {
-      case "toggle-sound":
-        this.muted = !this.muted;
-        localStorage.setItem("adaptive-ascent-muted", this.muted ? "1" : "0");
-        this.audio.setMuted(this.muted);
-        this.showToast(
-          this.language === "en"
-            ? this.muted
-              ? "Sound muted."
-              : "Sound on."
-            : this.muted
-              ? "声音已关闭。"
-              : "声音已开启。"
-        );
-        this.render();
-        return true;
-      case "preview-sfx":
-        this.audio.ensure();
-        this.audio.expert();
-        return true;
-      case "toggle-music":
-        this.musicMuted = !this.musicMuted;
-        localStorage.setItem("adaptive-ascent-music", this.musicMuted ? "1" : "0");
-        this.audio.setMusicMuted(this.musicMuted);
-        this.showToast(
-          this.language === "en"
-            ? this.musicMuted
-              ? "Music muted."
-              : "Music on."
-            : this.musicMuted
-              ? "音乐已关闭。"
-              : "音乐已开启。"
-        );
-        this.render();
-        return true;
       case "settings-font-size":
         this.fontScale = Number(actionTarget.dataset.size) || 1;
         localStorage.setItem(
@@ -3064,7 +3262,6 @@ export class AdaptiveGameApp {
         this.language = this.language === "zh" ? "en" : "zh";
         localStorage.setItem("adaptive-ascent-lang", this.language);
         document.documentElement.lang = this.language;
-        this.audio.ui();
         this.showToast(
           this.language === "en"
             ? "Language switched to English."
@@ -3116,7 +3313,6 @@ export class AdaptiveGameApp {
           `${SAVE_BACKUP_HINT_KEY}-${APP_VERSION}`,
           "1"
         );
-        this.audio.ui();
         this.showToast(
           this.language === "en"
             ? "Backup reminder dismissed for this version."
@@ -3127,13 +3323,11 @@ export class AdaptiveGameApp {
       case "rotate-events":
         if (rotateRandomEventPool(this.save)) {
           trackEvent("random_events_rotated");
-          this.audio.expert();
           this.renderMap();
         }
         return true;
       case "toggle-map-detail":
         this.mapDetailOpen = !this.mapDetailOpen;
-        this.audio.ui();
         this.renderMap();
         return true;
       case "cloud-sync":
@@ -3214,7 +3408,6 @@ export class AdaptiveGameApp {
             this.cloudConflict = false;
             this.cloudStatus =
               this.language === "en" ? "Cloud save applied" : "已使用云端存档";
-            this.audio.expert();
             this.show("report");
           } catch {
             this.cloudStatus =
@@ -3285,7 +3478,6 @@ export class AdaptiveGameApp {
             ? "Feedback copied. Paste it into the coach's collection form."
             : "反馈已复制，可粘贴给教练或回传表单。"
         );
-        this.audio.ui();
         return true;
       }
       case "export-report-card": {
@@ -3344,7 +3536,6 @@ export class AdaptiveGameApp {
             anchor.click();
           }
         }
-        this.audio.ui();
         return true;
       }
       default:
@@ -3389,7 +3580,6 @@ export class AdaptiveGameApp {
         this.liveName = "";
         this.liveRevealed = false;
         this.liveDistribution = undefined;
-        this.audio.ui();
         this.renderCoach();
         return true;
       }
@@ -3398,7 +3588,6 @@ export class AdaptiveGameApp {
           this.root.querySelector<HTMLInputElement>('input[name="live-name"]')
             ?.value.trim() ?? "";
         this.livePendingOption = Number(actionTarget.dataset.option) || 0;
-        this.audio.ui();
         this.renderCoach();
         return true;
       case "live-add": {
@@ -3417,7 +3606,6 @@ export class AdaptiveGameApp {
           this.livePendingOption
         );
         this.liveName = "";
-        this.audio.ui();
         this.renderCoach();
         return true;
       }
@@ -3427,7 +3615,6 @@ export class AdaptiveGameApp {
           this.liveSessionId
         ).distribution;
         this.liveRevealed = true;
-        this.audio.expert();
         this.renderCoach();
         return true;
       }
@@ -3438,7 +3625,6 @@ export class AdaptiveGameApp {
         this.liveDistribution = undefined;
         this.livePendingOption = 0;
         this.liveName = "";
-        this.audio.ui();
         this.renderCoach();
         return true;
       default:
@@ -3454,7 +3640,6 @@ export class AdaptiveGameApp {
       case "open-custom-scenarios":
         this.customPlayId = undefined;
         this.customPlayResult = undefined;
-        this.audio.ui();
         this.show("customScenarios");
         return true;
       case "custom-submit": {
@@ -3475,7 +3660,6 @@ export class AdaptiveGameApp {
         const errors = validateCustomScenario({ title, context, stake, options });
         if (errors.length > 0) {
           this.showToast(errors[0]);
-          this.audio.risk();
           return true;
         }
         this.customScenarios = [
@@ -3483,7 +3667,6 @@ export class AdaptiveGameApp {
           createCustomScenario({ title, context, stake, options })
         ];
         saveCustomScenarios(this.customScenarios);
-        this.audio.expert();
         this.renderCustomScenarios();
         return true;
       }
@@ -3496,7 +3679,6 @@ export class AdaptiveGameApp {
         anchor.download = "ascend-custom-scenarios.json";
         anchor.click();
         URL.revokeObjectURL(url);
-        this.audio.ui();
         return true;
       }
       case "custom-delete": {
@@ -3505,7 +3687,6 @@ export class AdaptiveGameApp {
           (scenario) => scenario.id !== id
         );
         saveCustomScenarios(this.customScenarios);
-        this.audio.ui();
         this.renderCustomScenarios();
         return true;
       }
@@ -3514,7 +3695,6 @@ export class AdaptiveGameApp {
         if (this.customScenarios.some((scenario) => scenario.id === id)) {
           this.customPlayId = id;
           this.customPlayResult = undefined;
-          this.audio.ui();
           this.show("customScenarioPlay");
         }
         return true;
@@ -3525,17 +3705,12 @@ export class AdaptiveGameApp {
         const scenario = this.customScenarios.find(
           (item) => item.id === this.customPlayId
         );
-        const quality = scenario?.options[index]?.quality;
-        if (quality === "expert") this.audio.expert();
-        else if (quality === "partial") this.audio.partial();
-        else this.audio.risk();
         this.renderCustomScenarioPlay();
         return true;
       }
       case "custom-back":
         this.customPlayId = undefined;
         this.customPlayResult = undefined;
-        this.audio.ui();
         this.show("customScenarios");
         return true;
       default:
@@ -3549,26 +3724,21 @@ export class AdaptiveGameApp {
   ): boolean {
     switch (action) {
       case "open-achievements":
-        this.audio.ui();
         this.show("achievements");
         return true;
       case "open-relations":
-        this.audio.ui();
         this.show("relations");
         return true;
       case "open-settings":
-        this.audio.ui();
         this.show("settings");
         return true;
       case "open-assessment":
         this.pendingProfile = structuredClone(this.save.profile);
         this.assessmentAnswers = [];
         this.assessmentStep = 0;
-        this.audio.ui();
         this.show("assessment");
         return true;
       case "open-coach":
-        this.audio.ui();
         this.show("coach");
         return true;
       case "coach-plan-goal":
@@ -3645,7 +3815,6 @@ export class AdaptiveGameApp {
         this.replayMode = true;
         this.lastOutcome = undefined;
         this.lastOutcomeNodeId = undefined;
-        this.audio.ui();
         this.show("story");
         return true;
       }
@@ -3655,24 +3824,20 @@ export class AdaptiveGameApp {
           this.wrongReviewQueue = [];
           this.wrongReviewIndex = 0;
           this.replayMode = false;
-          this.audio.ui();
           this.show("report");
           return true;
         }
         this.storyNodeId = this.wrongReviewQueue[this.wrongReviewIndex];
         this.lastOutcome = undefined;
         this.lastOutcomeNodeId = undefined;
-        this.audio.ui();
         this.show("story");
         return true;
       case "open-ending":
         if (isChapterPassed(this.save, 9)) {
-          this.audio.ui();
           this.show("ending");
         }
         return true;
       case "ending-back":
-        this.audio.ui();
         this.show("report");
         return true;
       case "ending-share": {
@@ -3687,7 +3852,6 @@ export class AdaptiveGameApp {
           textarea.value = text;
           void navigator.clipboard?.writeText(text);
         }
-        this.audio.ui();
         return true;
       }
       case "ending-card": {
@@ -3736,7 +3900,6 @@ export class AdaptiveGameApp {
             anchor.click();
           }
         }
-        this.audio.ui();
         return true;
       }
       case "ending-choice": {
@@ -3744,7 +3907,6 @@ export class AdaptiveGameApp {
         if (ending) {
           this.endingChoice = ending;
           recordAlternateEnding(this.save, `ending-${ending}`);
-          this.audio.expert();
           this.renderEnding();
         }
         return true;
@@ -3766,7 +3928,6 @@ export class AdaptiveGameApp {
             recordHiddenRoute(this.save, `hidden-${abilityId}`);
           }
         }
-        this.audio.ui();
         this.renderHiddenBranch();
         return true;
       }
@@ -3781,12 +3942,10 @@ export class AdaptiveGameApp {
           );
         }
         this.hiddenRouteLastCorrect = undefined;
-        this.audio.ui();
         this.renderHiddenBranch();
         return true;
       }
       case "continue-hidden-exit":
-        this.audio.ui();
         if (this.lastOutcome && this.lastOutcomeNodeId) {
           this.storyNodeId = this.lastOutcomeNodeId;
           this.show("story");
@@ -3826,7 +3985,6 @@ export class AdaptiveGameApp {
         this.replayMode = true;
         this.lastOutcome = undefined;
         this.lastOutcomeNodeId = undefined;
-        this.audio.ui();
         this.show("story");
         return true;
       }
@@ -3849,7 +4007,6 @@ export class AdaptiveGameApp {
         this.dualReviewQueue = dueIds;
         this.dualReviewIndex = 0;
         this.resetDualSelection();
-        this.audio.ui();
         this.show("dualReview");
         return true;
       }
@@ -3863,7 +4020,6 @@ export class AdaptiveGameApp {
           this.dualWorstIndex = option;
           if (this.dualBestIndex === option) this.dualBestIndex = undefined;
         }
-        this.audio.ui();
         this.renderDualReview();
         return true;
       }
@@ -3904,9 +4060,6 @@ export class AdaptiveGameApp {
           dualAxisQuality(outcome)
         );
         this.persistSave();
-        if (outcome === "perfect") this.audio.expert();
-        else if (outcome === "partial") this.audio.partial();
-        else this.audio.risk();
         this.renderDualReview();
         return true;
       }
@@ -3916,19 +4069,16 @@ export class AdaptiveGameApp {
           this.dualReviewQueue = [];
           this.dualReviewIndex = 0;
           this.resetDualSelection();
-          this.audio.ui();
           this.show("report");
           return true;
         }
         this.resetDualSelection();
-        this.audio.ui();
         this.renderDualReview();
         return true;
       case "dual-close":
         this.dualReviewQueue = [];
         this.dualReviewIndex = 0;
         this.resetDualSelection();
-        this.audio.ui();
         this.show("report");
         return true;
       case "open-team-academy":
@@ -3956,7 +4106,6 @@ export class AdaptiveGameApp {
           this.save.masteryPoints += reward;
           this.persistSave();
           trackEvent("daily_claim", { challengeId });
-          this.audio.expert();
           this.renderMap();
         }
         return true;
@@ -3978,14 +4127,12 @@ export class AdaptiveGameApp {
         this.save.trialEnergy = clamp(this.save.trialEnergy + 15, 0, 100);
         this.persistSave();
         trackEvent("weekly_claim", { challengeId });
-        this.audio.expert();
         this.renderMap();
         return true;
       }
       case "toggle-pressure":
         this.save.highPressureMode = !this.save.highPressureMode;
         this.persistSave();
-        this.audio.ui();
         this.renderMap();
         return true;
       case "set-difficulty": {
@@ -3993,7 +4140,6 @@ export class AdaptiveGameApp {
         // 资源缩放由 applyStoryChoice 以 save.difficulty 为准，下个决策即生效。
         const difficulty = actionTarget.dataset.difficulty;
         if (difficulty === "normal" || difficulty === "pressure" || difficulty === "extreme") {
-          this.audio.ui();
           this.save.difficulty = difficulty;
           this.persistSave();
           this.showToast(
@@ -4025,13 +4171,11 @@ export class AdaptiveGameApp {
         } catch {
           // ignore storage failures
         }
-        this.audio.ui();
         this.renderAchievements();
         return true;
       }
       case "toggle-hint":
         this.storyHintRevealed = !this.storyHintRevealed;
-        this.audio.ui();
         this.renderStory();
         return true;
       case "energy-restore":
@@ -4042,7 +4186,6 @@ export class AdaptiveGameApp {
           );
           this.energyRestoreUsed += 1;
           this.persistSave();
-          this.audio.expert();
           this.showToast(
             this.language === "en"
               ? `Energy restored +40 (${this.energyRestoreUsed}/2 this chapter).`
@@ -4068,7 +4211,6 @@ export class AdaptiveGameApp {
         const stage = adaptive.route.stages[adaptive.currentIndex];
         if (stage && completeAdaptiveStage(this.save, stage.id, "task")) {
           this.persistSave();
-          this.audio.expert();
           this.showToast(
             this.language === "en"
               ? `90-day stage complete: ${stage.titleEn}`
@@ -4083,7 +4225,6 @@ export class AdaptiveGameApp {
         const stage = adaptive.route.stages[adaptive.currentIndex];
         if (stage && completeAdaptiveStage(this.save, stage.id, "mastery")) {
           this.persistSave();
-          this.audio.expert();
           this.showToast(
             this.language === "en"
               ? `Mastery pass: ${stage.titleEn}`
@@ -4098,7 +4239,6 @@ export class AdaptiveGameApp {
         return true;
       case "dismiss-map-guide":
         this.markGuideStep("map-intro");
-        this.audio.ui();
         this.renderMap();
         return true;
       case "expedition-explore":
@@ -4156,14 +4296,12 @@ export class AdaptiveGameApp {
       }
       case "continue-transition":
         if (this.pendingChapterTransition) {
-          this.audio.ui();
           this.show("chapterTransition");
         }
         return true;
       case "continue-transition-map": {
         const forkId = this.pendingForkNodeId;
         if (forkId) {
-          this.audio.ui();
           this.storyNodeId = forkId;
           this.storyHintRevealed = false;
           this.pendingBranchNodeId = undefined;
@@ -4183,14 +4321,12 @@ export class AdaptiveGameApp {
         if (completed && completed < CHAPTERS.length) {
           this.selectedChapter = completed + 1;
         }
-        this.audio.ui();
         this.show("map");
         return true;
       }
       case "enter-fork": {
         const forkId = this.pendingForkNodeId;
         if (forkId) {
-          this.audio.ui();
           this.storyNodeId = forkId;
           this.storyHintRevealed = false;
           this.pendingBranchNodeId = undefined;
@@ -4209,7 +4345,6 @@ export class AdaptiveGameApp {
         this.lastOutcome = undefined;
         this.lastOutcomeNodeId = undefined;
         this.lastUnlockedAchievement = undefined;
-        this.audio.ui();
         if (this.pendingChapterTransition) {
           this.renderChapterTransition();
         } else {
@@ -4228,7 +4363,6 @@ export class AdaptiveGameApp {
               this.save.hiddenRouteProgress[this.hiddenBranchAbilityId] ?? 0;
             this.hiddenRouteLastCorrect = undefined;
             this.pendingBranchNodeId = undefined;
-            this.audio.ui();
             this.show("hiddenBranch");
             return true;
           }
@@ -4238,7 +4372,6 @@ export class AdaptiveGameApp {
           this.lastOutcome = undefined;
           this.lastOutcomeNodeId = undefined;
           this.interferenceText = undefined;
-          this.audio.ui();
           this.show("story");
           this.startRoundTimer();
         }
@@ -4256,10 +4389,8 @@ export class AdaptiveGameApp {
         if (nodeId) {
           // 已完成节点只用于展示，不可再次结算；重打请走 replay-chapter。
           if (isNodeComplete(this.save, nodeId)) {
-            this.audio.ui();
             return true;
           }
-          this.audio.ui();
           this.replayMode = false;
           this.storyNodeId = nodeId;
           this.storyHintRevealed = false;
@@ -4296,7 +4427,6 @@ export class AdaptiveGameApp {
             this.persistSave();
             return true;
           }
-          this.audio.ui();
           this.replayMode = false;
           this.storyNodeId = node.id;
           this.storyHintRevealed = false;
@@ -4322,14 +4452,12 @@ export class AdaptiveGameApp {
       case "select-chapter": {
         const chapterId = Number(actionTarget.dataset.chapter);
         if (this.save.unlockedChapters.includes(chapterId)) {
-          this.audio.ui();
           this.selectedChapter = chapterId;
           this.renderMap();
         }
         return true;
       }
       case "select-role":
-        this.audio.ui();
         this.pendingRole = (actionTarget.dataset.role as RoleId) ?? "highPotential";
         this.renderProfile();
         return true;
@@ -4339,7 +4467,6 @@ export class AdaptiveGameApp {
         this.save = loadSave(role);
         this.pendingRole = role;
         this.pendingProfile = undefined;
-        this.audio.ui();
         if (this.save.profileCreated) {
           this.show("menu");
         } else {
@@ -4369,16 +4496,13 @@ export class AdaptiveGameApp {
         this.save = loadSave(role);
         this.pendingRole = role;
         this.pendingProfile = undefined;
-        this.audio.ui();
         this.show("profile");
         return true;
       }
       case "open-menu":
-        this.audio.ui();
         this.show("menu");
         return true;
       case "open-profile":
-        this.audio.ui();
         this.show("profile");
         return true;
       case "start-trial-chapter":
@@ -4391,7 +4515,6 @@ export class AdaptiveGameApp {
         );
         return true;
       case "open-map":
-        this.audio.ui();
         if (this.save.profileCreated && this.save.playCount === 0) {
           this.markGuideStep("map");
         }
@@ -4405,7 +4528,6 @@ export class AdaptiveGameApp {
         const chapterId = Number(actionTarget.dataset.chapter);
         const chapter = CHAPTERS.find((item) => item.id === chapterId);
         if (chapter && isChapterComplete(this.save, chapter.id)) {
-          this.audio.ui();
           this.replayMode = true;
           this.storyNodeId = chapter.nodeIds[0];
           this.storyHintRevealed = false;
@@ -4425,7 +4547,6 @@ export class AdaptiveGameApp {
         if (chapter && isChapterComplete(this.save, chapter.id)) {
           retryChapter(this.save, chapter.id);
           trackEvent("chapter_retry", { chapterId });
-          this.audio.ui();
           this.replayMode = false;
           this.storyNodeId = chapter.nodeIds[0];
           this.storyHintRevealed = false;
@@ -4443,18 +4564,15 @@ export class AdaptiveGameApp {
         if (this.save.profileCreated && this.save.playCount === 0) {
           this.markGuideStep("ability");
         }
-        this.audio.ui();
         this.show("ability");
         return true;
       case "open-ability":
-        this.audio.ui();
         if (this.save.profileCreated && this.save.playCount === 0) {
           this.markGuideStep("ability");
         }
         this.show("ability");
         return true;
       case "open-report":
-        this.audio.ui();
         if (this.save.profileCreated && this.save.playCount === 0) {
           this.markGuideStep("report");
         }
@@ -4468,14 +4586,12 @@ export class AdaptiveGameApp {
               ? `Certification approved · ${cert.level}`
               : `认证通过 · ${cert.level}`
           );
-          this.audio.expert();
         } else {
           this.showToast(
             this.language === "en"
               ? `Not certified yet · ${cert.next}`
               : `暂未达标 · ${cert.next}`
           );
-          this.audio.partial();
         }
         return true;
       }
@@ -4485,7 +4601,6 @@ export class AdaptiveGameApp {
             ? "Certification = assessment score + role focus ability levels. Finish the 30-question assessment and train focus abilities to grow."
             : "认证点 = 测评总分 + 角色重点能力等级合计；完成 30 题测评提升总分，训练角色重点能力提升等级。"
         );
-        this.audio.ui();
         return true;
       default:
         return false;
@@ -4518,7 +4633,6 @@ export class AdaptiveGameApp {
         }
         this.customScenarios = [...this.customScenarios, ...imported];
         saveCustomScenarios(this.customScenarios);
-        this.audio.expert();
         this.renderCustomScenarios();
       };
       reader.readAsText(file);
@@ -4532,28 +4646,6 @@ export class AdaptiveGameApp {
     if (target.dataset.select === "rounds") {
       this.duelRounds = Number(target.value) || 3;
     }
-    if (target.dataset.select === "music-volume") {
-      this.musicVolume = Number(target.value) || 0;
-      localStorage.setItem(
-        "adaptive-ascent-music-volume",
-        String(this.musicVolume)
-      );
-      this.audio.setMusicVolume(this.musicVolume);
-      if (this.view === "settings") {
-        this.renderSettings();
-      }
-    }
-    if (target.dataset.select === "sfx-volume") {
-      this.sfxVolume = Number(target.value) || 0;
-      localStorage.setItem(
-        "adaptive-ascent-sfx-volume",
-        String(this.sfxVolume)
-      );
-      this.audio.setSfxVolume(this.sfxVolume);
-      if (this.view === "settings") {
-        this.renderSettings();
-      }
-    }
     if (target.dataset.importSave && target instanceof HTMLInputElement) {
       void this.importSave(target);
     }
@@ -4561,9 +4653,15 @@ export class AdaptiveGameApp {
 
   private createProfileFromForm(): void {
     const input = this.root.querySelector<HTMLInputElement>("input[name='playerName']");
+    const titleInput = this.root.querySelector<HTMLInputElement>(
+      "input[name='playerTitle']"
+    );
     const name =
       input?.value.trim() || (this.language === "en" ? "You" : "你");
-    const profile = createProfile(name, this.pendingRole);
+    const profile = createProfile(name, this.pendingRole, {
+      title: titleInput?.value.trim(),
+      perspective: this.pendingPerspective ?? this.save.profile.perspective
+    });
     this.pendingProfile = profile;
     this.assessmentAnswers = [];
     this.assessmentStep = 0;
@@ -4574,13 +4672,16 @@ export class AdaptiveGameApp {
     const input = this.root.querySelector<HTMLInputElement>(
       "input[name='playerName']"
     );
+    const titleInput = this.root.querySelector<HTMLInputElement>(
+      "input[name='playerTitle']"
+    );
     const name =
       input?.value.trim() || (this.language === "en" ? "You" : "你");
-    const profile = createProfile(name, this.pendingRole);
+    const profile = createProfile(name, this.pendingRole, {
+      title: titleInput?.value.trim(),
+      perspective: this.pendingPerspective ?? this.save.profile.perspective
+    });
     activateProfile(this.save, profile);
-    this.audio.startAmbient();
-    this.audio.setMusicMuted(this.musicMuted);
-    this.audio.setMusicVolume(this.musicVolume);
     this.selectedChapter = 1;
     this.show("map");
   }
@@ -4608,10 +4709,6 @@ export class AdaptiveGameApp {
       assessment: applyAssessment
     });
     this.pendingProfile = undefined;
-    this.audio.startAmbient();
-    this.audio.setMusicMuted(this.musicMuted);
-    this.audio.setMusicVolume(this.musicVolume);
-    this.audio.expert();
     this.selectedChapter = 1;
     this.show("assessmentResult");
   }
@@ -4661,7 +4758,6 @@ export class AdaptiveGameApp {
           : "完整勘察：能力+1、精力+2、修炼点+1。";
     }
     this.persistSave();
-    this.audio.playBrush();
     if (rewardText) this.showToast(rewardText);
     this.renderStory();
   }
@@ -4686,13 +4782,11 @@ export class AdaptiveGameApp {
       const pending = this.pendingIntegrityOption;
       this.integrityGateNodeId = undefined;
       this.pendingIntegrityOption = undefined;
-      this.audio.playStamp();
       this.showToast(
         this.language === "en" ? "Verification passed." : "验证通过。"
       );
       this.resolveStoryOption(pending);
     } else {
-      this.audio.risk();
       this.showToast(
         this.language === "en"
           ? "That is not the real trade-off of this move."
@@ -4806,7 +4900,6 @@ export class AdaptiveGameApp {
     );
     this.save.productionCount = 0;
     this.persistSave();
-    this.audio.playCoins();
     this.showToast(
       this.language === "en"
         ? "Production claimed: +10 energy, +5 trust, +5 influence, +3 capital."
@@ -4858,7 +4951,6 @@ export class AdaptiveGameApp {
     this.save.lastDuelBonusDate = new Date().toISOString().slice(0, 10);
     this.save.duelsToday = 0;
     this.persistSave();
-    this.audio.expert();
     this.showToast(
       this.language === "en"
         ? "Duel Pioneer title unlocked: +10 mastery, +10 energy, +5 influence."
@@ -4940,7 +5032,6 @@ export class AdaptiveGameApp {
       this.riskCrisisActive() &&
       rawNode.options[optionIndex].quality === "risk"
     ) {
-      this.audio.risk();
       this.showToast(
         this.language === "en"
           ? "Trust crisis: high-risk moves are blocked until you restore trust."
@@ -4953,7 +5044,15 @@ export class AdaptiveGameApp {
     const beforeIds = ACHIEVEMENTS.filter((achievement) =>
       isAchievementUnlocked(this.save, achievement.id)
     ).map((achievement) => achievement.id);
-    const outcome = applyStoryChoice(this.save, this.storyNodeId, optionIndex);
+    const decisionTimeMs =
+      this.storyDecisionStartedAt > 0
+        ? Math.max(0, Date.now() - this.storyDecisionStartedAt)
+        : undefined;
+    const outcome = applyStoryChoice(this.save, this.storyNodeId, optionIndex, {
+      decisionTimeMs,
+      morale: this.save.morale
+    });
+    this.storyDecisionStartedAt = 0;
     if (outcome.option.quality !== "expert") {
       this.save.reviewCards = scheduleMissedDecision(
         this.save.reviewCards ?? [],
@@ -4974,7 +5073,12 @@ export class AdaptiveGameApp {
     trackEvent("story_choice", {
       nodeId: this.storyNodeId,
       quality: outcome.option.quality,
-      chapterId: getNode(this.storyNodeId).chapterId
+      chapterId: getNode(this.storyNodeId).chapterId,
+      abilityIds: Object.keys(outcome.option.effects),
+      pps: Number((this.save.adaptive?.pps.currentPps ?? 0).toFixed(2)),
+      tier: this.save.adaptive?.pps.tier ?? "standard",
+      decisionTimeMs,
+      resourcesAfter: { ...this.save.profile.resources }
     });
     const afterIds = ACHIEVEMENTS.filter((achievement) =>
       isAchievementUnlocked(this.save, achievement.id)
@@ -5020,11 +5124,8 @@ export class AdaptiveGameApp {
       this.pendingBranchNodeId = roleBranch;
     }
     if (outcome.option.quality === "expert") {
-      this.audio.expert();
     } else if (outcome.option.quality === "partial") {
-      this.audio.partial();
     } else {
-      this.audio.risk();
     }
     this.renderStory();
   }
@@ -5047,8 +5148,6 @@ export class AdaptiveGameApp {
       this.save.profile.abilities,
       aiArchetype(this.save)
     );
-    this.audio.ensure();
-    this.audio.round();
     this.duelEngine = new DuelEngine(
       human,
       ai,
@@ -5070,8 +5169,6 @@ export class AdaptiveGameApp {
       this.save.profile.abilities,
       aiArchetype(this.save)
     );
-    this.audio.ensure();
-    this.audio.round();
     this.duelEngine = new DuelEngine(
       human,
       ai,
@@ -5098,8 +5195,6 @@ export class AdaptiveGameApp {
       this.save.profile.abilities,
       aiArchetype(this.save)
     );
-    this.audio.ensure();
-    this.audio.round();
     this.duelEngine = new DuelEngine(
       human,
       ai,
@@ -5126,8 +5221,6 @@ export class AdaptiveGameApp {
       this.language === "en" ? "Player Two" : "玩家二",
       "#e9826c"
     );
-    this.audio.ensure();
-    this.audio.round();
     this.duelEngine = new DuelEngine(
       playerOne,
       playerTwo,
@@ -5222,7 +5315,6 @@ export class AdaptiveGameApp {
     peer.onOpen = () => {
       this.remoteStatus =
         this.language === "en" ? "Channel established" : "通道已建立";
-      this.audio.remoteConnected();
       peer.send({
         kind: "hello",
         name: this.save.profile.name,
@@ -5240,7 +5332,6 @@ export class AdaptiveGameApp {
           this.language === "en"
             ? "Connection lost. A resume snapshot was saved; return to the lobby to continue against AI."
             : "连接已断开，已保存续战快照；返回大厅可转为 AI 续战。";
-        this.audio.risk();
       } else {
         this.remoteStatus = status;
       }
@@ -5418,8 +5509,6 @@ export class AdaptiveGameApp {
       this.localPassed = Boolean(parsed.localPassed);
       this.duelEngine = DuelEngine.fromSnapshot(parsed.engine);
       this.duelRecorded = false;
-      this.audio.ensure();
-      this.audio.round();
       this.show("duel");
     } catch {
       this.clearDuelSnapshot();
@@ -5443,7 +5532,6 @@ export class AdaptiveGameApp {
     );
     const roundTimeout = difficultyMs > 0 ? difficultyMs : DUEL_ROUND_TIMEOUT_MS;
     this.duelRoundDeadline = Date.now() + roundTimeout;
-    this.duelWarningPlayed.clear();
     this.updateDuelTimerDisplay();
     this.duelRoundTickId = window.setInterval(() => {
       this.updateDuelTimerDisplay();
@@ -5471,7 +5559,7 @@ export class AdaptiveGameApp {
     }, roundTimeout);
   }
 
-  /** 1v1 回合倒计时：剩余 15/10/5 秒时变色提醒并播放提示音，归零后显示超时。 */
+  /** 1v1 回合倒计时：剩余 15/10/5 秒时变色提醒，归零后显示超时。 */
   private updateDuelTimerDisplay(): void {
     const el = this.root.querySelector<HTMLElement>("#duel-timer");
     if (!el) return;
@@ -5485,13 +5573,6 @@ export class AdaptiveGameApp {
     el.style.display = "";
     el.classList.toggle("urgent", seconds <= 10);
     el.classList.toggle("warning", seconds <= 15);
-    if (
-      (seconds === 15 || seconds === 10 || seconds === 5) &&
-      !this.duelWarningPlayed.has(seconds)
-    ) {
-      this.duelWarningPlayed.add(seconds);
-      this.audio.round();
-    }
     el.textContent =
       this.language === "en"
         ? `Time ${seconds}s`
@@ -5504,7 +5585,6 @@ export class AdaptiveGameApp {
       return;
     }
     this.duelTimedOutThisRound = false;
-    this.audio.duelPick();
     const optionIndex = Number(target.dataset.option);
     if (this.duelMode === "ai") {
       engine.pick(0, optionIndex);
@@ -5571,7 +5651,6 @@ export class AdaptiveGameApp {
       JSON.stringify(this.save, null, 2),
       "application/json"
     );
-    this.audio.ui();
   }
 
   private exportAnalytics(): void {
@@ -5580,7 +5659,6 @@ export class AdaptiveGameApp {
       JSON.stringify(exportAnalyticsPayload(readAnalyticsEvents()), null, 2),
       "application/json"
     );
-    this.audio.ui();
   }
 
   private exportReturnPackage(): void {
@@ -5598,7 +5676,6 @@ export class AdaptiveGameApp {
       JSON.stringify(payload, null, 2),
       "application/json"
     );
-    this.audio.ui();
   }
 
   private exportReport(): void {
@@ -5608,7 +5685,6 @@ export class AdaptiveGameApp {
       buildReportMarkdown(this.save, this.language),
       "text/markdown;charset=utf-8"
     );
-    this.audio.ui();
   }
 
   private copySaveLink(target: HTMLElement): void {
@@ -5619,7 +5695,6 @@ export class AdaptiveGameApp {
     window.setTimeout(() => {
       target.textContent = original;
     }, 1400);
-    this.audio.ui();
   }
 
   private async ensureCloudClient(): Promise<RoomClient> {
@@ -5645,6 +5720,40 @@ export class AdaptiveGameApp {
 
   private handleCloudMessage(message: RoomServerMessage): void {
     switch (message.type) {
+      case "group_waiting": {
+        this.groupRoomId = message.roomId;
+        this.groupPlayers = message.players;
+        this.groupCapacity = message.capacity;
+        this.groupError = undefined;
+        if (this.view === "groupHall") this.renderGroupHall();
+        break;
+      }
+      case "group_round": {
+        this.groupRoomId = message.roomId;
+        this.groupRound = message.round;
+        try {
+          this.groupNode = getNode(message.nodeId);
+        } catch {
+          this.groupNode = undefined;
+        }
+        this.groupPicked = undefined;
+        this.groupDistribution = undefined;
+        this.groupRevealPlayers = undefined;
+        this.groupEnded = false;
+        if (this.view === "groupHall") this.renderGroupHall();
+        break;
+      }
+      case "group_reveal": {
+        this.groupDistribution = message.counts;
+        this.groupRevealPlayers = message.players;
+        if (this.view === "groupHall") this.renderGroupHall();
+        break;
+      }
+      case "group_end": {
+        this.groupEnded = true;
+        if (this.view === "groupHall") this.renderGroupHall();
+        break;
+      }
       case "registered": {
         this.cloudToken = message.token;
         this.cloudAccountName = (message.account as { name?: string })?.name;
@@ -5659,7 +5768,6 @@ export class AdaptiveGameApp {
         }
         localStorage.setItem("adaptive-ascent-cloud-token", message.token);
         this.cloudStatus = "云端账号已创建";
-        this.audio.remoteConnected();
         this.roomClient?.cloudSave(message.token, this.save);
         break;
       }
@@ -5678,7 +5786,6 @@ export class AdaptiveGameApp {
       case "logged_in": {
         this.cloudAccountName = (message.account as { name?: string })?.name;
         this.cloudStatus = "云端账号已连接";
-        this.audio.remoteConnected();
         if (this.pendingCloudAction === "load") {
           const remote = message.account as { save?: SaveState };
           if (remote.save) {
@@ -5711,12 +5818,10 @@ export class AdaptiveGameApp {
       }
       case "save_ok":
         this.cloudStatus = "云端同步成功";
-        this.audio.expert();
         break;
       case "leaderboard":
         this.cloudEntries = message.entries;
         this.cloudStatus = "排行榜已刷新";
-        this.audio.ui();
         break;
       case "queued":
         this.cloudStatus = "已进入云端匹配队列，等待对手…";
@@ -5757,7 +5862,6 @@ export class AdaptiveGameApp {
         break;
       case "error":
         this.cloudStatus = message.message;
-        this.audio.risk();
         break;
       default:
         break;
@@ -5961,7 +6065,6 @@ export class AdaptiveGameApp {
     localStorage.setItem("adaptive-ascent-room-id", roomId);
     this.duelMode = "remote";
     this.duelRecorded = false;
-    this.audio.remoteConnected();
     this.show("duel");
   }
 
@@ -5973,8 +6076,6 @@ export class AdaptiveGameApp {
     try {
       const text = await file.text();
       this.save = importSaveJson(text);
-      this.audio.ensure();
-      this.audio.expert();
       this.show("menu");
     } catch (error) {
       window.alert(error instanceof Error ? error.message : "导入存档失败");
@@ -6052,7 +6153,6 @@ export class AdaptiveGameApp {
       this.save.masteryPoints += 2;
       this.persistSave();
       trackEvent("guide_complete");
-      this.audio.expert();
     }
   }
 

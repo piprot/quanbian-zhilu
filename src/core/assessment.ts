@@ -1,5 +1,5 @@
 import { ROLES, abilityLevel } from "./abilities.ts";
-import type { AbilityId } from "./types";
+import type { AbilityId, RoleId } from "./types";
 
 export interface AssessmentOption {
   label: string;
@@ -11,6 +11,178 @@ export interface AssessmentQuestion {
   abilityId: AbilityId;
   prompt: string;
   options: AssessmentOption[];
+}
+
+export interface RoleTrackDimension {
+  id: string;
+  name: string;
+  nameEn: string;
+  description: string;
+  abilityIds: AbilityId[];
+}
+
+export interface RoleAssessmentTrack {
+  role: RoleId;
+  name: string;
+  nameEn: string;
+  dimensions: RoleTrackDimension[];
+}
+
+/** 三角色专属测评轨道：只作为测评子维度，主模型仍用现有十项能力。 */
+export const ROLE_ASSESSMENT_TRACKS: RoleAssessmentTrack[] = [
+  {
+    role: "parachute",
+    name: "空降管理者",
+    nameEn: "Parachute Manager",
+    dimensions: [
+      {
+        id: "parachute-insight",
+        name: "识人",
+        nameEn: "Reading People",
+        description: "快速判断谁可信、谁可用、谁在观望。",
+        abilityIds: ["insight"]
+      },
+      {
+        id: "parachute-deploy",
+        name: "用人",
+        nameEn: "Placing People",
+        description: "把对的人放进关键位置，用岗位成果验证。",
+        abilityIds: ["deploy"]
+      },
+      {
+        id: "parachute-mobilize",
+        name: "驭人",
+        nameEn: "Mobilizing People",
+        description: "把反对者和观望者变成共同推进者。",
+        abilityIds: ["mobilize"]
+      },
+      {
+        id: "parachute-strategy",
+        name: "谋权",
+        nameEn: "Building Authority",
+        description: "先立小胜、再换授权，建势而不硬争。",
+        abilityIds: ["strategy"]
+      },
+      {
+        id: "parachute-stability",
+        name: "固权",
+        nameEn: "Consolidating Power",
+        description: "把个人影响变成制度与梯队。",
+        abilityIds: ["stability"]
+      }
+    ]
+  },
+  {
+    role: "founder",
+    name: "创业者",
+    nameEn: "Founder",
+    dimensions: [
+      {
+        id: "founder-opportunity",
+        name: "机会识别",
+        nameEn: "Opportunity Spotting",
+        description: "在不确定性里识别值得投入的信号。",
+        abilityIds: ["insight", "structure"]
+      },
+      {
+        id: "founder-resource",
+        name: "资源整合",
+        nameEn: "Resource Integration",
+        description: "把有限资源、人才与关系拧成增长。",
+        abilityIds: ["deploy", "strategy"]
+      },
+      {
+        id: "founder-resilience",
+        name: "韧性坚持",
+        nameEn: "Resilience",
+        description: "连续受挫后仍能恢复并重新开局。",
+        abilityIds: ["recovery"]
+      },
+      {
+        id: "founder-business",
+        name: "商业敏感",
+        nameEn: "Business Sense",
+        description: "看穿成本、现金与增长的真实关系。",
+        abilityIds: ["strategy", "structure"]
+      },
+      {
+        id: "founder-vision",
+        name: "愿景感召",
+        nameEn: "Vision Pull",
+        description: "让团队相信方向并愿意一起走。",
+        abilityIds: ["communication", "mobilize"]
+      }
+    ]
+  },
+  {
+    role: "highPotential",
+    name: "高潜人才",
+    nameEn: "High-Potential",
+    dimensions: [
+      {
+        id: "highpot-selfdrive",
+        name: "自驱力",
+        nameEn: "Self-Drive",
+        description: "没有指令也能持续产出与自我更新。",
+        abilityIds: ["recovery", "execution"]
+      },
+      {
+        id: "highpot-agile",
+        name: "敏捷迭代",
+        nameEn: "Agile Iteration",
+        description: "小步验证、快速调整、结果说话。",
+        abilityIds: ["execution", "structure"]
+      },
+      {
+        id: "highpot-cross",
+        name: "跨界协同",
+        nameEn: "Cross-Boundary Alignment",
+        description: "跨部门推动共同目标与责任落地。",
+        abilityIds: ["communication", "deploy"]
+      },
+      {
+        id: "highpot-influence",
+        name: "影响力雏形",
+        nameEn: "Emerging Influence",
+        description: "不靠职位，也能让关键人愿意配合。",
+        abilityIds: ["mobilize", "communication"]
+      },
+      {
+        id: "highpot-review",
+        name: "复盘自省",
+        nameEn: "Review & Reflection",
+        description: "从结果里提炼可复用的判断标准。",
+        abilityIds: ["structure", "insight"]
+      }
+    ]
+  }
+];
+
+export function assessmentTrackFor(role: RoleId): RoleAssessmentTrack {
+  return (
+    ROLE_ASSESSMENT_TRACKS.find((track) => track.role === role) ??
+    ROLE_ASSESSMENT_TRACKS[0]
+  );
+}
+
+export function roleTrackScores(
+  role: RoleId,
+  abilities: Record<AbilityId, number>
+): Array<RoleTrackDimension & { score: number; grade: string }> {
+  const track = assessmentTrackFor(role);
+  return track.dimensions.map((dimension) => {
+    const score = Math.round(
+      dimension.abilityIds.reduce(
+        (sum, id) => sum + abilityLevel(abilities[id]),
+        0
+      ) / dimension.abilityIds.length
+    );
+    return {
+      ...dimension,
+      score,
+      grade: score >= 4 ? "A" : score >= 3 ? "B" : "C"
+    };
+  });
 }
 
 export const ASSESSMENT_QUESTIONS: AssessmentQuestion[] = [

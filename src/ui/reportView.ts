@@ -42,12 +42,12 @@ import {
 } from "./display";
 import { artAsset } from "./assets";
 import { escapeAttr, escapeHtml } from "./escape";
+import { adaptiveCoachPanelMarkup } from "./adaptiveCoachPanel";
 
 const ONLINE_ENABLED = import.meta.env.VITE_ENABLE_ONLINE === "true";
 
-// 报告页 / 能力页 / 结局页共用的云端与开关状态（不属于存档或语言的少量 UI 态）。
+// 报告页 / 能力页 / 结局页共用的云端状态（不属于存档或语言的少量 UI 态）。
 export interface ReportCloudState {
-  muted: boolean;
   accountName?: string;
   token: string;
   recoveryCode: string;
@@ -560,14 +560,15 @@ export function reportView(
       done: isChapterComplete(save, chapter.id)
     };
   });
+  const adaptivePanel = adaptiveCoachPanelMarkup(save, language);
   return `
     <header class="topbar">
       <div class="brand">${uiString(language, "brand")}</div>
       <button class="link" data-action="open-menu">${uiString(language, "returnHome")}</button>
-      <button class="link sound-toggle" data-action="toggle-sound" aria-label="${language === "en" ? "Toggle sound" : "切换声音"}">${cloud.muted ? uiString(language, "soundOff") : uiString(language, "soundOn")}</button>
     </header>
     <main class="report-shell" aria-label="${language === "en" ? "Review report" : "复盘报告"}">
       ${dimensionMarkup(language, save)}
+      ${adaptivePanel}
       <section class="report-hero">
         <div>
           <p class="eyebrow">${uiString(language, "reportTitle")}</p>

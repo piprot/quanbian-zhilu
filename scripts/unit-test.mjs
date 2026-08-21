@@ -13,8 +13,25 @@ globalThis.sessionStorage = {
   removeItem: (key) => backupStore.delete(key)
 };
 
-import { abilityLevel, totalAbilityLevels } from "../src/core/abilities.ts";
-import { ASSESSMENT_QUESTIONS } from "../src/core/assessment.ts";
+import {
+  abilityLevel,
+  rankProgress,
+  totalAbilityLevels
+} from "../src/core/abilities.ts";
+import {
+  ASSESSMENT_QUESTIONS,
+  ROLE_ASSESSMENT_TRACKS,
+  assessmentTrackFor,
+  roleTrackScores
+} from "../src/core/assessment.ts";
+import { HISTORY_MIRRORS, dominantMirror } from "../src/core/historyMirrors.ts";
+import { adaptiveRecommendations } from "../src/core/recommendations.ts";
+import {
+  generateAiScenario,
+  validateAiScenario
+} from "../src/core/aiScenario.ts";
+import { coachStudentSummary } from "../src/core/coach-analytics.ts";
+import { energyDimensions } from "../src/core/energy-dimensions.ts";
 import {
   TRAINING_PATHS,
   scoreTrainingAnswers
@@ -140,19 +157,21 @@ import {
   chapterEconomyScale,
   chapterStarCount,
   computeSaveHash,
+  createProfile,
   dailyRecoveryFor,
   economyFactors,
   decisionWindowMs,
   deleteRoleSlot,
+  fullPathProgress,
   hireTrialAlly,
   investTrialAccelerator,
   isChapterComplete,
   isChapterPassed,
   loadSave,
   migrateSave,
+  nextIncompleteMainNode,
   optionGateFor,
   recordDuelResult,
-  normalizeVolume,
   resourceStrainFor,
   resolveCloudConflict,
   roleSlotSummaries,
@@ -295,9 +314,6 @@ assert(
     scenarioShellFor(1, seededSave.scenarioSeed).zh,
   "scenario shell should stay stable within a chapter for the same run seed"
 );
-assert(normalizeVolume(60) === 50, "volume 60 should normalize to 50");
-assert(normalizeVolume(90) === 100, "volume 90 should normalize to 100");
-assert(normalizeVolume(0) === 0, "volume 0 should stay 0");
 assert(
   decisionWindowMs(22000, "x".repeat(300)) > 22000,
   "long scenarios should extend the decision window"
@@ -1805,6 +1821,101 @@ assert(
 assert(
   personalCoach.actionPlan.length === 3,
   "personal coach report should include a three-step action plan"
+);
+
+// P0: 段位进度 / 全程路径 / 史鉴 / 角色轨道 / 自适应推荐
+const progressStart = rankProgress(0);
+assert(
+  progressStart.rank.name === "初阶观察者" &&
+    progressStart.next?.name === "实干者" &&
+    progressStart.remaining === 16,
+  "rank progress should show next rank and remaining XP"
+);
+const progressMax = rankProgress(60);
+assert(
+  progressMax.progress === 100 && !progressMax.next,
+  "max rank should be complete"
+);
+const pathProgress = fullPathProgress(DEFAULT_SAVE);
+assert(
+  pathProgress.totalMain === 81 &&
+    pathProgress.completedMain === 0 &&
+    pathProgress.percent === 0,
+  "fresh save should have empty full-path progress"
+);
+assert(
+  nextIncompleteMainNode(DEFAULT_SAVE) === CHAPTERS[0].nodeIds[0],
+  "fresh save should recommend the first main node"
+);
+assert(
+  HISTORY_MIRRORS.length >= 10 &&
+    new Set(HISTORY_MIRRORS.map((mirror) => mirror.abilityId)).size >= 6,
+  "history mirrors should be broad enough for recommendations"
+);
+assert(
+  dominantMirror({ strategy: 4, communication: -2 }).abilityId === "strategy",
+  "dominant mirror should follow the largest ability delta"
+);
+assert(
+  ROLE_ASSESSMENT_TRACKS.length === 3 &&
+    ROLE_ASSESSMENT_TRACKS.every((track) => track.dimensions.length === 5),
+  "each role should have a five-dimension assessment track"
+);
+assert(
+  assessmentTrackFor("parachute").dimensions.length === 5 &&
+    roleTrackScores("parachute", DEFAULT_SAVE.profile.abilities).length === 5,
+  "role track scores should cover all five dimensions"
+);
+const recommendations = adaptiveRecommendations(DEFAULT_SAVE);
+assert(
+  recommendations.length === 3 &&
+    new Set(recommendations.map((card) => card.kind)).size === 3,
+  "adaptive recommendations should return main/training/mirror cards"
+);
+const aiNode = generateAiScenario({
+  role: "parachute",
+  abilities: DEFAULT_SAVE.profile.abilities,
+  abilityId: "mobilize",
+  difficulty: "hard",
+  chapterId: 3,
+  seed: 42,
+  language: "zh"
+});
+assert(
+  aiNode.options.length === 3 && validateAiScenario(aiNode).length === 0,
+  "AI scenario should generate a valid three-option node"
+);
+assert(
+  generateAiScenario({
+    role: "parachute",
+    abilities: DEFAULT_SAVE.profile.abilities,
+    abilityId: "mobilize",
+    difficulty: "hard",
+    chapterId: 3,
+    seed: 42,
+    language: "en"
+  }).context.includes("lens"),
+  "AI scenario should generate English context for en"
+);
+const coachSummary = coachStudentSummary(DEFAULT_SAVE);
+assert(
+  coachSummary.strong.length === 3 &&
+    coachSummary.weak.length === 3 &&
+    coachSummary.history.length >= 0,
+  "coach summary should include strengths, weak spots, and growth history"
+);
+const identityProfile = createProfile("ShengWei", "parachute", {
+  title: "军师",
+  perspective: "female"
+});
+assert(
+  identityProfile.title === "军师" && identityProfile.perspective === "female",
+  "profile should persist title and perspective"
+);
+const energy = energyDimensions(DEFAULT_SAVE);
+assert(
+  Object.values(energy).every((value) => value >= 0 && value <= 100),
+  "energy dimensions should stay within 0-100"
 );
 
 console.log("PASS unit test");

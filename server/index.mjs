@@ -19,6 +19,7 @@ import {
   getAccountByRecovery,
   initDb,
   isTokenRevoked,
+  listAccounts,
   leaderboard as dbLeaderboard,
   revokeToken,
   upsertAccount
@@ -34,6 +35,7 @@ const MAX_SAVE_BYTES = Number(process.env.MAX_SAVE_BYTES || 256 * 1024);
 const ROOM_TTL_MS = Number(process.env.ROOM_TTL_MS || 10 * 60 * 1000);
 const VALID_ROLES = new Set(["parachute", "founder", "highPotential"]);
 const VALID_ROUNDS = new Set([3, 5, 7]);
+const GROUP_SCENARIO_IDS = ["c1n1", "c2n1", "c3n1"];
 
 if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
   throw new Error("Production requires DATABASE_URL");
@@ -52,7 +54,169 @@ function persist() {
   writeFileSync(DATA_FILE, JSON.stringify(store, null, 2));
 }
 
+const AI_ABILITY_NAMES = {
+  insight: { zh: "识人", en: "Insight" },
+  deploy: { zh: "用人", en: "Placement" },
+  mobilize: { zh: "驭人", en: "Mobilize" },
+  strategy: { zh: "谋权", en: "Strategy" },
+  authority: { zh: "掌权", en: "Authority" },
+  stability: { zh: "固权", en: "Consolidation" },
+  recovery: { zh: "情绪自愈", en: "Recovery" },
+  execution: { zh: "执行力", en: "Execution" },
+  structure: { zh: "结构思考", en: "Structured Thinking" },
+  communication: { zh: "协同沟通", en: "Communication" }
+};
+const AI_DIFFICULTIES = new Set(["easy", "medium", "hard"]);
+
+function localAiScenario(payload) {
+  const en = payload.language === "en";
+  const abilityId = AI_ABILITY_NAMES[payload.abilityId] ? payload.abilityId : "communication";
+  const difficulty = AI_DIFFICULTIES.has(payload.difficulty) ? payload.difficulty : "medium";
+  const ability = AI_ABILITY_NAMES[abilityId];
+  const chapterId = Number.isInteger(payload.chapterId) ? payload.chapterId : 1;
+  const seed = Number.isInteger(payload.seed) ? payload.seed : Date.now() % 100000;
+  const note = {
+    easy: en ? "Signals are still readable." : "信息还不算复杂。",
+    medium: en ? "Every choice has a cost." : "任何选择都有代价。",
+    hard: en ? "The margin for error is very low." : "容错很低。"
+  }[difficulty];
+  const title = en
+    ? `${ability.en} · Dynamic Dilemma`
+    : `${ability.zh} · 动态两难`;
+  const context = en
+    ? `A leadership moment around ${ability.en}. ${note}`
+    : `一个围绕「${ability.zh}」的现场。${note}`;
+  const stake = en
+    ? "See who can move the result and where the cost will land."
+    : "先看清谁能推动结果、代价落在哪里。";
+  return {
+    id: `ai-${seed}-${abilityId}-${difficulty}`,
+    chapterId,
+    title,
+    kind: "random",
+    context,
+    stake,
+    options: [
+      {
+        label: en ? "Diagnose first, then act" : "先诊断，再行动",
+        summary: en ? "Turn the contradiction into a verifiable test." : "把矛盾变成可验证的小测试。",
+        quality: "expert",
+        effects: { [abilityId]: 2 },
+        resources: { trust: 1 },
+        feedback: en ? "The situation starts moving in your direction." : "局面开始向你可控的方向移动。",
+        theory: en ? "Diagnose first, act second, keep the standard." : "先诊断、再行动，握紧验证标准。"
+      },
+      {
+        label: en ? "Hold the room steady" : "先稳住场面",
+        summary: en ? "Buy time to verify the key variable." : "争取时间核实关键变量。",
+        quality: "partial",
+        effects: { [abilityId]: 1 },
+        resources: { capital: -1 },
+        feedback: en ? "The room is steady, but one variable is still open." : "局面暂时稳住，但关键变量还没验证。",
+        theory: en ? "Hold the line, then close the verification gap." : "先稳住，再补上验证。"
+      },
+      {
+        label: en ? "Send a strong signal now" : "立刻亮明态度",
+        summary: en ? "Break the deadlock and accept the cost openly." : "打破僵局，公开承担代价。",
+        quality: "risk",
+        effects: { [abilityId]: 3 },
+        resources: { trust: -2 },
+        feedback: en ? "The signal lands loudly and the cost shows." : "信号很强，代价也开始显现。",
+        theory: en ? "Strong signals require an exit route." : "强信号也要为代价预留退路。"
+      }
+    ]
+  };
+}
+
+async function generateAiNode(payload) {
+  if (process.env.LLM_API_URL && process.env.LLM_API_KEY) {
+    try {
+      const response = await fetch(process.env.LLM_API_URL, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${process.env.LLM_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: process.env.LLM_MODEL || "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You generate one Chinese/English leadership dilemma as strict JSON matching {id,chapterId,title,kind,context,stake,options:[{label,summary,quality,effects,resources,feedback,theory}]}. quality is expert|partial|risk. Return only JSON."
+            },
+            {
+              role: "user",
+              content: JSON.stringify({
+                role: payload.role,
+                abilityId: payload.abilityId,
+                difficulty: payload.difficulty,
+                language: payload.language,
+                seed: payload.seed
+              })
+            }
+          ],
+          temperature: 0.8,
+          response_format: { type: "json_object" }
+        }),
+        signal: AbortSignal.timeout(15000)
+      });
+      if (!response.ok) throw new Error(`LLM status ${response.status}`);
+      const data = await response.json();
+      const text = data?.choices?.[0]?.message?.content ?? "{}";
+      const parsed = JSON.parse(text);
+      if (parsed && parsed.options?.length >= 2) {
+        return { source: "llm", node: parsed };
+      }
+    } catch {
+      // fall back to local template
+    }
+  }
+  return { source: "local", node: localAiScenario(payload) };
+}
+
 const httpServer = createServer(async (_request, response) => {
+  const url = new URL(
+    _request.url ?? "/",
+    `http://${_request.headers.host || "localhost"}`
+  );
+  if (_request.method === "POST" && url.pathname === "/api/ai-scenario") {
+    let body = "";
+    for await (const chunk of _request) body += chunk;
+    let payload = {};
+    try {
+      payload = JSON.parse(body || "{}");
+    } catch {
+      payload = {};
+    }
+    const result = await generateAiNode(payload);
+    response.writeHead(200, {
+      "content-type": "application/json; charset=utf-8"
+    });
+    response.end(
+      JSON.stringify({ ok: true, source: result.source, node: result.node })
+    );
+    return;
+  }
+  if (_request.method === "GET" && url.pathname === "/api/coach/students") {
+    const students = await coachAccounts();
+    response.writeHead(200, {
+      "content-type": "application/json; charset=utf-8"
+    });
+    response.end(JSON.stringify({ ok: true, students }));
+    return;
+  }
+  if (_request.method === "GET" && url.pathname === "/api/coach/student") {
+    const name = String(url.searchParams.get("name") || "");
+    const students = await coachAccounts();
+    const student =
+      students.find((item) => item.name === name) ?? students[0];
+    response.writeHead(200, {
+      "content-type": "application/json; charset=utf-8"
+    });
+    response.end(JSON.stringify({ ok: true, student: student ?? null }));
+    return;
+  }
   const healthy = await dbHealth();
   response.writeHead(200, { "content-type": "application/json; charset=utf-8" });
   response.end(
@@ -162,6 +326,67 @@ function createRoom(player, rounds) {
   return room;
 }
 
+function broadcastGroup(room, payload) {
+  for (const player of room.players) {
+    send(player.socket, payload);
+  }
+}
+
+function groupPlayers(room) {
+  return room.players.map((player) => ({
+    name: player.name,
+    picked: room.picks?.[player.name] !== undefined
+  }));
+}
+
+function startGroupRound(room) {
+  room.status = "playing";
+  room.picks = {};
+  const nodeId = GROUP_SCENARIO_IDS[room.round - 1];
+  broadcastGroup(room, {
+    type: "group_round",
+    roomId: room.id,
+    round: room.round,
+    nodeId
+  });
+}
+
+function createGroupRoom(player, capacity) {
+  const roomId = randomUUID().slice(0, 4).toUpperCase();
+  const room = {
+    id: roomId,
+    mode: "group",
+    status: "waiting",
+    capacity: Math.max(2, Math.min(8, Number(capacity) || 4)),
+    rounds: GROUP_SCENARIO_IDS.length,
+    createdAt: Date.now(),
+    round: 1,
+    picks: {},
+    players: []
+  };
+  rooms.set(roomId, room);
+  addGroupPlayer(roomId, player);
+  return room;
+}
+
+function addGroupPlayer(roomId, player) {
+  const room = roomById(roomId);
+  if (!room || room.mode !== "group" || room.status !== "waiting") return null;
+  if (room.players.length >= room.capacity) return null;
+  room.players.push(player);
+  player.roomId = roomId;
+  broadcastGroup(room, {
+    type: "group_waiting",
+    roomId,
+    players: groupPlayers(room),
+    capacity: room.capacity
+  });
+  if (room.players.length >= room.capacity) {
+    startGroupRound(room);
+  }
+  return room;
+}
+
 function tryAutoMatch(player) {
   const opponent = matchQueue.shift();
   if (!opponent) {
@@ -195,6 +420,20 @@ roomCleanup.unref?.();
 function accountForToken(token) {
   if (revokedTokens.has(token)) return null;
   return store.accounts[token];
+}
+
+async function coachAccounts() {
+  if (dbEnabled) return listAccounts(100);
+  return Object.values(store.accounts)
+    .map((account) => ({
+      name: account.name,
+      role: account.role,
+      save: account.save,
+      score: account.score,
+      updatedAt: account.updatedAt
+    }))
+    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+    .slice(0, 100);
 }
 
 function jsonLeaderboard() {
@@ -474,6 +713,81 @@ wss.on("connection", (socket, request) => {
         });
         break;
       }
+      case "group_create": {
+        const capacity = Number(message.capacity);
+        createGroupRoom(
+          {
+            socket,
+            name: cleanName(message.name)
+          },
+          Number.isInteger(capacity) ? capacity : 4
+        );
+        break;
+      }
+      case "group_join": {
+        const room = roomById(String(message.roomId || "").toUpperCase());
+        if (!room || room.mode !== "group" || room.status !== "waiting") {
+          send(socket, { type: "error", message: "群策房间不存在或已开局" });
+          return;
+        }
+        addGroupPlayer(room.id, {
+          socket,
+          name: cleanName(message.name)
+        });
+        break;
+      }
+      case "group_pick": {
+        const optionIndex = Number(message.optionIndex);
+        if (![0, 1, 2].includes(optionIndex)) {
+          send(socket, { type: "error", message: "选项索引无效" });
+          return;
+        }
+        const player = findPlayer(socket);
+        if (!player?.roomId) return;
+        const room = roomById(player.roomId);
+        if (!room || room.mode !== "group" || room.status !== "playing") return;
+        if (room.picks[player.name] !== undefined) {
+          send(socket, { type: "error", message: "本回合已选择" });
+          return;
+        }
+        room.picks[player.name] = optionIndex;
+        broadcastGroup(room, {
+          type: "group_waiting",
+          roomId: room.id,
+          players: groupPlayers(room),
+          capacity: room.capacity
+        });
+        const pickedAll = room.players.every(
+          (item) => room.picks[item.name] !== undefined
+        );
+        if (!pickedAll) break;
+        const counts = [0, 0, 0];
+        for (const item of room.players) {
+          counts[room.picks[item.name]] += 1;
+        }
+        broadcastGroup(room, {
+          type: "group_reveal",
+          roomId: room.id,
+          round: room.round,
+          counts,
+          players: room.players.map((item) => ({
+            name: item.name,
+            pick: room.picks[item.name]
+          }))
+        });
+        room.round += 1;
+        if (room.round > room.rounds) {
+          room.status = "finished";
+          broadcastGroup(room, {
+            type: "group_end",
+            roomId: room.id,
+            rounds: room.rounds
+          });
+        } else {
+          startGroupRound(room);
+        }
+        break;
+      }
       case "create_room": {
         const name = cleanName(message.name);
         const role = cleanRole(message.role);
@@ -681,6 +995,26 @@ function leaveRoom(socket) {
   if (!player?.roomId) return;
   const room = roomById(player.roomId);
   if (!room) return;
+  if (room.mode === "group") {
+    player.disconnected = true;
+    if (room.status !== "playing") {
+      room.players = room.players.filter((item) => item.socket !== socket);
+    }
+    if (room.players.length === 0 || room.players.every((item) => item.disconnected)) {
+      rooms.delete(room.id);
+      return;
+    }
+    broadcastGroup(room, {
+      type: "group_waiting",
+      roomId: room.id,
+      players: groupPlayers(room),
+      capacity: room.capacity
+    });
+    if (room.status === "waiting" && room.players.length === room.capacity) {
+      startGroupRound(room);
+    }
+    return;
+  }
   if (room.status === "playing") {
     player.disconnected = true;
     player.disconnectedAt = Date.now();

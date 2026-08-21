@@ -1,5 +1,31 @@
 # 更新日志
 
+## 2.0.0（2026-08-21）
+### 自适应智能教练：底座、情境路由、教练闭环与数据管线
+- 新增学习者模型 `src/core/learner-model.ts`：10 项能力按证据、质量、BKT 后验估计掌握度与置信度，输出估算中/已保留/已验证/已迁移四档证据阶段。
+- 新增 PPS 难度引擎 `src/core/adaptive-dda.ts`：最近 15 次决策合成 0~5 PPS，带 5 次校准期、恢复/标准/拉伸三档、防死亡螺旋与 comeback 加成；难度连续影响资源损耗、时间窗、AI 强度与恢复。
+- 新增情境路由 `src/core/scenario-router.ts`：自动从选项 effects 推导能力标签，按能力缺口、章节焦点、难度档、防重复与种子噪声选题；AI 情境页新增“按我的画像智能推荐”。
+- 新增动态后果规则 `src/core/consequence-rules.ts`：连续风险、连续专家、精力/士气过低、掌握度就绪都会给出教练级建议。
+- 新增针对性反馈 `src/core/adaptive-feedback.ts`：每个决策输出“展示了什么能力 → 证据是什么 → 下一步练什么”的确定性链路，LLM 只负责措辞。
+- 新增 FSRS 风格记忆卡 `src/core/fsrs-schedule.ts` 与教练警觉 `src/core/coach-alerts.ts`：稳定性/难度/可提取性建模，遗忘、平台期、过载、掌握度就绪、责任滞留等提醒进入报告面板。
+- 报告页新增“自适应教练面板”：PPS、难度档、调节系数、弱项证据阶段、教练建议、记忆卡状态全部可见。
+- 新增 A/B 实验与数据管线：`src/core/experiment.ts`、`src/core/adaptive-metrics.ts`、`scripts/adaptive-sim.mjs`、`scripts/adaptive-export.mjs`。
+- 新增测试与脚本：`test:adaptive-core`、`test:adaptive-router`、`test:adaptive-coach`、`test:adaptive-data`、`adaptive:sim`、`adaptive:export`。
+- 存档升级：新增 `adaptive` 与 `fsrsCards` 字段，旧档自动迁移，`save-roundtrip` 覆盖。
+
+## 1.8.0（2026-08-20）
+### 将道原型借鉴落地（P0/P1/P2）
+- 主控台新增五重段位进度条、距下一段 XP、全程路径（主线情境完成度）与精力四维派生面板。
+- 结果页升级为「后果 → 能力涨落（细分到子技能）→ 教练之眼 → 历史镜鉴」四段式。
+- 新增轻量史鉴堂：16 条资治通鉴/史记/权经镜鉴，按十项能力映射，可在结果页与独立视图阅读。
+- 能力测评新增三角色专属轨道：空降/创业/高潜各 5 个子维度，沿用十项能力主模型，不另建能力体系。
+- 主控台新增自适应推荐三卡：主线情境 / 进阶训练 / 史鉴卡，按最弱能力推荐。
+- 新增 AI 动态叙事：按角色、最弱能力与难度生成专属两难；服务端 `/api/ai-scenario` 支持 LLM 生成，失败自动回退本地模板。
+- 新增教练数据看板：服务端 `/api/coach/students` 与 `/api/coach/student`，客户端展示学员列表、能力雷达、XP 成长曲线、教练洞察与对比。
+- 新增群策堂：2-8 人房间、每局 3 个共享情境、回合揭示分布、结束复盘；服务端房间协议扩展并附 `scripts/group-hall-smoke.mjs` 冒烟。
+- 建档新增名号与男性/女性视角，仅影响少量情境叙事细节，不参与数值。
+- 新增 P2 试玩门槛文档 `docs/PLAYTEST_GATES_2026-08-20.md`：精力四维先做派生展示，心力压力/连击节律待试玩验证。
+
 ## 1.7.48（2026-08-18）
 ### 训练营序号修正
 - 训练营情境编号由“第 X 关 · 情境 Y/4”改为明确的“第 X 课 · 情境 Y/4”。

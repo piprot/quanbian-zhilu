@@ -185,20 +185,66 @@ export function totalAbilityLevels(abilities: Record<AbilityId, number>): number
   return ABILITY_ORDER.reduce((sum, id) => sum + abilityLevel(abilities[id]), 0);
 }
 
+const RANKS = [
+  { name: "初阶观察者", nameEn: "Observer", min: 0, color: "#9fb3c8" },
+  { name: "实干者", nameEn: "Executor", min: 16, color: "#57c7a3" },
+  { name: "破局者", nameEn: "Breaker", min: 26, color: "#4db7d6" },
+  { name: "变革者", nameEn: "Transformer", min: 38, color: "#e9826c" },
+  { name: "执权者", nameEn: "Power Holder", min: 48, color: "#f2c14e" }
+];
+
 export function rankForTotal(total: number): {
   name: string;
   nameEn: string;
   min: number;
   color: string;
 } {
-  const ranks = [
-    { name: "初阶观察者", nameEn: "Observer", min: 0, color: "#9fb3c8" },
-    { name: "实干者", nameEn: "Executor", min: 16, color: "#57c7a3" },
-    { name: "破局者", nameEn: "Breaker", min: 26, color: "#4db7d6" },
-    { name: "变革者", nameEn: "Transformer", min: 38, color: "#e9826c" },
-    { name: "执权者", nameEn: "Power Holder", min: 48, color: "#f2c14e" }
-  ];
-  return [...ranks].reverse().find((rank) => total >= rank.min) ?? ranks[0];
+  return [...RANKS].reverse().find((rank) => total >= rank.min) ?? RANKS[0];
+}
+
+export interface RankProgress {
+  rank: ReturnType<typeof rankForTotal>;
+  next?: ReturnType<typeof rankForTotal>;
+  progress: number;
+  remaining: number;
+}
+
+export function rankProgress(total: number): RankProgress {
+  const current = rankForTotal(total);
+  const index = RANKS.findIndex((rank) => rank.min === current.min);
+  const next = index >= 0 && index < RANKS.length - 1 ? RANKS[index + 1] : undefined;
+  if (!next) {
+    return { rank: current, progress: 100, remaining: 0 };
+  }
+  const span = next.min - current.min;
+  const progress = Math.min(
+    100,
+    Math.max(0, Math.round(((total - current.min) / span) * 100))
+  );
+  return {
+    rank: current,
+    next,
+    progress,
+    remaining: Math.max(0, next.min - total)
+  };
+}
+
+export function abilityRanking(
+  abilities: Record<AbilityId, number>,
+  count = 3
+): AbilityId[] {
+  return ABILITY_ORDER.slice()
+    .sort((a, b) => abilities[b] - abilities[a])
+    .slice(0, count);
+}
+
+export function weakestAbilities(
+  abilities: Record<AbilityId, number>,
+  count = 1
+): AbilityId[] {
+  return ABILITY_ORDER.slice()
+    .sort((a, b) => abilities[a] - abilities[b])
+    .slice(0, count);
 }
 
 export function createDefaultAbilities(): Record<AbilityId, number> {

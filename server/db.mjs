@@ -66,6 +66,24 @@ export async function dbHealth() {
   }
 }
 
+export async function listAccounts(limit = 200) {
+  if (!pool) return [];
+  const { rows } = await pool.query(
+    `SELECT name, role, save, score, updated_at
+     FROM accounts
+     ORDER BY updated_at DESC
+     LIMIT $1`,
+    [limit]
+  );
+  return rows.map((row) => ({
+    name: row.name,
+    role: row.role,
+    save: row.save,
+    score: row.score,
+    updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : undefined
+  }));
+}
+
 export async function upsertAccount(
   token,
   name,

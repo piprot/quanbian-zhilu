@@ -1,6 +1,8 @@
 import {
   ASSESSMENT_QUESTIONS,
-  certificationLevel
+  assessmentTrackFor,
+  certificationLevel,
+  roleTrackScores
 } from "../core/assessment";
 import { profileSummary } from "../core/game";
 import { recommendedTraining } from "../core/duel";
@@ -24,7 +26,6 @@ import { escapeHtml } from "./escape";
 export interface AssessmentViewState {
   assessmentStep: number;
   selected: number | undefined;
-  muted: boolean;
 }
 
 export function assessmentView(
@@ -35,11 +36,11 @@ export function assessmentView(
   const question = ASSESSMENT_QUESTIONS[state.assessmentStep];
   const questionView = assessmentDisplay(language, question);
   const en = language === "en";
+  const track = assessmentTrackFor(profile.role);
   return `
       <header class="topbar">
         <div class="brand">${uiString(language, "brand")}</div>
         <button class="link" data-action="open-profile">${en ? "Back to Profile" : "返回建档"}</button>
-        <button class="link sound-toggle" data-action="toggle-sound" aria-label="${language === "en" ? "Toggle sound" : "切换声音"}">${state.muted ? uiString(language, "soundOff") : uiString(language, "soundOn")}</button>
       </header>
       <main class="assessment-shell" aria-label="${language === "en" ? "Ability assessment" : "能力测评"}">
         <section class="assessment-panel">
@@ -53,6 +54,28 @@ export function assessmentView(
               ? `
                 <div class="assessment-intro">
                   <p>${uiString(language, "assessmentOptional")}</p>
+                  <div class="assessment-track-preview">
+                    <h2>${en ? "Your Role Track" : "你的角色专属轨道"}</h2>
+                    <p class="muted">${en ? `Five sub-dimensions for ${track.nameEn}, mapped onto the ten-ability model.` : `「${track.name}」的五个子维度，全部映射到现有十项能力主模型。`}</p>
+                    <div class="track-dimension-list">
+                      ${track.dimensions
+                        .map(
+                          (dimension) => `
+                            <span class="track-dimension">
+                              <strong>${escapeHtml(en ? dimension.nameEn : dimension.name)}</strong>
+                              <small>${escapeHtml(
+                                en
+                                  ? `Focus: ${dimension.abilityIds
+                                      .map((id) => abilityDisplay(language, id).name)
+                                      .join(" · ")}`
+                                  : dimension.description
+                              )}</small>
+                            </span>
+                          `
+                        )
+                        .join("")}
+                    </div>
+                  </div>
                 </div>
               `
               : ""
@@ -89,11 +112,11 @@ export function assessmentView(
 
 export function assessmentResultView(
   save: SaveState,
-  language: Language,
-  muted: boolean
+  language: Language
 ): string {
   const summary = profileSummary(save);
   const cert = certificationLevel(save);
+  const trackScores = roleTrackScores(save.profile.role, save.profile.abilities);
   const training = recommendedTraining(
     save.profile.abilities,
     save.profile.role,
@@ -111,7 +134,6 @@ export function assessmentResultView(
   return `
       <header class="topbar">
         <div class="brand">${uiString(language, "brand")}</div>
-        <button class="link sound-toggle" data-action="toggle-sound" aria-label="${language === "en" ? "Toggle sound" : "切换声音"}">${muted ? uiString(language, "soundOff") : uiString(language, "soundOn")}</button>
       </header>
       <main class="assessment-result-shell" aria-label="${language === "en" ? "Assessment report" : "测评报告"}">
         <section class="assessment-result-hero">
@@ -146,6 +168,30 @@ export function assessmentResultView(
                     <span style="--dot:${ABILITIES[id].color}"></span>
                     <strong>${abilityDisplay(language, id).name}</strong>
                     <p>${abilityDisplay(language, id).tagline}</p>
+                  </div>
+                `
+              )
+              .join("")}
+          </div>
+        </section>
+        <section class="role-track-panel">
+          <h2>${en ? "Role Track" : "角色专属轨道"}</h2>
+          <p class="muted">${en ? "Five role-specific sub-dimensions mapped onto the ten-ability model." : "五个角色专属子维度，映射到十项能力主模型。"}</p>
+          <div class="track-dimension-list">
+            ${trackScores
+              .map(
+                (dimension) => `
+                  <div class="track-dimension-result">
+                    <span class="track-grade">${dimension.grade}</span>
+                    <strong>${escapeHtml(en ? dimension.nameEn : dimension.name)}</strong>
+                    <small>${escapeHtml(
+                      en
+                        ? `Focus: ${dimension.abilityIds
+                            .map((id) => abilityDisplay(language, id).name)
+                            .join(" · ")}`
+                        : dimension.description
+                    )}</small>
+                    <em>${dimension.score} / 6</em>
                   </div>
                 `
               )

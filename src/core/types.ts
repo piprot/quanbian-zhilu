@@ -83,6 +83,10 @@ export interface PlayerProfile {
   role: RoleId;
   abilities: Record<AbilityId, number>;
   resources: Record<ResourceKey, number>;
+  /** 名号：仅作身份展示，不参与数值。 */
+  title?: string;
+  /** 叙事视角：只影响少量情境细节，不改变能力与资源。 */
+  perspective?: "male" | "female";
 }
 
 /** AI 陪练人格原型：影响选项偏好与对局风格。 */
@@ -127,6 +131,75 @@ export interface DuelHistoryEntry {
   opponentScore: number;
   won: boolean;
   timestamp: number;
+}
+
+export type AdaptiveDifficultyTier = "recovery" | "standard" | "stretch";
+
+export interface AbilityMasteryState {
+  ability: AbilityId;
+  attempts: number;
+  expert: number;
+  partial: number;
+  risk: number;
+  lastAt: number;
+  qualitySum: number;
+  mastery: number;
+  confidence: number;
+  bktMastery: number;
+}
+
+export interface LearnerModel {
+  abilities: Record<AbilityId, AbilityMasteryState>;
+  updatedAt: number;
+}
+
+export interface PpsObservation {
+  at: number;
+  quality: OptionQuality;
+  abilityIds: AbilityId[];
+  resourceDelta: Partial<Record<ResourceKey, number>>;
+  decisionTimeMs?: number;
+  usedHint?: boolean;
+  morale?: number;
+}
+
+export interface PpsState {
+  currentPps: number;
+  previousPps: number;
+  tier: AdaptiveDifficultyTier;
+  calibrationRemaining: number;
+  observations: PpsObservation[];
+  lastUpdatedAt: number;
+  consecutiveExpert: number;
+  consecutiveRisk: number;
+}
+
+export interface AdaptiveState {
+  learnerModel: LearnerModel;
+  pps: PpsState;
+  configVersion: number;
+}
+
+export interface FsrsCard {
+  nodeId: string;
+  abilityIds: AbilityId[];
+  stability: number;
+  difficulty: number;
+  retrievability: number;
+  dueAt: number;
+  lastReviewedAt: number;
+  reviews: number;
+}
+
+export interface AdaptiveAdjustment {
+  tier: AdaptiveDifficultyTier;
+  pps: number;
+  resourceFactor: { neg: number; pos: number };
+  decisionWindowMs: number;
+  gateOffset: number;
+  aiStrength: number;
+  recoveryScale: number;
+  reason?: string;
 }
 
 export interface SaveState {
@@ -218,6 +291,9 @@ export interface SaveState {
   leadershipBestStars?: Record<string, number>;
   /** SM-2 间隔复习卡：未选专家项的决策进入到期回练队列。 */
   reviewCards?: ReviewCard[];
+  /** FSRS 风格记忆卡：绑定能力与掌握度遗忘预测。 */
+  fsrsCards?: FsrsCard[];
+  adaptive?: AdaptiveState;
   /** 90 天引领路线已通关的阶段 id。 */
   adaptiveRoutePassed?: string[];
   /** Five-dimension leadership model experience. */

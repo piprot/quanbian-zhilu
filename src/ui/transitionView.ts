@@ -8,7 +8,6 @@ import { escapeHtml } from "./escape";
 export function chapterTransitionView(
   save: SaveState,
   language: Language,
-  muted: boolean,
   pendingChapterTransition: number,
   pendingForkNodeId: string | undefined
 ): string {
@@ -19,7 +18,6 @@ export function chapterTransitionView(
   return `
     <header class="topbar">
       <div class="brand">${uiString(language, "brand")}</div>
-      <button class="link sound-toggle" data-action="toggle-sound" aria-label="${en ? "Toggle sound" : "切换声音"}">${muted ? uiString(language, "soundOff") : uiString(language, "soundOn")}</button>
       <button class="link language-toggle" data-action="toggle-language" aria-label="${en ? "Switch language" : "切换语言"}">${uiString(language, "language")}</button>
     </header>
     <main class="transition-shell" aria-label="${en ? "Chapter transition" : "章节过渡"}">

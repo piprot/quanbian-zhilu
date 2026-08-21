@@ -1,10 +1,17 @@
 import {
+  fullPathProgress,
   economyFactors,
   isChapterComplete,
   isChapterPassed,
   isNodeComplete,
   profileSummary
 } from "../core/game";
+import {
+  adaptiveRecommendations,
+  type RecommendationCard
+} from "../core/recommendations";
+import { HISTORY_MIRRORS } from "../core/historyMirrors";
+import { energyDimensions } from "../core/energy-dimensions";
 import {
   CHAPTERS,
   RANDOM_EVENT_IDS,
@@ -33,6 +40,7 @@ import {
   chapterBadge,
   chapterDisplay,
   chapterReflectionText,
+  abilityDisplay,
   rankName,
   resourceChips
 } from "./display";
@@ -76,6 +84,8 @@ export function mapView(
   state: MapViewState
 ): string {
   const summary = profileSummary(save);
+  const fullPath = fullPathProgress(save);
+  const energy = energyDimensions(save);
   const en = language === "en";
   const chapter = getChapter(state.selectedChapter);
   const mainNodes = chapter.nodeIds.map(getNode);
@@ -248,6 +258,47 @@ export function mapView(
                 : ""
               }
             </div>
+            <div class="mini-panel rank-progress-panel">
+              <h3>${en ? "Rank Progress" : "段位进度"}</h3>
+              <div class="rank-progress-head">
+                <strong>${rankName(language, summary.rank)}</strong>
+                ${
+                  summary.rankProgress.next
+                    ? `<span>${en
+                        ? `${summary.rankProgress.remaining} XP to ${summary.rankProgress.next.nameEn}`
+                        : `距「${summary.rankProgress.next.name}」${summary.rankProgress.remaining} XP`}</span>`
+                    : `<span>${en ? "Max rank" : "已达最高段位"}</span>`
+                }
+              </div>
+              <div class="rank-progress-bar"><i style="width:${summary.rankProgress.progress}%"></i></div>
+              <div class="full-path-row">
+                <span>${en ? `Path ${fullPath.completedMain} / ${fullPath.totalMain}` : `全程路径 ${fullPath.completedMain} / ${fullPath.totalMain}`}</span>
+                <i class="full-path-bar"><em style="width:${fullPath.percent}%"></em></i>
+                <small>${fullPath.percent}%</small>
+              </div>
+            </div>
+            <div class="mini-panel energy-dimensions-panel">
+              <h3>${en ? "Energy · Four Dimensions" : "精力管理 · 四维"}</h3>
+              ${(
+                [
+                  ["physical", en ? "Physical" : "体能"],
+                  ["emotional", en ? "Emotional" : "情感"],
+                  ["mental", en ? "Mental" : "思维"],
+                  ["will", en ? "Will" : "意志"]
+                ] as Array<[keyof typeof energy, string]>
+              )
+                .map(
+                  ([key, label]) => `
+                    <div class="energy-dimension-row">
+                      <span>${label}</span>
+                      <i><em style="width:${energy[key]}%"></em></i>
+                      <b>${energy[key]}</b>
+                    </div>
+                  `
+                )
+                .join("")}
+              <p class="muted">${en ? "Derived from resources and abilities; the single energy resource stays authoritative." : "由资源与能力派生展示，不替换现有精力资源。"}</p>
+            </div>
             <div class="mini-panel adaptive-route-panel">
               <h3>${en ? adaptive.route.titleEn : adaptive.route.titleZh}</h3>
               <p class="muted">${en ? `Stage ${adaptive.currentIndex + 1} / ${adaptive.route.stages.length}` : `阶段 ${adaptive.currentIndex + 1} / ${adaptive.route.stages.length}`}</p>
@@ -267,6 +318,30 @@ export function mapView(
                     `
                     : ""
               }
+            </div>
+            <div class="mini-panel recommendation-panel">
+              <h3>${en ? "Adaptive Recommendation" : "自适应推荐"}</h3>
+              <p class="muted">${en ? "One next move per weak spot, chosen from your strongest signals." : "按你最值得补的短板，给出一张下一步卡。"}</p>
+              <div class="recommendation-list">
+                ${adaptiveRecommendations(save)
+                  .map((card) => recommendationMarkup(language, save, card))
+                  .join("")}
+              </div>
+            </div>
+            <div class="mini-panel ai-scenario-panel">
+              <h3>${en ? "AI Dynamic Narrative" : "AI 动态叙事"}</h3>
+              <p class="muted">${en ? "Generate a fresh dilemma from your profile and weakest ability." : "根据你的档案与最弱项，生成一个全新的职场两难。"}</p>
+              <button data-action="open-ai-scenario">${en ? "Create Scenario" : "生成专属情境"}</button>
+            </div>
+            <div class="mini-panel coach-dashboard-panel">
+              <h3>${en ? "Coach Dashboard" : "教练数据看板"}</h3>
+              <p class="muted">${en ? "Student list, radar, XP curve, and coaching insights." : "学员列表、能力雷达、成长曲线与教练洞察。"}</p>
+              <button data-action="open-coach-dashboard">${en ? "Open Dashboard" : "打开看板"}</button>
+            </div>
+            <div class="mini-panel group-hall-panel">
+              <h3>${en ? "Group Decision Hall" : "群策堂"}</h3>
+              <p class="muted">${en ? "2-8 players answer the same dilemma, then review the distribution together." : "2-8 人同答一个两难，揭示分布后共同复盘。"}</p>
+              <button data-action="open-group-hall">${en ? "Enter Hall" : "进入群策堂"}</button>
             </div>
             ${npcCameoMarkup(language, save, chapter.id)}
             <div class="map-extras" ${state.mapDetailOpen ? "" : "hidden"}>
@@ -441,4 +516,63 @@ export function mapView(
         </section>
       </main>
     `;
+}
+
+function recommendationMarkup(
+  language: Language,
+  save: SaveState,
+  card: RecommendationCard
+): string {
+  const en = language === "en";
+  const abilityName = abilityDisplay(language, card.abilityId).name;
+  const typeLabel =
+    card.kind === "main"
+      ? en
+        ? "Main Scenario"
+        : "主线情境"
+      : card.kind === "training"
+        ? en
+          ? "Focused Training"
+          : "进阶训练"
+        : en
+          ? "History Mirror"
+          : "史鉴卡";
+  if (card.kind === "main" && card.nodeId) {
+    let title = card.nodeId;
+    try {
+      title = storyNodeDisplay(language, save, getNode(card.nodeId)).title;
+    } catch {
+      // keep node id
+    }
+    return `
+      <div class="recommendation-card main-card">
+        <span class="rec-type">${typeLabel}</span>
+        <strong>${escapeHtml(title)}</strong>
+        <small>${en ? `Focus: ${abilityName}` : `聚焦能力：${abilityName}`}</small>
+        <button data-action="open-node" data-node="${escapeAttr(card.nodeId)}">${en ? "Play" : "进入情境"}</button>
+      </div>
+    `;
+  }
+  if (card.kind === "training") {
+    const detail = abilityDisplay(language, card.abilityId);
+    return `
+      <div class="recommendation-card training-card">
+        <span class="rec-type">${typeLabel}</span>
+        <strong>${escapeHtml(detail.name)}</strong>
+        <small>${escapeHtml(detail.tagline)}</small>
+        <button data-action="open-training" data-ability="${card.abilityId}">${en ? "Train" : "开始训练"}</button>
+      </div>
+    `;
+  }
+  const mirror =
+    HISTORY_MIRRORS.find((item) => item.id === card.mirrorId) ??
+    HISTORY_MIRRORS[0];
+  return `
+    <div class="recommendation-card mirror-card">
+      <span class="rec-type">${typeLabel}</span>
+      <strong>${escapeHtml(mirror.title)}</strong>
+      <small>${escapeHtml(mirror.source)} · ${abilityName}</small>
+      <button data-action="open-history-mirrors">${en ? "Open Hall" : "打开史鉴堂"}</button>
+    </div>
+  `;
 }

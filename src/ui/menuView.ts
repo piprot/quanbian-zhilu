@@ -7,7 +7,6 @@ import { rankName } from "./display";
 import { escapeHtml } from "./escape";
 
 export interface MenuViewState {
-  muted: boolean;
   latestDecision: string;
   dueReviewBanner: string;
   guideSteps: string[];
@@ -135,7 +134,7 @@ export function menuView(
     card("open-custom-scenarios", "menu-card-10", "02", "情境工坊", "Scenario Workshop", "写下真实职场两难，校验专家/部分/风险结构，再与团队一起试玩复盘。", "Write a real workplace dilemma, validate the expert/partial/risk structure, and play it with your team.")
   ].join("");
   const systemCards = [
-    card("open-settings", "menu-card-08", "01", uiString(language, "settingsTitle"), "Settings", "统一管理声音、语言、难度、存档数据与操作说明。", "Sound, language, difficulty, save data, and help in one place."),
+    card("open-settings", "menu-card-08", "01", uiString(language, "settingsTitle"), "Settings", "统一管理语言、难度、存档数据与操作说明。", "Language, difficulty, save data, and help in one place."),
     card("open-profile", "menu-card-09", "02", "角色档案", "Role Archives", "空降、创业、高潜三套档案独立保存，随时切换，不再删档。", "Keep every role's save and switch between parachute, founder, and high potential without deleting progress."),
     card("open-lorebook", "menu-card-10", "03", "线索图鉴", "Clue Atlas", "支线弧、随机事件、隐藏路线与 NPC 关系汇总，隐藏内容不再靠猜。", "Side arcs, random events, hidden routes, and NPC relations in one atlas, so hidden content stops being guesswork.")
   ].join("");
@@ -143,13 +142,12 @@ export function menuView(
     group("01", "个人训练", "Personal Training", "主线、AI 对练、小游戏与个人复盘，完成从判断到成长的闭环。", "Campaign, AI duels, mini-games and reviews for your personal leadership loop.", personalCards),
     group("02", "团体训练", "Group Training", "两人或小组一起练：团队课程、同屏轮流、远程开房和领导力小游戏。", "Practice together as a pair or group: team courses, same-screen turns, remote rooms, and leadership mini-games.", groupCards),
     group("03", "培训师模块", "Trainer Hub", "面向培训师：导入小组存档、生成工作坊流程、校验并共创真实案例。", "For facilitators: import team saves, build workshop agendas, validate and co-create real cases.", trainerCards),
-    group("04", "系统设置", "System & Settings", "声音、语言、难度、存档数据与操作说明统一管理。", "Sound, language, difficulty, save data and help in one place.", systemCards)
+    group("04", "系统设置", "System & Settings", "语言、难度、存档数据与操作说明统一管理。", "Language, difficulty, save data and help in one place.", systemCards)
   ].join("");
 
   return `
     <header class="topbar">
       <div class="brand">${uiString(language, "brand")}</div>
-      <button class="link sound-toggle" data-action="toggle-sound" aria-label="${en ? "Toggle sound" : "切换声音"}" title="${en ? "Toggle sound" : "切换声音"}"><span aria-hidden="true">${state.muted ? "🔇" : "🔊"}</span>${state.muted ? uiString(language, "soundOff") : uiString(language, "soundOn")}</button>
       <button class="link language-toggle" data-action="toggle-language" aria-label="${en ? "Switch language" : "切换语言"}" title="${en ? "Switch language" : "切换语言"}"><span aria-hidden="true">🌐</span>${uiString(language, "language")}</button>
       <div class="topbar-meta">
         <span>${started ? save.profile.name : "未建档"}</span>

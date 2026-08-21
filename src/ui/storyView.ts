@@ -23,6 +23,7 @@ import {
 import { EXPANDED_TRAINING } from "../core/trainingExtras";
 import { EXPANDED_TRAINING_EN } from "../core/trainingExtrasEn";
 import { optionGateFor } from "../core/game";
+import { dominantMirror } from "../core/historyMirrors";
 import { uiString, type Language } from "../core/i18n";
 import { ROLE_EN } from "../core/translations";
 import type {
@@ -34,8 +35,8 @@ import type {
 } from "../core/types";
 import {
   abilityDisplay,
+  abilityDetailDisplay,
   chapterDisplay,
-  leadershipLensText,
   nodeIntel,
   npcAvatarColor,
   npcDisplay,
@@ -241,6 +242,82 @@ function npcEchoMarkup(
     `;
 }
 
+function abilityShiftDetailMarkup(
+  language: Language,
+  outcome: ChoiceOutcome
+): string {
+  const en = language === "en";
+  const rows = outcome.gainedAbilityIds.map((id, index) => {
+    const delta = outcome.option.effects[id] ?? 0;
+    const detail = abilityDetailDisplay(language, id);
+    const sub = detail.subSkills[index % Math.max(1, detail.subSkills.length)];
+    return `
+      <div class="ability-shift-row ${delta < 0 ? "negative" : ""}">
+        <span style="--dot:${ABILITIES[id].color}"></span>
+        <strong>${abilityDisplay(language, id).name}</strong>
+        <em>${escapeHtml(sub)}</em>
+        <b>${formatDelta(delta)}</b>
+      </div>
+    `;
+  });
+  if (!rows.length) return "";
+  return `
+    <section class="ability-shift-detail">
+      <h3>${en ? "Ability Shifts" : "能力涨落"}</h3>
+      ${rows.join("")}
+    </section>
+  `;
+}
+
+function coachEyeText(language: Language, outcome: ChoiceOutcome): string {
+  const en = language === "en";
+  if (outcome.option.quality === "expert") {
+    return en
+      ? "What evidence made you trust this move? Write down the one step you would repeat next time."
+      : "是哪个证据让你敢这样选？把下次要复制的那个步骤写下来。";
+  }
+  if (outcome.option.quality === "partial") {
+    return en
+      ? "You solved part of it. Which person or assumption is still untested?"
+      : "你解决了一半。还有哪个人的反应、哪个假设没有被验证？";
+  }
+  return en
+    ? "What did you act on before verifying? What would you confirm first next time?"
+    : "你刚才是在什么还没验证的情况下行动的？下一次你会先确认什么？";
+}
+
+function historyMirrorCardMarkup(
+  language: Language,
+  outcome: ChoiceOutcome
+): string {
+  const en = language === "en";
+  const mirror = dominantMirror(outcome.option.effects);
+  return `
+    <section class="history-mirror-card">
+      <span>${en ? "History Mirror" : "历史镜鉴"}</span>
+      <h3>${escapeHtml(mirror.title)}</h3>
+      <p class="mirror-source">${escapeHtml(mirror.source)}</p>
+      <blockquote>${escapeHtml(mirror.quote)}</blockquote>
+      <p class="mirror-lesson">${escapeHtml(en ? mirror.lessonEn : mirror.lessonZh)}</p>
+    </section>
+  `;
+}
+
+function perspectiveContextNote(
+  save: SaveState,
+  language: Language
+): string {
+  const perspective = save.profile.perspective;
+  if (!perspective) return "";
+  return language === "en"
+    ? perspective === "female"
+      ? " As a female leader, the room may read you differently; weigh those signals."
+      : " As a male leader, the room may read you differently; weigh those signals."
+    : perspective === "female"
+      ? " 作为女性管理者，会议室的眼光可能不同：把这些信号读进判断里。"
+      : " 作为男性管理者，会议室的眼光可能不同：把这些信号读进判断里。";
+}
+
 function outcomeMarkup(
   save: SaveState,
   language: Language,
@@ -320,8 +397,8 @@ function outcomeMarkup(
         <blockquote>${escapeHtml(option.theory)}</blockquote>
         ${sixPartReviewMarkup(save, language, outcome, state.lastOutcomeNodeId, state.storyNodeId)}
         <div class="leadership-lens ${option.quality}">
-          <strong>${language === "en" ? "Adaptive Leadership Lens" : "自适应领导力视角"}</strong>
-          <p>${escapeHtml(leadershipLensText(language, option.quality))}</p>
+          <strong>${language === "en" ? "Coach's Eye · Reflection" : "教练之眼 · 反思"}</strong>
+          <p>${escapeHtml(coachEyeText(language, outcome))}</p>
         </div>
         <div class="outcome-effects score-pop">
           <span><b>+${outcome.qualityScore}</b> ${language === "en" ? "Expert Fit" : "专家契合分"}</span>
@@ -337,6 +414,7 @@ function outcomeMarkup(
             )
             .join("")}
         </div>
+        ${abilityShiftDetailMarkup(language, outcome)}
         ${outcome.resourceStrain ? `<p class="strain-note">${uiString(language, "strainNote")} -${outcome.resourceStrain}</p>` : ""}
         <div class="outcome-resources">
           ${(Object.keys(RESOURCE_NAMES) as ResourceKey[])
@@ -352,6 +430,7 @@ function outcomeMarkup(
             })
             .join("")}
         </div>
+        ${historyMirrorCardMarkup(language, outcome)}
         <canvas id="outcome-relations" class="outcome-relations" aria-label="${language === "en" ? "Relationship graph after this decision" : "本次决策后的人物关系图"}"></canvas>
         <button class="primary" data-action="${finalAction}">${finalLabel}</button>
       </section>
@@ -718,7 +797,7 @@ export function storyView(
                 <span class="role-tag">${language === "en" ? "Role-specific" : "角色专属"}</span>
                 <p>${escapeHtml(language === "en" ? ROLE_EN[save.profile.role].lens : ROLES[save.profile.role].lens)}</p>
               </div>
-              <p class="scenario-context">${escapeHtml(node.context)}</p>
+              <p class="scenario-context">${escapeHtml(node.context + perspectiveContextNote(save, language))}</p>
               ${proceduralNarrativeMarkup(save, language, state.storyNodeId)}
               <div class="stake">
                 <strong>${uiString(language, "currentTest")}</strong>

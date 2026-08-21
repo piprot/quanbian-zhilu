@@ -186,3 +186,56 @@ export function renderGroupRadar(
     }
   });
 }
+
+export function renderXpCurve(
+  canvas: HTMLCanvasElement,
+  points: Array<{ index: number; xp: number }>
+): void {
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const width = canvas.clientWidth || 320;
+  const height = canvas.clientHeight || 180;
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+  if (!points.length) {
+    ctx.fillStyle = "rgba(231, 229, 228, 0.5)";
+    ctx.font = "12px sans-serif";
+    ctx.fillText("No growth data yet", 12, height / 2);
+    return;
+  }
+  const maxX = Math.max(...points.map((point) => point.index), 1);
+  const maxY = Math.max(...points.map((point) => point.xp), 10);
+  const pad = 18;
+  const innerW = width - pad * 2;
+  const innerH = height - pad * 2;
+  ctx.strokeStyle = "rgba(159, 179, 200, 0.25)";
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 3; i += 1) {
+    const y = pad + (innerH / 3) * i;
+    ctx.beginPath();
+    ctx.moveTo(pad, y);
+    ctx.lineTo(width - pad, y);
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  points.forEach((point, index) => {
+    const x = pad + (point.index / maxX) * innerW;
+    const y = pad + innerH - (point.xp / maxY) * innerH;
+    if (index === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = "#e8c36a";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  points.forEach((point) => {
+    const x = pad + (point.index / maxX) * innerW;
+    const y = pad + innerH - (point.xp / maxY) * innerH;
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = "#57c7a3";
+    ctx.fill();
+  });
+}

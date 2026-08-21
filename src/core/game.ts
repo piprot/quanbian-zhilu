@@ -4,16 +4,26 @@ import {
   ROLES,
   abilityLevel,
   createDefaultAbilities,
+  rankProgress,
   rankForTotal,
   totalAbilityLevels
 } from "./abilities.ts";
 import {
+  CHAPTERS,
   getChapter,
   getNode,
   randomEventEligibleCount
 } from "./story.ts";
 import { addDimensionExp, applyMoraleChange } from "./leadership-model.ts";
 import { normalizeReviewCards } from "./review-schedule.ts";
+import { normalizeFsrsCards } from "./fsrs-schedule.ts";
+import { scheduleFsrsReview } from "./fsrs-schedule.ts";
+import {
+  adaptiveEconomyFactor,
+  createDefaultAdaptiveState,
+  normalizeAdaptiveState,
+  recordAdaptiveDecision
+} from "./adaptive-dda.ts";
 import type {
   AbilityId,
   ChoiceOutcome,
@@ -64,9 +74,10 @@ export function economyFactors(
 ): { neg: number; pos: number } {
   const difficulty = PRESSURE_FACTORS[effectiveDifficulty(save)];
   const chapter = chapterEconomyScale(chapterId);
+  const adaptive = adaptiveEconomyFactor(save);
   return {
-    neg: Number((difficulty.neg * chapter.neg).toFixed(2)),
-    pos: Number((difficulty.pos * chapter.pos).toFixed(2))
+    neg: Number((difficulty.neg * chapter.neg * adaptive.neg).toFixed(2)),
+    pos: Number((difficulty.pos * chapter.pos * adaptive.pos).toFixed(2))
   };
 }
 
@@ -80,15 +91,6 @@ export function roundDurationMsForDifficulty(
 }
 
 export const NORMAL_DECISION_MS = 0;
-
-/** 把旧版音量值归一到设置下拉允许的档位，避免显示 0 但实际有声。 */
-export function normalizeVolume(value: number): number {
-  if (!Number.isFinite(value) || value <= 0) return 0;
-  const options = [0, 25, 50, 75, 100];
-  return options.reduce((best, option) =>
-    Math.abs(option - value) < Math.abs(best - value) ? option : best
-  );
-}
 
 /** 高压/极限档的决策时限：长文本按阅读量动态加时，短文本仍保持原有节奏。 */
 export function decisionWindowMs(baseMs: number, text: string): number {
@@ -170,6 +172,8 @@ export const DEFAULT_SAVE: SaveState = {
   leadershipBestLevel: {},
   leadershipBestStars: {},
   reviewCards: [],
+  fsrsCards: [],
+  adaptive: createDefaultAdaptiveState(),
   adaptiveRoutePassed: [],
   dimensionExp: {
     credibility: 0,
@@ -188,7 +192,14 @@ export const DEFAULT_SAVE: SaveState = {
   duelsToday: 0
 };
 
-export function createProfile(name: string, role: RoleId): PlayerProfile {
+export function createProfile(
+  name: string,
+  role: RoleId,
+  options?: {
+    title?: string;
+    perspective?: "male" | "female";
+  }
+): PlayerProfile {
   const roleDef = ROLES[role];
   const abilities = createDefaultAbilities();
   for (const [id, exp] of Object.entries(roleDef.startingAbilities) as Array<
@@ -200,7 +211,9 @@ export function createProfile(name: string, role: RoleId): PlayerProfile {
     name: name.trim() || "你",
     role,
     abilities,
-    resources: { ...roleDef.startingResources }
+    resources: { ...roleDef.startingResources },
+    title: options?.title?.trim() || undefined,
+    perspective: options?.perspective
   };
 }
 
@@ -446,6 +459,8 @@ function normalizeSave(save: SaveState): SaveState {
         ? save.leadershipBestStars
         : {},
     reviewCards: normalizeReviewCards(save.reviewCards),
+    fsrsCards: normalizeFsrsCards(save.fsrsCards),
+    adaptive: normalizeAdaptiveState(save.adaptive),
     adaptiveRoutePassed: Array.isArray(save.adaptiveRoutePassed)
       ? save.adaptiveRoutePassed
       : [],
@@ -515,6 +530,13 @@ export function computeSaveHash(save: SaveState): string {
       card.dueAt,
       card.lastQuality
     ]),
+    fv: (save.fsrsCards ?? []).map((card) => [
+      card.nodeId,
+      card.stability,
+      card.difficulty,
+      card.retrievability,
+      card.dueAt
+    ]),
     dexp: save.dimensionExp,
     mor: save.morale,
     pc: save.playCount,
@@ -546,7 +568,14 @@ export function computeSaveHash(save: SaveState): string {
       save.alternateEndings,
       save.routePath
     ],
-    diff: save.difficulty
+    diff: save.difficulty,
+    adp: [
+      save.adaptive?.pps.currentPps ?? 0,
+      save.adaptive?.pps.tier ?? "standard",
+      Object.entries(save.adaptive?.learnerModel.abilities ?? {}).map(
+        ([id, state]) => [id, state.attempts, state.mastery]
+      )
+    ]
   };
   const json = JSON.stringify(projection);
   let hash = 5381;
@@ -748,7 +777,12 @@ function boostLowestFocusAbility(save: SaveState): AbilityId | undefined {
 export function applyStoryChoice(
   save: SaveState,
   nodeId: string,
-  optionIndex: number
+  optionIndex: number,
+  meta?: {
+    decisionTimeMs?: number;
+    usedHint?: boolean;
+    morale?: number;
+  }
 ): ChoiceOutcome {
   // 已完成节点只能通过显式「重打」模式回看，不能再次结算，否则能力/资源/修炼点会被无限刷取。
   if (isNodeComplete(save, nodeId)) {
@@ -902,6 +936,24 @@ export function applyStoryChoice(
   if (save.decisionHistory.length > MAX_HISTORY_LENGTH) {
     save.decisionHistory = save.decisionHistory.slice(-MAX_HISTORY_LENGTH);
   }
+  save.fsrsCards = scheduleFsrsReview(
+    save.fsrsCards ?? [],
+    nodeId,
+    Object.keys(option.effects) as AbilityId[],
+    option.quality
+  );
+  if (!save.adaptive) {
+    save.adaptive = createDefaultAdaptiveState();
+  }
+  const adaptiveResult = recordAdaptiveDecision(save.adaptive, {
+    abilityIds: Object.keys(option.effects) as AbilityId[],
+    quality: option.quality,
+    resourceDelta: delta.resources,
+    decisionTimeMs: meta?.decisionTimeMs,
+    usedHint: meta?.usedHint,
+    morale: meta?.morale ?? save.morale
+  });
+  save.adaptive = adaptiveResult.state;
   saveState(save);
   return outcome;
 }
@@ -1194,11 +1246,40 @@ export function profileSummary(save: SaveState) {
   return {
     total,
     rank,
+    rankProgress: rankProgress(total),
     chapterCount,
     abilityCount: ABILITY_ORDER.filter(
       (id) => abilityLevel(save.profile.abilities[id]) >= 2
     ).length
   };
+}
+
+export function fullPathProgress(save: SaveState): {
+  completedMain: number;
+  totalMain: number;
+  percent: number;
+} {
+  const totalMain = CHAPTERS.reduce((sum, chapter) => sum + chapter.nodeIds.length, 0);
+  let completedMain = 0;
+  for (const chapter of CHAPTERS) {
+    for (const nodeId of chapter.nodeIds) {
+      if (isNodeComplete(save, nodeId)) completedMain += 1;
+    }
+  }
+  return {
+    completedMain,
+    totalMain,
+    percent: totalMain ? Math.round((completedMain / totalMain) * 100) : 0
+  };
+}
+
+export function nextIncompleteMainNode(save: SaveState): string | null {
+  for (const chapter of CHAPTERS) {
+    for (const nodeId of chapter.nodeIds) {
+      if (!isNodeComplete(save, nodeId)) return nodeId;
+    }
+  }
+  return null;
 }
 
 export function recordDuelResult(

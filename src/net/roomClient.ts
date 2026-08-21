@@ -23,6 +23,21 @@ export type RoomServerMessage =
   | { type: "reveal"; optionIndex: number }
   | { type: "signal"; signal: unknown }
   | { type: "opponent_left" }
+  | {
+      type: "group_waiting";
+      roomId: string;
+      players: Array<{ name: string; picked?: boolean }>;
+      capacity: number;
+    }
+  | { type: "group_round"; roomId: string; round: number; nodeId: string }
+  | {
+      type: "group_reveal";
+      roomId: string;
+      round: number;
+      counts: number[];
+      players: Array<{ name: string; pick: number }>;
+    }
+  | { type: "group_end"; roomId: string; rounds: number }
   | { type: "error"; message: string };
 
 export class RoomClient {
@@ -110,6 +125,18 @@ export class RoomClient {
 
   createRoom(name: string, role: string, save: SaveState, rounds: number): void {
     this.send({ type: "create_room", name, role, save, rounds });
+  }
+
+  createGroupRoom(name: string, capacity: number): void {
+    this.send({ type: "group_create", name, capacity });
+  }
+
+  joinGroupRoom(roomId: string, name: string): void {
+    this.send({ type: "group_join", roomId, name });
+  }
+
+  groupPick(optionIndex: number): void {
+    this.send({ type: "group_pick", optionIndex });
   }
 
   joinRoom(roomId: string, name: string, role: string, save: SaveState): void {
