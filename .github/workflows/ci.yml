@@ -68,6 +68,12 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
+      - name: Adaptive tests
+        run: npm run test:adaptive-core && npm run test:adaptive-router && npm run test:adaptive-coach && npm run test:adaptive-data
+
+      - name: Adaptive simulation gate
+        run: npm run adaptive:sim -- 3
+
       - name: Team academy audit
         run: npm run test:academy
 
